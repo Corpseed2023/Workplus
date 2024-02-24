@@ -1,6 +1,7 @@
-package repository;
+package com.example.desktime.repository;
 
-import model.User;
+
+import com.example.desktime.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
