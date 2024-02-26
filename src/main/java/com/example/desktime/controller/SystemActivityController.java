@@ -26,4 +26,5 @@ public class SystemActivityController {
             return new ResponseEntity<>("Error logging system activity", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
