@@ -1,4 +1,4 @@
-package com.example.desktime.model;
-
-public class Subscription {
-}
+//package com.example.desktime.model;
+//
+//public class Subscription {
+//}
