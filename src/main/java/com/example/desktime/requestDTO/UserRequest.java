@@ -1,23 +1,21 @@
-package com.example.desktime.model;
+package com.example.desktime.requestDTO;
 
-import jakarta.persistence.*;
-import lombok.Data;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Comment;
 
 import java.util.Date;
-import java.util.List;
 
-@Entity(name = "user")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-public class User {
+public class UserRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "username")
     private String username;
 
     private String email;
@@ -39,15 +37,6 @@ public class User {
     @Comment(value = "1 : Active, 0 : Inactive")
     private boolean isEnable;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Desktime> desktimes;
-
 
 
 }
-
-
-
-
-
-
