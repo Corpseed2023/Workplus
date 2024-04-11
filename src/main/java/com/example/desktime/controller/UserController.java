@@ -44,5 +44,10 @@ public class UserController {
     }
 
 
+    @GetMapping("/hello")
+    public String helloWorld() {
+        return "Hello, workign fine!";
+    }
+
 
 }

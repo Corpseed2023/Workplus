@@ -11,7 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Desktime {
+public class Desktime{
 
     @Column(name = "id")
     @Id
@@ -43,5 +43,27 @@ public class Desktime {
     @Temporal(TemporalType.TIMESTAMP)
     private Date currentDate;
 
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "login_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date loginTime;
+
+    @Column(name = "user_role")
+    private String userRole;
+
+    @Column(name = "logout_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date logoutTime;
+
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "login_date")
+    private String loginDate;
+
+    @Column(name = "login_time_convention")
+    private String loginTimeConvention;
 
 }

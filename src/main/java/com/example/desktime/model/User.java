@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
-
 import java.util.Date;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class User {
     private boolean isEnable;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Desktime> desktimes;
+    private List<Desktime> deskTimes;
 
 
 
