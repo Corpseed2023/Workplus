@@ -9,4 +9,6 @@ public interface UserService {
     void saveUserData(UserRequest userRequest);
 
     ResponseEntity<User> getUserdetails(User user);
+
+    User getUserByUsernameAndEmail(String username, String email);
 }
