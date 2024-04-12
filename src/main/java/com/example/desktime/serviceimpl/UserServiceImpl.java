@@ -35,12 +35,13 @@ public class UserServiceImpl implements UserService {
         userData.setEnable(userRequest.isEnable());
 
         try {
-            // Fetch and set roles
             Set<Roles> roles = new HashSet<>();
             if (userRequest.getRoleNames() != null) {
                 for (String roleName : userRequest.getRoleNames()) {
-                    Roles role = rolesRepository.findByRoleName(roleName)
-                            .orElseThrow(() -> new NoSuchElementException("Role not found with name: " + roleName));
+                    Roles role = rolesRepository.findByRoleName(roleName);
+                    if (role == null) {
+                        throw new NoSuchElementException("Role not found with name: " + roleName);
+                    }
                     roles.add(role);
                 }
             }
@@ -55,6 +56,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Error saving user data", e);
         }
     }
+
 
     @Override
     public ResponseEntity<User> getUserdetails(User user) {
