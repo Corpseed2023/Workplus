@@ -1,6 +1,7 @@
 package com.example.desktime.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
@@ -11,6 +12,7 @@ import java.util.Set;
 @Entity(name = "user")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id

@@ -3,16 +3,18 @@ package com.example.desktime.controller;
 
 import com.example.desktime.model.User;
 import com.example.desktime.requestDTO.UserRequest;
+import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 import java.util.NoSuchElementException;
 
 
 @RestController
+//@RequestMapping("/userRequest")
 public class UserController {
 
     @Autowired
@@ -45,6 +47,17 @@ public class UserController {
         } else {
 
             return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @GetMapping("/allUsersList")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        try {
+            List<UserResponse> users = userService.getAllUsers();
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
