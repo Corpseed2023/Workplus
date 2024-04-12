@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
+
 
 @RestController
 public class UserController {
@@ -20,12 +22,15 @@ public class UserController {
     public ResponseEntity<String> postData(@RequestBody UserRequest userRequest) {
         try {
             userService.saveUserData(userRequest);
-            return new ResponseEntity<>("Data received successfully!", HttpStatus.OK);
+            return new ResponseEntity<>("User created successfully!", HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Invalid user data: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>("One or more roles not found", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @GetMapping("/userDetails")
     public ResponseEntity<User> getUserDetails(@RequestParam String username) {
@@ -42,12 +47,5 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
-    @GetMapping("/hello")
-    public String helloWorld() {
-        return "Hello, workign fine!";
-    }
-
 
 }

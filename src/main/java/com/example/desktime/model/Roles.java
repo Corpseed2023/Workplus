@@ -2,8 +2,6 @@ package com.example.desktime.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.Comment;
-
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -11,8 +9,7 @@ import java.util.Date;
 public class Roles {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
-    private Long roleId;
+    private Long id;
 
     @Column(name = "role_name")
     private String roleName;
@@ -35,8 +32,8 @@ public class Roles {
     // Constructors, getters, and setters
     public Roles() {}
 
-    public Roles(Long roleId, String roleName, Long createdBy, Date createdAt, Date updatedAt, boolean isEnable) {
-        this.roleId = roleId;
+    public Roles(Long id, String roleName, Long createdBy, Date createdAt, Date updatedAt, boolean isEnable) {
+        this.id = id;
         this.roleName = roleName;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
@@ -44,13 +41,12 @@ public class Roles {
         this.isEnable = isEnable;
     }
 
-
-    public Long getRoleId() {
-        return roleId;
+    public Long getId() {
+        return id;
     }
 
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getRoleName() {
