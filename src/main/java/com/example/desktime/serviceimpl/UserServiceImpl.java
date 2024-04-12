@@ -5,13 +5,14 @@ import com.example.desktime.model.User;
 import com.example.desktime.repository.RolesRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.UserRequest;
-import com.example.desktime.requestDTO.UserResponse;
+import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -75,5 +76,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameAndEmail(username, email);
     }
 
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(user -> new UserResponse(user.getUsername(), user.getEmail()))
+                .collect(Collectors.toList());
+    }
 }
 
