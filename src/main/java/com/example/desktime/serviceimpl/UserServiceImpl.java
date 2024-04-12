@@ -1,15 +1,17 @@
 package com.example.desktime.serviceimpl;
 
+import com.example.desktime.model.Roles;
 import com.example.desktime.model.User;
+import com.example.desktime.repository.RolesRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.UserRequest;
+import com.example.desktime.requestDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -17,23 +19,41 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RolesRepository rolesRepository;
+
     @Override
     public void saveUserData(UserRequest userRequest) {
-
         User userData = new User();
 
         userData.setUsername(userRequest.getUsername());
-
-        userData.setUsername(userRequest.getUsername());
+        userData.setEmail(userRequest.getEmail());
         userData.setPassword(userRequest.getPassword());
         userData.setCreatedBy(userRequest.getCreatedBy());
         userData.setCreatedAt(new Date());
         userData.setUpdatedAt(new Date());
         userData.setEnable(userRequest.isEnable());
-        userData.setEmail(userRequest.getEmail());
 
+        try {
+            // Fetch and set roles
+            Set<Roles> roles = new HashSet<>();
+            if (userRequest.getRoleNames() != null) {
+                for (String roleName : userRequest.getRoleNames()) {
+                    Roles role = rolesRepository.findByRoleName(roleName)
+                            .orElseThrow(() -> new NoSuchElementException("Role not found with name: " + roleName));
+                    roles.add(role);
+                }
+            }
+            userData.setRoles(roles);
 
-        userRepository.save(userData);
+            userRepository.save(userData);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid user data: " + e.getMessage());
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("One or more roles not found");
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving user data", e);
+        }
     }
 
     @Override

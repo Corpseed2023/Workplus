@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity(name = "user")
 @Data
@@ -41,6 +42,11 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Desktime> deskTimes;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(  name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Roles> roles;
 
 
 }
