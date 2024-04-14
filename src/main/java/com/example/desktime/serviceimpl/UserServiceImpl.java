@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,30 +25,25 @@ public class UserServiceImpl implements UserService {
     private RolesRepository rolesRepository;
 
     @Override
-    public void saveUserData(UserRequest userRequest) {
-        User userData = new User();
+    public void saveUserData(UserRequest userRequest) throws AccessDeniedException {
 
-        userData.setUsername(userRequest.getUsername());
-        userData.setEmail(userRequest.getEmail());
-        userData.setPassword(userRequest.getPassword());
-        userData.setCreatedBy(userRequest.getCreatedBy());
-        userData.setCreatedAt(new Date());
-        userData.setUpdatedAt(new Date());
-        userData.setEnable(userRequest.isEnable());
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
 
+        if (userRequest.getRoleNames() != null && userRequest.getRoleNames().contains("ADMIN")) {
+            saveAdminUserData(userRequest);
+            return;
+        }
+
+        if (!hasAdminRole(userRequest.getCreatedBy())) {
+            throw new AccessDeniedException("Only users with ADMIN role can create new users");
+        }
+
+        User userData = createUserFromRequest(userRequest);
         try {
-            Set<Roles> roles = new HashSet<>();
-            if (userRequest.getRoleNames() != null) {
-                for (String roleName : userRequest.getRoleNames()) {
-                    Roles role = rolesRepository.findByRoleName(roleName);
-                    if (role == null) {
-                        throw new NoSuchElementException("Role not found with name: " + roleName);
-                    }
-                    roles.add(role);
-                }
-            }
+            Set<Roles> roles = getRolesFromRequest(userRequest);
             userData.setRoles(roles);
-
             userRepository.save(userData);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid user data: " + e.getMessage());
@@ -57,6 +53,53 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Error saving user data", e);
         }
     }
+
+    private User createUserFromRequest(UserRequest userRequest) {
+        User userData = new User();
+        userData.setUsername(userRequest.getUsername());
+        userData.setEmail(userRequest.getEmail());
+        userData.setPassword(userRequest.getPassword());
+        userData.setCreatedBy(userRequest.getCreatedBy());
+        userData.setCreatedAt(new Date());
+        userData.setUpdatedAt(new Date());
+        userData.setEnable(userRequest.isEnable());
+        return userData;
+    }
+
+    private Set<Roles> getRolesFromRequest(UserRequest userRequest) {
+        Set<Roles> roles = new HashSet<>();
+        if (userRequest.getRoleNames() != null) {
+            for (String roleName : userRequest.getRoleNames()) {
+                Roles role = rolesRepository.findByRoleName(roleName);
+                if (role == null) {
+                    throw new NoSuchElementException("Role not found with name: " + roleName);
+                }
+                roles.add(role);
+            }
+        }
+        return roles;
+    }
+
+    private void saveAdminUserData(UserRequest userRequest) {
+        User adminUser = createUserFromRequest(userRequest);
+        Roles adminRole = rolesRepository.findByRoleName("ADMIN");
+        if (adminRole == null) {
+            throw new NoSuchElementException("ADMIN role not found");
+        }
+        adminUser.setRoles(Set.of(adminRole));
+        userRepository.save(adminUser);
+    }
+
+    private boolean hasAdminRole(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
+
+        System.out.println(user);
+
+
+        return user.getRoles().stream().anyMatch(role -> role.getRoleName().equals("ADMIN"));
+    }
+
 
 
     @Override
@@ -84,5 +127,36 @@ public class UserServiceImpl implements UserService {
                 .map(user -> new UserResponse(user.getUsername(), user.getEmail()))
                 .collect(Collectors.toList());
     }
+
+
+    @Override
+    public User authenticateUser(String email, String password) {
+        // Retrieve user by email
+        User user = userRepository.findByEmail(email)
+                .orElse(null);
+
+        if (user != null && passwordMatches(password, user.getPassword())) {
+            return user;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean passwordMatches(String rawPassword, String encodedPassword) {
+
+        return rawPassword.equals(encodedPassword);
+    }
+
+    @Override
+    public boolean existofUserDetails(String username, String email) {
+        if (username != null && email != null) {
+            // Check if both username and email exist
+            return userRepository.existsByEmailAndUsername(email,username);
+        } else {
+            // Check if either username or email exists
+            return false;
+        }
+    }
+
 }
 
