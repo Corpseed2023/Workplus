@@ -2,7 +2,9 @@ package com.example.desktime.controller;
 
 
 import com.example.desktime.model.User;
+import com.example.desktime.requestDTO.LoginRequest;
 import com.example.desktime.requestDTO.UserRequest;
+import com.example.desktime.responseDTO.LoginResponse;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,50 @@ public class UserController {
             return new ResponseEntity<>(users, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest) {
+        try {
+            // Validate input fields
+            if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
+                return ResponseEntity.badRequest().body(new LoginResponse("Email and password are required", null));
+            }
+
+            // Retrieve user by email
+            User authenticatedUser = userService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
+
+            if (authenticatedUser != null) {
+                // Generate JWT token or session management logic here
+                return ResponseEntity.ok(new LoginResponse("Login successful", authenticatedUser));
+            } else {
+
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid email or password", null));
+            }
+        } catch (Exception e) {
+            // Log exception
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Error processing the request", null));
+        }
+    }
+
+    @GetMapping("/checkUserExists")
+    public ResponseEntity<Boolean> checkUserExists(@RequestParam(required = false) String username,
+                                                   @RequestParam(required = false) String email) {
+        if (username == null && email == null) {
+            return ResponseEntity.badRequest().body(false); // Return false if both parameters are null
+        }
+
+        boolean userExists = false;
+
+        if (username != null && email != null) {
+            userExists = userService.existofUserDetails(username, email);
+        }
+
+        if (userExists) {
+            return ResponseEntity.ok(true); // Both username and email exist
+        } else {
+            return ResponseEntity.notFound().build(); // Either username or email does not exist
         }
     }
 

@@ -1,14 +1,10 @@
 package com.example.desktime.requestDTO;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Comment;
-
 import java.util.Date;
 import java.util.Set;
 

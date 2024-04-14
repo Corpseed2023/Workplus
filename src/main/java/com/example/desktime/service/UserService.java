@@ -6,6 +6,7 @@ import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.responseDTO.UserResponse;
 import org.springframework.http.ResponseEntity;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 public interface UserService {
@@ -14,7 +15,11 @@ public interface UserService {
     ResponseEntity<User> getUserdetails(User user);
     User getUserByUsernameAndEmail(String username, String email);
 
-    void saveUserData(UserRequest userRequest);
+    void saveUserData(UserRequest userRequest) throws AccessDeniedException;
 
     List<UserResponse> getAllUsers();
+
+    User authenticateUser(String email, String password);
+
+    boolean existofUserDetails(String username, String email);
 }

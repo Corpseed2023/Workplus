@@ -18,7 +18,7 @@ public class DeskTimeController {
     @Autowired
     private DesktimeService desktimeService;
 
-    @PostMapping("/saveDesktime")
+    @PostMapping("/saveDeskTime")
     public ResponseEntity<String> saveDesktime(@RequestBody DeskTimeRequest deskTimeRequest,
                                                @RequestParam String username,
                                                @RequestParam String email) {
