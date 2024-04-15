@@ -27,7 +27,8 @@ public class ScreenshotController {
                 return new ResponseEntity<>("Please upload a screenshot file.", HttpStatus.BAD_REQUEST);
             }
             byte[] screenshotData = file.getBytes();
-            Screenshot screenshot = screenShotService.uploadScreenshot(userId, screenshotData, userMail);
+            String originalFilename = file.getOriginalFilename(); // Get the original filename
+            Screenshot screenshot = screenShotService.uploadScreenshot(userId, screenshotData, userMail, originalFilename);
             return ResponseEntity.ok().body(screenshot);
         } catch (IOException e) {
             return new ResponseEntity<>("Failed to upload screenshot.", HttpStatus.INTERNAL_SERVER_ERROR);

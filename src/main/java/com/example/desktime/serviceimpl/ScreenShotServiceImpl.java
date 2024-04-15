@@ -28,7 +28,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
 
     @Override
-    public Screenshot uploadScreenshot(Long userId, byte[] screenshotData, String userMail) throws IOException {
+    public Screenshot uploadScreenshot(Long userId, byte[] screenshotData, String userMail, String originalFilename) throws IOException {
         User user = userRepository.findUserByEmail(userMail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userMail);
@@ -38,13 +38,13 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         String directoryPath = "D:/DeskTimeSnap/uploadedScreenshots"; // Update the directory path as needed
         Files.createDirectories(Paths.get(directoryPath));
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-        String formattedDate = dateFormat.format(new Date());
-        String fileName = user.getId() + "_" + formattedDate + "_" + "screenshot.png"; // Customize the filename as needed
+        // Append a timestamp to avoid filename conflicts
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = userId + "_" + timestamp + "_" + originalFilename; // Use the original filename
         Path filePath = Paths.get(directoryPath, fileName);
         Files.write(filePath, screenshotData);
 
-        // Create the Screenshot entity with the file name
+        // Create the Screenshot entity with the original file name
         Screenshot screenshot = new Screenshot(user, new Date(), fileName);
         screenshot.setScreenshotName(fileName); // Set the screenshot name
         screenshot = screenshotRepository.save(screenshot);
