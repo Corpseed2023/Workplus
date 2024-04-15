@@ -1,14 +1,21 @@
 package com.example.desktime.responseDTO;
 
+import com.example.desktime.model.AttendanceType;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 public class DailyActivityResponse {
     private Long id;
     private String userEmail;
-    private String date;
-    private String loginTime;
-    private String logoutTime;
+    private LocalDate date;
+    private LocalDateTime loginTime;
+    private LocalDateTime logoutTime;
     private boolean present;
     private String dayOfWeek;
-    private String attendanceType;
+    private AttendanceType attendanceType;
+
+    private String loginTimeConvention;
+
 
     // Constructors, getters, and setters
 
@@ -32,30 +39,6 @@ public class DailyActivityResponse {
         this.userEmail = userEmail;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getLoginTime() {
-        return loginTime;
-    }
-
-    public void setLoginTime(String loginTime) {
-        this.loginTime = loginTime;
-    }
-
-    public String getLogoutTime() {
-        return logoutTime;
-    }
-
-    public void setLogoutTime(String logoutTime) {
-        this.logoutTime = logoutTime;
-    }
-
     public boolean isPresent() {
         return present;
     }
@@ -72,12 +55,46 @@ public class DailyActivityResponse {
         this.dayOfWeek = dayOfWeek;
     }
 
-    public String getAttendanceType() {
+
+    public LocalDate getDate() {
+
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public LocalDateTime getLoginTime() {
+        return loginTime;
+    }
+
+    public void setLoginTime(LocalDateTime loginTime) {
+        this.loginTime = loginTime;
+    }
+
+    public LocalDateTime getLogoutTime() {
+        return logoutTime;
+    }
+
+    public void setLogoutTime(LocalDateTime logoutTime) {
+        this.logoutTime = logoutTime;
+    }
+
+    public AttendanceType getAttendanceType() {
         return attendanceType;
     }
 
-    public void setAttendanceType(String attendanceType) {
+    public void setAttendanceType(AttendanceType attendanceType) {
         this.attendanceType = attendanceType;
+    }
+
+    public String getLoginTimeConvention() {
+        return loginTimeConvention;
+    }
+
+    public void setLoginTimeConvention(String loginTimeConvention) {
+        this.loginTimeConvention = loginTimeConvention;
     }
 }
 

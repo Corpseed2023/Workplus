@@ -1,11 +1,15 @@
 package com.example.desktime.requestDTO;
 
 
+import jakarta.persistence.Column;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class DailyActivityRequest {
     private String email;
-    private String date;
-    private String loginTime;
+    private LocalDate date;
+    private LocalDateTime loginTime;
 
     // Constructors, getters, and setters
 
@@ -21,19 +25,19 @@ public class DailyActivityRequest {
         this.email = email;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public String getLoginTime() {
+    public LocalDateTime getLoginTime() {
         return loginTime;
     }
 
-    public void setLoginTime(String loginTime) {
+    public void setLoginTime(LocalDateTime loginTime) {
         this.loginTime = loginTime;
     }
 }

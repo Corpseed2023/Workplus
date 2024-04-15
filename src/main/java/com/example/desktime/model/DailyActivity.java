@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "daily_activities")
 public class DailyActivity {
 
     @Id
@@ -34,6 +33,12 @@ public class DailyActivity {
     @Enumerated(EnumType.STRING)
     @Column(name = "attendance_type")
     private AttendanceType attendanceType;
+
+    @Column(name = "login_time_convention")
+    private String loginTimeConvention;
+
+    private String ipAddress;
+
 
     // Constructors, getters, and setters
     // Getters and setters omitted for brevity
@@ -116,5 +121,22 @@ public class DailyActivity {
 
     public void setAttendanceType(AttendanceType attendanceType) {
         this.attendanceType = attendanceType;
+    }
+
+
+    public String getLoginTimeConvention() {
+        return loginTimeConvention;
+    }
+
+    public void setLoginTimeConvention(String loginTimeConvention) {
+        this.loginTimeConvention = loginTimeConvention;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 }
