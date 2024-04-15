@@ -7,5 +7,6 @@ import java.io.IOException;
 public interface ScreenShotService {
 
 
-    Screenshot uploadScreenshot(Long userId, byte[] screenshotData, String userMail) throws IOException;
+    Screenshot uploadScreenshot(Long userId, byte[] screenshotData, String userMail, String originalFilename) throws IOException;
+
 }
