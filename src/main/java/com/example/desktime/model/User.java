@@ -43,8 +43,8 @@ public class User {
     @Comment(value = "1 : Active, 0 : Inactive")
     private boolean isEnable;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Desktime> deskTimes;
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Desktime> deskTimes;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(  name = "user_roles",
