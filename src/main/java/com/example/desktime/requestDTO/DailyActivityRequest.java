@@ -1,7 +1,6 @@
 package com.example.desktime.requestDTO;
 
 
-import jakarta.persistence.Column;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,9 +9,6 @@ public class DailyActivityRequest {
     private String email;
     private LocalDate date;
     private LocalDateTime loginTime;
-
-    // Constructors, getters, and setters
-
 
     public DailyActivityRequest() {
     }

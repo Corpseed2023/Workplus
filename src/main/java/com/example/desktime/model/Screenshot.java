@@ -25,11 +25,10 @@ public class Screenshot {
     @Temporal(TemporalType.TIMESTAMP)
     private Date screenshotTime;
 
-    @Lob
-    @Column(name = "screenshot_data", columnDefinition = "BLOB")
-    private String screenshotData;
+    @Column(name = "screenshot_url")
+    private String screenshotUrl; // Store the URL of the image
 
-    private String screenshotName;
+    private String screenshotName; // Store the name of the image file
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -39,10 +38,13 @@ public class Screenshot {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    public Screenshot(User user, Date screenshotTime, String screenshotData) {
+    // Constructor with necessary fields
+    public Screenshot(User user, Date screenshotTime, String screenshotUrl, String screenshotName) {
         this.user = user;
         this.screenshotTime = screenshotTime;
-        this.screenshotData = screenshotData;
+        this.screenshotUrl = screenshotUrl;
+        this.screenshotName = screenshotName;
+        this.createdAt = new Date(); // Set the createdAt field to the current date/time
+        this.updatedAt = new Date(); // Set the updatedAt field to the current date/time
     }
-
 }
