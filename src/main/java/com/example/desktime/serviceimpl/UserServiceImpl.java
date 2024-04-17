@@ -1,5 +1,6 @@
 package com.example.desktime.serviceimpl;
 
+import com.example.desktime.config.SecurityConfig;
 import com.example.desktime.model.Roles;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.RolesRepository;
@@ -8,14 +9,9 @@ import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.nio.file.AccessDeniedException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +24,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RolesRepository rolesRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public void saveUserData(UserRequest userRequest) throws AccessDeniedException {
@@ -63,13 +62,15 @@ public class UserServiceImpl implements UserService {
         User userData = new User();
         userData.setUsername(userRequest.getUsername());
         userData.setEmail(userRequest.getEmail());
-        userData.setPassword(userRequest.getPassword());
+        // Encrypting the password before setting it
+        userData.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         userData.setCreatedBy(userRequest.getCreatedBy());
         userData.setCreatedAt(new Date());
         userData.setUpdatedAt(new Date());
         userData.setEnable(userRequest.isEnable());
         return userData;
     }
+
 
     private Set<Roles> getRolesFromRequest(UserRequest userRequest) {
         Set<Roles> roles = new HashSet<>();
@@ -196,6 +197,18 @@ public class UserServiceImpl implements UserService {
         existingUser.setUpdatedAt(new Date());
         return existingUser;
     }
+
+    @Override
+    public void softDeleteUser(Long userId) throws IllegalArgumentException {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        User user = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        // Set isEnable to false for soft delete
+        user.setEnable(false);
+
+        userRepository.save(user);
+    }
+
 
 
 }
