@@ -108,6 +108,28 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     }
 
 
+    @Override
+    public DailyActivityResponse getDailyActivityByEmail(String email) {
+        DailyActivity dailyActivity = dailyActivityRepository.findByUserEmail(email);
+        if (dailyActivity != null) {
+            return convertToResponse(dailyActivity);
+        } else {
+            throw new IllegalArgumentException("No daily activity found for the user with email: " + email);
+        }
+    }
 
-
+    // Helper method to convert DailyActivity to DailyActivityResponse
+    private DailyActivityResponse convertToResponse(DailyActivity dailyActivity) {
+        DailyActivityResponse response = new DailyActivityResponse();
+        response.setId(dailyActivity.getId());
+        response.setUserEmail(dailyActivity.getUser().getEmail());
+        response.setDate(dailyActivity.getDate());
+        response.setLoginTime(dailyActivity.getLoginTime());
+        response.setLogoutTime(dailyActivity.getLogoutTime());
+        response.setPresent(dailyActivity.isPresent());
+        response.setDayOfWeek(dailyActivity.getDayOfWeek());
+        response.setAttendanceType(dailyActivity.getAttendanceType());
+        response.setLoginTimeConvention(dailyActivity.getLoginTimeConvention());
+        return response;
+    }
 }

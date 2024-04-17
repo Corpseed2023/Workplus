@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 @RestController
 public class DailyActivityController {
@@ -48,6 +49,17 @@ public class DailyActivityController {
         }
     }
 
+    @GetMapping("/dailyActivity")
+    public ResponseEntity<?> getDailyActivity(@RequestParam String email) {
+        try {
+            DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email);
+            return new ResponseEntity<>(dailyActivityResponse, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
 

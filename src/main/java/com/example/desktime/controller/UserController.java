@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -106,5 +108,25 @@ public class UserController {
             return ResponseEntity.notFound().build(); // Either username or email does not exist
         }
     }
+
+
+    @PutMapping("/editUser")
+    public ResponseEntity<String> editUserDetails(@RequestParam Long userId, @RequestBody UserRequest userRequest) {
+        try {
+            userService.editUserDetails(userId, userRequest);
+            return new ResponseEntity<>("User details updated successfully!", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Invalid user data: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>("One or more roles not found", HttpStatus.BAD_REQUEST);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>("Only administrators can edit user details", HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
 
 }

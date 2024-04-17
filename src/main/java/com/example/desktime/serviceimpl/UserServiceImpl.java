@@ -8,8 +8,13 @@ import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.nio.file.AccessDeniedException;
 import java.util.*;
@@ -157,6 +162,41 @@ public class UserServiceImpl implements UserService {
             return false;
         }
     }
+
+
+
+    @Override
+    public void editUserDetails(Long userId, UserRequest userRequest) throws AccessDeniedException {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        User existingUser = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        if (!hasAdminRole(userRequest.getCreatedBy())) {
+            throw new AccessDeniedException("Only users with ADMIN role can edit user details");
+        }
+
+        User updatedUser = updateUserFromRequest(existingUser, userRequest);
+
+        try {
+            Set<Roles> roles = getRolesFromRequest(userRequest);
+            updatedUser.setRoles(roles);
+            userRepository.save(updatedUser);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid user data: " + e.getMessage());
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("One or more roles not found");
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating user details", e);
+        }
+    }
+
+    private User updateUserFromRequest(User existingUser, UserRequest userRequest) {
+        existingUser.setUsername(userRequest.getUsername());
+        existingUser.setPassword(userRequest.getPassword());
+        existingUser.setEnable(userRequest.isEnable());
+        existingUser.setUpdatedAt(new Date());
+        return existingUser;
+    }
+
 
 }
 
