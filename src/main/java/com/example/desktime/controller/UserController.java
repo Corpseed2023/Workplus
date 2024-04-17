@@ -65,7 +65,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
             // Validate input fields
@@ -80,7 +80,6 @@ public class UserController {
                 // Generate JWT token or session management logic here
                 return ResponseEntity.ok(new LoginResponse("Login successful", authenticatedUser));
             } else {
-
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid email or password", null));
             }
         } catch (Exception e) {
@@ -88,6 +87,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Error processing the request", null));
         }
     }
+
 
     @GetMapping("/checkUserExists")
     public ResponseEntity<Boolean> checkUserExists(@RequestParam(required = false) String username,
