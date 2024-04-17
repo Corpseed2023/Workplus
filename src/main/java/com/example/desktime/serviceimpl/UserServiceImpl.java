@@ -148,10 +148,11 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private boolean passwordMatches(String rawPassword, String encodedPassword) {
 
-        return rawPassword.equals(encodedPassword);
-    }
+        private boolean passwordMatches(String rawPassword, String encodedPassword) {
+            return passwordEncoder.matches(rawPassword, encodedPassword);
+        }
+
 
     @Override
     public boolean existofUserDetails(String username, String email) {
