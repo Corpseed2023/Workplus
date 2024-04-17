@@ -12,4 +12,6 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
 
 
     Optional<DailyActivity> findByUser(User user);
+
+    DailyActivity findByUserEmail(String email);
 }

@@ -7,11 +7,10 @@ import com.example.desktime.service.UserProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 @RestController
 public class UserProcessController {
@@ -33,5 +32,17 @@ public class UserProcessController {
         }
     }
 
+
+    @GetMapping("/getUserProcesses")
+    public ResponseEntity<?> getUserProcesses(@RequestParam String userEmail) {
+        try {
+            List<UserProcessResponse> userProcesses = userProcessService.getUserProcessesByEmail(userEmail);
+            return new ResponseEntity<>(userProcesses, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

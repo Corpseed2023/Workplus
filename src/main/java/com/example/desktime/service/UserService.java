@@ -22,4 +22,6 @@ public interface UserService {
     User authenticateUser(String email, String password);
 
     boolean existofUserDetails(String username, String email);
+
+    void editUserDetails(Long userId, UserRequest userRequest) throws AccessDeniedException;
 }

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 public class ScreenshotController {
@@ -33,6 +35,31 @@ public class ScreenshotController {
             return ResponseEntity.ok().body(screenshotResponse);
         } catch (IOException e) {
             return new ResponseEntity<>("Failed to upload screenshot.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getUserScreenshots")
+    public ResponseEntity<?> getUserScreenshots(@RequestParam String userEmail, @RequestParam String date) {
+        try {
+            LocalDate screenshotDate = LocalDate.parse(date); // Parse the date string to LocalDate
+            List<ScreenshotResponse> userScreenshots = screenShotService.getUserScreenshotsByEmailAndDate(userEmail, screenshotDate);
+            return new ResponseEntity<>(userScreenshots, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/deleteScreenshot")
+    public ResponseEntity<?> deleteScreenshot(@RequestParam Long screenshotId,@RequestParam Long userId) {
+        try {
+            screenShotService.deleteScreenshotById(screenshotId,userId);
+            return new ResponseEntity<>("Screenshot deleted successfully.", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -15,4 +15,6 @@ public interface DailyActivityService {
     DailyActivityResponse saveDailyActivity(DailyActivityRequest request);
 
     LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request);
+
+    DailyActivityResponse getDailyActivityByEmail(String email);
 }
