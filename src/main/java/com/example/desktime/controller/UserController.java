@@ -127,6 +127,17 @@ public class UserController {
     }
 
 
+    @DeleteMapping("/deleteUser")
+    public ResponseEntity<String> softDeleteUser(@RequestParam Long userId) {
+        try {
+            userService.softDeleteUser(userId);
+            return new ResponseEntity<>("User soft deleted successfully!", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
 }

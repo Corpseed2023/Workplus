@@ -24,4 +24,6 @@ public interface UserService {
     boolean existofUserDetails(String username, String email);
 
     void editUserDetails(Long userId, UserRequest userRequest) throws AccessDeniedException;
+
+    void softDeleteUser(Long userId);
 }
