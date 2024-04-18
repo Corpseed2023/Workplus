@@ -16,5 +16,5 @@ public interface DailyActivityService {
 
     LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request);
 
-    DailyActivityResponse getDailyActivityByEmail(String email);
+    DailyActivityResponse getDailyActivityByEmail(String email, LocalDate currentDate);
 }
