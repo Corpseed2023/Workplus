@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/roles")
+@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class RolesController {
 
     @Autowired

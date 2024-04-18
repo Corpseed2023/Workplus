@@ -13,6 +13,8 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class UserProcessController {
 
     @Autowired
