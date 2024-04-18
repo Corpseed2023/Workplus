@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -50,9 +51,9 @@ public class DailyActivityController {
     }
 
     @GetMapping("/dailyActivity")
-    public ResponseEntity<?> getDailyActivity(@RequestParam String email) {
+    public ResponseEntity<?> getDailyActivity(@RequestParam String email,@RequestParam LocalDate currentDate) {
         try {
-            DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email);
+            DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email,currentDate);
             return new ResponseEntity<>(dailyActivityResponse, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
