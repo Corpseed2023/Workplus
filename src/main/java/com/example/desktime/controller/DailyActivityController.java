@@ -16,6 +16,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class DailyActivityController {
 
     @Autowired
@@ -51,9 +52,27 @@ public class DailyActivityController {
     }
 
     @GetMapping("/dailyActivity")
-    public ResponseEntity<?> getDailyActivity(@RequestParam String email,@RequestParam LocalDate currentDate) {
+    public ResponseEntity<?> getDailyActivity(@RequestParam String email) {
         try {
+
+            LocalDate currentDate = LocalDate.now();
+
             DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email,currentDate);
+            return new ResponseEntity<>(dailyActivityResponse, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/filteredDailyActivityData")
+    public ResponseEntity<?> getFilteredDailyActivityData(@RequestParam String email ,@RequestParam LocalDate date) {
+        try {
+
+
+            DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email,date);
             return new ResponseEntity<>(dailyActivityResponse, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
