@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class ScreenshotController {
 
 
