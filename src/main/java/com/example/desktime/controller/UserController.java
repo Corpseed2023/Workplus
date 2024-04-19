@@ -1,9 +1,11 @@
 package com.example.desktime.controller;
 
 
+import com.example.desktime.config.EmailService;
 import com.example.desktime.model.User;
 import com.example.desktime.requestDTO.LoginRequest;
 import com.example.desktime.requestDTO.UserRequest;
+import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.LoginResponse;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
@@ -26,16 +28,23 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+
+
     @PostMapping("/createUser")
-    public ResponseEntity<String> postData(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<String> createUser(@RequestBody UserRequest userRequest) {
         try {
             userService.saveUserData(userRequest);
-            return new ResponseEntity<>("User created successfully!", HttpStatus.CREATED);
+
+            return new ResponseEntity<>("User created successfully! An email has been sent to the user.", HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("Invalid user data: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>("One or more roles not found", HttpStatus.BAD_REQUEST);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>("Access denied: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
+            // Log the exception for debugging
+            e.printStackTrace();
             return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -113,9 +122,9 @@ public class UserController {
 
 
     @PutMapping("/editUser")
-    public ResponseEntity<String> editUserDetails(@RequestParam Long userId, @RequestBody UserRequest userRequest) {
+    public ResponseEntity<String> editUserDetails(@RequestParam Long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
         try {
-            userService.editUserDetails(userId, userRequest);
+            userService.editUserDetails(userId, userUpdateRequest);
             return new ResponseEntity<>("User details updated successfully!", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("Invalid user data: " + e.getMessage(), HttpStatus.BAD_REQUEST);
