@@ -125,14 +125,22 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameAndEmail(username, email);
     }
 
-
     @Override
     public List<UserResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
-                .map(user -> new UserResponse(user.getId(),user.getUsername(), user.getEmail()))
+                .map(user -> new UserResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getRoles().stream() // Stream over roles
+                                .map(Roles::getRoleName) // Extract roleName
+                                .collect(Collectors.toSet()), // Collect roleNames to a Set
+                        user.getCreatedAt())) // Include createdAt
                 .collect(Collectors.toList());
     }
+
+
 
 
     @Override
