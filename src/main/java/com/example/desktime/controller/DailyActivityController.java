@@ -11,9 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
