@@ -104,12 +104,13 @@ public class UserServiceImpl implements UserService {
 
 
 
-
     private Set<Roles> getRolesFromRequest(UserRequest userRequest) {
         Set<Roles> roles = new HashSet<>();
         if (userRequest.getRoleNames() != null) {
-            for (String roleName : userRequest.getRoleNames()) {
-                Roles role = rolesRepository.findByRoleName(roleName);
+            // Split roleNames string into individual role names
+            String[] roleNameArray = userRequest.getRoleNames().split(",");
+            for (String roleName : roleNameArray) {
+                Roles role = rolesRepository.findByRoleName(roleName.trim());
                 if (role == null) {
                     throw new NoSuchElementException("Role not found with name: " + roleName);
                 }
