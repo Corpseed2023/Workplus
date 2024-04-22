@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findByIsEnableTrue();
         return users.stream()
                 .map(user -> new UserResponse(
                         user.getId(),
