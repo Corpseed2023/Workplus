@@ -1,11 +1,13 @@
 package com.example.desktime.serviceimpl;
 
-import com.example.desktime.config.SecurityConfig;
+import com.example.desktime.config.EmailService;
+import com.example.desktime.config.PasswordConfig;
 import com.example.desktime.model.Roles;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.RolesRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.UserRequest;
+import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.nio.file.AccessDeniedException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -28,15 +32,41 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private PasswordConfig passwordConfig;
+
+    @Autowired
+    EmailService emailService;
+
     @Override
     public void saveUserData(UserRequest userRequest) throws AccessDeniedException {
-
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
 
         if (userRequest.getRoleNames() != null && userRequest.getRoleNames().contains("ADMIN")) {
-            saveAdminUserData(userRequest);
+            // Create admin user
+            User adminUser = new User();
+            adminUser.setUsername(userRequest.getUsername());
+            adminUser.setEmail(userRequest.getEmail());
+            char[] passwordChars = passwordConfig.geek_Password(7);
+            String randomPassword = String.valueOf(passwordChars);
+            adminUser.setPassword(passwordEncoder.encode(randomPassword));
+            adminUser.setCreatedBy(userRequest.getCreatedBy());
+            adminUser.setCreatedAt(new Date());
+            adminUser.setUpdatedAt(new Date());
+            adminUser.setEnable(userRequest.isEnable());
+
+            Roles adminRole = rolesRepository.findByRoleName("ADMIN");
+            if (adminRole == null) {
+                throw new NoSuchElementException("ADMIN role not found");
+            }
+            adminUser.setRoles(Set.of(adminRole));
+
+            userRepository.save(adminUser);
+
+            emailService.sendUserCreationMail(userRequest.getUsername(), randomPassword, userRequest.getEmail());
+
             return;
         }
 
@@ -44,11 +74,25 @@ public class UserServiceImpl implements UserService {
             throw new AccessDeniedException("Only users with ADMIN role can create new users");
         }
 
-        User userData = createUserFromRequest(userRequest);
+        // Create regular user
+        User userData = new User();
+        userData.setUsername(userRequest.getUsername());
+        userData.setEmail(userRequest.getEmail());
+        char[] passwordChars = passwordConfig.geek_Password(7);
+        String randomPassword = String.valueOf(passwordChars);
+        userData.setPassword(passwordEncoder.encode(randomPassword));
+        userData.setCreatedBy(userRequest.getCreatedBy());
+        userData.setCreatedAt(new Date());
+        userData.setUpdatedAt(new Date());
+        userData.setEnable(userRequest.isEnable());
+
         try {
             Set<Roles> roles = getRolesFromRequest(userRequest);
             userData.setRoles(roles);
             userRepository.save(userData);
+
+            emailService.sendUserCreationMail(userRequest.getUsername(), randomPassword, userRequest.getEmail());
+
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid user data: " + e.getMessage());
         } catch (NoSuchElementException e) {
@@ -58,25 +102,15 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User createUserFromRequest(UserRequest userRequest) {
-        User userData = new User();
-        userData.setUsername(userRequest.getUsername());
-        userData.setEmail(userRequest.getEmail());
-        // Encrypting the password before setting it
-        userData.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        userData.setCreatedBy(userRequest.getCreatedBy());
-        userData.setCreatedAt(new Date());
-        userData.setUpdatedAt(new Date());
-        userData.setEnable(userRequest.isEnable());
-        return userData;
-    }
 
 
     private Set<Roles> getRolesFromRequest(UserRequest userRequest) {
         Set<Roles> roles = new HashSet<>();
         if (userRequest.getRoleNames() != null) {
-            for (String roleName : userRequest.getRoleNames()) {
-                Roles role = rolesRepository.findByRoleName(roleName);
+            // Split roleNames string into individual role names
+            String[] roleNameArray = userRequest.getRoleNames().split(",");
+            for (String roleName : roleNameArray) {
+                Roles role = rolesRepository.findByRoleName(roleName.trim());
                 if (role == null) {
                     throw new NoSuchElementException("Role not found with name: " + roleName);
                 }
@@ -86,15 +120,6 @@ public class UserServiceImpl implements UserService {
         return roles;
     }
 
-    private void saveAdminUserData(UserRequest userRequest) {
-        User adminUser = createUserFromRequest(userRequest);
-        Roles adminRole = rolesRepository.findByRoleName("ADMIN");
-        if (adminRole == null) {
-            throw new NoSuchElementException("ADMIN role not found");
-        }
-        adminUser.setRoles(Set.of(adminRole));
-        userRepository.save(adminUser);
-    }
 
     private boolean hasAdminRole(Long userId) {
         User user = userRepository.findById(userId)
@@ -125,14 +150,22 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameAndEmail(username, email);
     }
 
-
     @Override
     public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findByIsEnableTrue();
         return users.stream()
-                .map(user -> new UserResponse(user.getUsername(), user.getEmail()))
+                .map(user -> new UserResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getRoles().stream() // Stream over roles
+                                .map(Roles::getRoleName) // Extract roleName
+                                .collect(Collectors.toSet()), // Collect roleNames to a Set
+                        user.getCreatedAt())) // Include createdAt
                 .collect(Collectors.toList());
     }
+
+
 
 
     @Override
@@ -168,19 +201,19 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void editUserDetails(Long userId, UserRequest userRequest) throws AccessDeniedException {
+    public void editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException {
         Optional<User> optionalUser = userRepository.findById(userId);
         User existingUser = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        if (!hasAdminRole(userRequest.getCreatedBy())) {
+        if (!hasAdminRole(userUpdateRequest.getCreatedBy())) {
             throw new AccessDeniedException("Only users with ADMIN role can edit user details");
         }
 
-        User updatedUser = updateUserFromRequest(existingUser, userRequest);
+        User updatedUser = updateUserFromRequest(existingUser, userUpdateRequest);
 
         try {
-            Set<Roles> roles = getRolesFromRequest(userRequest);
-            updatedUser.setRoles(roles);
+//            Set<Roles> roles = getRole(userUpdateRequest);
+//            updatedUser.setRoles(roles);
             userRepository.save(updatedUser);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid user data: " + e.getMessage());
@@ -191,13 +224,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User updateUserFromRequest(User existingUser, UserRequest userRequest) {
+    private User updateUserFromRequest(User existingUser, UserUpdateRequest userRequest) {
         existingUser.setUsername(userRequest.getUsername());
-        existingUser.setPassword(userRequest.getPassword());
+        if (userRequest.getPassword() != null) {
+            // Update the password only if it exists in the request
+            existingUser.setPassword(userRequest.getPassword());
+        }
         existingUser.setEnable(userRequest.isEnable());
         existingUser.setUpdatedAt(new Date());
         return existingUser;
     }
+
 
     @Override
     public void softDeleteUser(Long userId) throws IllegalArgumentException {
