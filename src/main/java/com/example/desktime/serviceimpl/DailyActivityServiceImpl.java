@@ -3,6 +3,7 @@ package com.example.desktime.serviceimpl;
 import com.example.desktime.model.DailyActivity;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.DailyActivityRepository;
+import com.example.desktime.repository.UserProcessRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.DailyActivityRequest;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
@@ -25,6 +26,10 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserProcessRepository userProcessRepository;
+
 
     @Autowired
     private DailyActivityRepository dailyActivityRepository;
