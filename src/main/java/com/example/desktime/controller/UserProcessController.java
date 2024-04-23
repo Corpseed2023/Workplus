@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
@@ -47,6 +48,10 @@ public class UserProcessController {
         }
     }
 
+    @GetMapping("/getUserDateProcess")
+    public List<UserProcessResponse> getUserDateProcess(@RequestParam String userEmail, @RequestParam LocalDate date) {
+        return userProcessService.getUserProcessWithEmailAndDate(userEmail, date);
+    }
 
 
 }
