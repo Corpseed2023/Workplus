@@ -71,11 +71,9 @@ public class DailyActivityController {
     }
 
 
-
     @GetMapping("/filteredDailyActivityData")
     public ResponseEntity<?> getFilteredDailyActivityData(@RequestParam String email ,@RequestParam LocalDate date) {
         try {
-
 
             DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email,date);
             return new ResponseEntity<>(dailyActivityResponse, HttpStatus.OK);

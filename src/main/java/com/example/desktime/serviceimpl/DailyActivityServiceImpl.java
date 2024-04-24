@@ -116,10 +116,13 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     @Override
     public DailyActivityResponse getDailyActivityByEmail(String email, LocalDate currentDate) {
         DailyActivity dailyActivity = dailyActivityRepository.findByUserEmailAndDate(email, currentDate);
+
+        DailyActivityResponse response = new DailyActivityResponse();
+
         if (dailyActivity != null) {
             return convertToResponse(dailyActivity);
         } else {
-            throw new IllegalArgumentException("No daily activity found for the user with email: " + email + " and date: " + currentDate);
+            return response;
         }
     }
 
