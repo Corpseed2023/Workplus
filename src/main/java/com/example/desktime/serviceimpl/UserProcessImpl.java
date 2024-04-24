@@ -10,6 +10,8 @@ import com.example.desktime.service.UserProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,6 +57,7 @@ public class UserProcessImpl implements UserProcessService {
         userProcessResponse.setUserId(savedUserProcess.getUser().getId());
         userProcessResponse.setUserMail(savedUserProcess.getUser().getEmail());
 
+
         return userProcessResponse;
     }
 
@@ -91,4 +94,41 @@ public class UserProcessImpl implements UserProcessService {
     }
 
 
+    @Override
+    public List<UserProcessResponse> getUserProcessWithEmailAndDate(String userEmail, LocalDate date) {
+        try {
+            List<UserProcess> userProcesses = userProcessRepository.findByUserEmailAndDate(userEmail, date);
+            return userProcesses.stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+    private UserProcessResponse mapToResponse(UserProcess userProcess) {
+        UserProcessResponse response = new UserProcessResponse();
+        if (userProcess != null) {
+            response.setId(userProcess.getId());
+            User user = userProcess.getUser();
+            if (user != null) {
+                response.setUserId(user.getId());
+                response.setUserMail(user.getEmail());
+            }
+            response.setDate(userProcess.getDate());
+            response.setProcessName(userProcess.getProcessName());
+            response.setStartTime(userProcess.getStartTime());
+            response.setEndTime(userProcess.getEndTime());
+            response.setDurationMinutes(userProcess.getDurationMinutes());
+            response.setProcessPath(userProcess.getProcessPath());
+            response.setDeviceName(userProcess.getDeviceName());
+            response.setOperatingSystem(userProcess.getOperatingSystem());
+            response.setProcessId(userProcess.getProcessId());
+            response.setProcessType(userProcess.getProcessType());
+            response.setActivityType(userProcess.getActivityType());
+            response.setAdditionalMetadata(userProcess.getAdditionalMetadata());
+        }
+        return response;
+    }
 }

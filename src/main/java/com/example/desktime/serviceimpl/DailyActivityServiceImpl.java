@@ -3,6 +3,7 @@ package com.example.desktime.serviceimpl;
 import com.example.desktime.model.DailyActivity;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.DailyActivityRepository;
+import com.example.desktime.repository.UserProcessRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.DailyActivityRequest;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
@@ -25,6 +26,10 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserProcessRepository userProcessRepository;
+
 
     @Autowired
     private DailyActivityRepository dailyActivityRepository;
@@ -111,10 +116,13 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     @Override
     public DailyActivityResponse getDailyActivityByEmail(String email, LocalDate currentDate) {
         DailyActivity dailyActivity = dailyActivityRepository.findByUserEmailAndDate(email, currentDate);
+
+        DailyActivityResponse response = new DailyActivityResponse();
+
         if (dailyActivity != null) {
             return convertToResponse(dailyActivity);
         } else {
-            throw new IllegalArgumentException("No daily activity found for the user with email: " + email + " and date: " + currentDate);
+            return response;
         }
     }
 
