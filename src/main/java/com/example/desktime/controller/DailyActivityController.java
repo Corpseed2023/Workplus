@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -50,12 +52,16 @@ public class DailyActivityController {
     }
 
     @GetMapping("/dailyActivity")
-    public ResponseEntity<?> getDailyActivity(@RequestParam String email) {
+    public ResponseEntity<?> getDailyActivity(@RequestParam String email , @RequestParam(required = false) LocalDate date) {
         try {
+            LocalDate currentDate;
+            if (date != null) {
+                currentDate = date;
+            } else {
+                currentDate = LocalDate.now();
+            }
 
-            LocalDate currentDate = LocalDate.now();
-
-            DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email,currentDate);
+            DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email, currentDate);
             return new ResponseEntity<>(dailyActivityResponse, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -63,6 +69,7 @@ public class DailyActivityController {
             return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
     @GetMapping("/filteredDailyActivityData")
