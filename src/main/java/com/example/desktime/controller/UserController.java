@@ -7,6 +7,7 @@ import com.example.desktime.requestDTO.LoginRequest;
 import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.LoginResponse;
+import com.example.desktime.responseDTO.SingleUserResponse;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,20 +51,16 @@ public class UserController {
     }
 
     @GetMapping("/userDetails")
-    public ResponseEntity<User> getUserDetails(@RequestParam String username) {
-        User user = new User();
-        user.setUsername(username);
-//        user.setEmail(email);
-
-        ResponseEntity<User> responseEntity = userService.getUserdetails(user);
+    public ResponseEntity<SingleUserResponse> getUserDetails(@RequestParam String usernameMail) {
+        ResponseEntity<SingleUserResponse> responseEntity = userService.getSingleUserDetails(usernameMail);
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return responseEntity;
+            return ResponseEntity.ok(responseEntity.getBody());
         } else {
-
             return ResponseEntity.notFound().build();
         }
     }
+
 
 
     @GetMapping("/allUsersList")

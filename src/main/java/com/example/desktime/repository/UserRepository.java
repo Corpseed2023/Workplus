@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT u FROM user u WHERE u.email = :userMail")
+    @Query("SELECT u FROM user u WHERE u.email = :userMail" )
     User findUserByEmail(String userMail);
 
 
@@ -29,5 +29,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByIdAndRolesRoleName(Long userId, String admin);
 
     List<User> findByIsEnableTrue();
+
+
+
 
 }
