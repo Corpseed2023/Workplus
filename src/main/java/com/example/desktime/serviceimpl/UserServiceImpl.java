@@ -8,6 +8,7 @@ import com.example.desktime.repository.RolesRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
+import com.example.desktime.responseDTO.SingleUserResponse;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,16 +135,25 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public ResponseEntity<User> getUserdetails(User user) {
-        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
+    public ResponseEntity<SingleUserResponse> getSingleUserDetails(String usernameMail) {
+        User userDetails = userRepository.findUserByEmail(usernameMail);
 
-        if (existingUser.isPresent()) {
-            return ResponseEntity.ok(existingUser.get());
+        if (userDetails != null) {
+            SingleUserResponse singleUserResponse = new SingleUserResponse();
+            singleUserResponse.setId(userDetails.getId());
+            singleUserResponse.setUsername(userDetails.getUsername());
+            singleUserResponse.setEmail(userDetails.getEmail());
+            singleUserResponse.setCreatedBy(userDetails.getCreatedBy());
+            singleUserResponse.setEnable(userDetails.isEnable());
+            singleUserResponse.setRoles(userDetails.getRoles());
+
+            return ResponseEntity.ok(singleUserResponse);
         } else {
             // User not found
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @Override
     public User getUserByUsernameAndEmail(String username, String email) {
