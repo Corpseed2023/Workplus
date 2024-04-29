@@ -26,7 +26,6 @@ public class DailyActivityController {
     @PostMapping("/saveDailyActivity")
     public ResponseEntity<?> saveDailyActivity(@RequestBody DailyActivityRequest request) {
         try {
-            // Check if the email is null or doesn't contain the specified domain
             if (request.getEmail() == null || !request.getEmail().endsWith("@corpseed.com")) {
                 return new ResponseEntity<>("User not found within the domain corpseed.com. Email is null or doesn't contain the specified domain.", HttpStatus.NOT_FOUND);
             }

@@ -23,16 +23,15 @@ public class ScreenshotController {
 
 
     @PostMapping(value = "/uploadScreenShot", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> uploadScreenshot(@RequestParam Long referenceId,
-                                              @RequestPart(name = "file", required = false) MultipartFile file,
-                                              @RequestParam String userMail) {
+    public ResponseEntity<?> uploadScreenshot(@RequestPart(name = "file", required = false) MultipartFile file,
+                                              @RequestParam(required = false) String userMail) {
         try {
             if (file.isEmpty()) {
                 return new ResponseEntity<>("Please upload a screenshot file.", HttpStatus.BAD_REQUEST);
             }
             byte[] screenshotData = file.getBytes();
             String originalFilename = file.getOriginalFilename(); // Get the original filename
-            ScreenshotResponse screenshotResponse = screenShotService.uploadScreenshot(referenceId, screenshotData, userMail, originalFilename);
+            ScreenshotResponse screenshotResponse = screenShotService.uploadScreenshot(screenshotData, userMail, originalFilename);
             return ResponseEntity.ok().body(screenshotResponse);
         } catch (IOException e) {
             return new ResponseEntity<>("Failed to upload screenshot.", HttpStatus.INTERNAL_SERVER_ERROR);

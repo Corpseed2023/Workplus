@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -78,23 +80,34 @@ public class UserController {
         try {
             // Validate input fields
             if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
-                return ResponseEntity.badRequest().body(new LoginResponse("Email and password are required", null));
+                return ResponseEntity.badRequest().body(new LoginResponse("Email and password are required"));
             }
 
             // Retrieve user by email
             User authenticatedUser = userService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
 
             if (authenticatedUser != null) {
-                // Generate JWT token or session management logic here
-                return ResponseEntity.ok(new LoginResponse("Login successful", authenticatedUser));
+                // Set roles separately
+                Set<String> roles = authenticatedUser.getRoles().stream()
+                        .map(role -> role.getRoleName())
+                        .collect(Collectors.toSet());
+                // Create LoginResponse object with roles
+                LoginResponse response = new LoginResponse("Login successful");
+                response.setId(authenticatedUser.getId());
+                response.setUsername(authenticatedUser.getUsername());
+                response.setEmail(authenticatedUser.getEmail());
+                response.setRoles(roles);
+
+                return ResponseEntity.ok(response);
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid email or password", null));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid email or password"));
             }
         } catch (Exception e) {
             // Log exception
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Error processing the request", null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Error processing the request"));
         }
     }
+
 
 
     @GetMapping("/checkUserExists")
