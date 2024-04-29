@@ -29,9 +29,13 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     @Autowired
     private ScreenshotRepository screenshotRepository;
 
+    Long referenceId;
+
 
     @Override
-    public ScreenshotResponse uploadScreenshot(Long referenceId, byte[] screenshotData, String userMail, String originalFilename) throws IOException {
+    public ScreenshotResponse uploadScreenshot( byte[] screenshotData, String userMail, String originalFilename) throws IOException {
+
+
         User user = userRepository.findUserByEmail(userMail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userMail);
@@ -48,7 +52,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         Files.write(filePath, screenshotData);
 
         // Create the URL for the image (assuming it's served by the application)
-        String imageUrl = "http://localhost:8888/uploadedScreenshots/" + fileName; // Adjust the URL format as needed
+        String imageUrl = "file:///D:/DeskTimeSnap/uploadedScreenshots/" + fileName; // Adjust the URL format as needed
 
         // Create a Screenshot entity
         Screenshot screenshot = new Screenshot();

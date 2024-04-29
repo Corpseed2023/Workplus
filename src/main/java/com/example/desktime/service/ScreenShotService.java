@@ -10,7 +10,7 @@ import java.util.List;
 public interface ScreenShotService {
 
 
-    ScreenshotResponse uploadScreenshot(Long referenceId, byte[] screenshotData, String userMail, String originalFilename) throws IOException;
+    ScreenshotResponse uploadScreenshot(byte[] screenshotData, String userMail, String originalFilename) throws IOException;
 
     List<ScreenshotResponse> getUserScreenshotsByEmailAndDate(String userEmail, LocalDate screenshotDate);
 
