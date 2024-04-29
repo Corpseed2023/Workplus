@@ -45,21 +45,20 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
 
-//                LocalDateTime loginTimeUTC = request.getLoginTime();
-//                ZoneId utcZone = ZoneId.of("UTC");
-//                ZoneId istZone = ZoneId.of("Asia/Kolkata");
-//                ZonedDateTime utcDateTime = ZonedDateTime.of(loginTimeUTC, utcZone);
-//                ZonedDateTime istDateTime = utcDateTime.withZoneSameInstant(istZone);
-//                LocalDateTime loginTimeIST = istDateTime.toLocalDateTime();
-//
-//                String loginTimeConvention = loginTimeIST.getHour() < 12 ? "AM" : "PM"; // Determine AM/PM based on the hour
+                // Check if the data for the specified user and today's date already exists
+                Optional<DailyActivity> existingActivity = dailyActivityRepository.findByUserAndDate(user, LocalDate.now());
 
-                LocalDate activityDate = request.getDate();
+                // If data already exists for today, return a response indicating that the data was not saved
+                if (existingActivity.isPresent()) {
+                    throw new IllegalArgumentException("Data already exists for today.");
+                }
 
-                // Store login time directly from the request
-                LocalDateTime loginTime = request.getLoginTime();
+                LocalDate activityDate = LocalDate.now();
 
-                DailyActivity dailyActivity = new DailyActivity(user, activityDate, loginTime, null, true, null);
+                // Get the current time in Indian time zone
+                LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+
+                DailyActivity dailyActivity = new DailyActivity(user, activityDate, currentIndiaTime, null, true, null);
                 dailyActivity.setDayOfWeek(activityDate.getDayOfWeek().toString());
                 dailyActivity.setLoginTimeConvention(loginTimeConvention); // Set AM/PM
 
@@ -68,8 +67,8 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 DailyActivityResponse response = new DailyActivityResponse();
                 response.setId(savedActivity.getId());
                 response.setUserEmail(request.getEmail());
-                response.setDate(request.getDate());
-                response.setLoginTime(loginTime); // Store login time as received in the request
+                response.setDate(activityDate);
+                response.setLoginTime(currentIndiaTime); // Store login time in Indian time zone
                 response.setPresent(true);
                 response.setDayOfWeek(savedActivity.getDayOfWeek());
                 response.setAttendanceType(savedActivity.getAttendanceType());
@@ -82,6 +81,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             throw new IllegalArgumentException("Invalid date format. Please provide the date in yyyy-MM-dd format.");
         }
     }
+
 
     @Override
     public LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request) {
