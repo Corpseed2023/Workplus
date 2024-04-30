@@ -16,7 +16,11 @@ public class SingleUserResponse {
     private String email;
     private Long createdBy;
     private boolean isEnable;
-    private Set<Roles> roles;
+    private Date createdAt;
+    private Date updatedAt;
+//    private Set<Roles> roles;
+
+    private Set<String> roles; // Change to Set of String for role names
 
 
 }

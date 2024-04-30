@@ -86,6 +86,8 @@ public class UserServiceImpl implements UserService {
         userData.setCreatedAt(new Date());
         userData.setUpdatedAt(new Date());
         userData.setEnable(userRequest.isEnable());
+        userData.setCreatedAt(userRequest.getCreatedAt());
+        userData.setUpdatedAt(userRequest.getUpdatedAt());
 
         try {
             Set<Roles> roles = getRolesFromRequest(userRequest);
@@ -145,7 +147,17 @@ public class UserServiceImpl implements UserService {
             singleUserResponse.setEmail(userDetails.getEmail());
             singleUserResponse.setCreatedBy(userDetails.getCreatedBy());
             singleUserResponse.setEnable(userDetails.isEnable());
-            singleUserResponse.setRoles(userDetails.getRoles());
+            singleUserResponse.setUpdatedAt(userDetails.getUpdatedAt());
+            singleUserResponse.setCreatedAt(userDetails.getCreatedAt());
+//             Extract role names from Roles objects and set to SingleUserResponse
+//            Set<String> roleNames = userDetails.getRoles().stream()
+//                    .map(Roles::getRoleName)
+//                    .collect(Collectors.toSet());
+
+            Set<String> roleName = userDetails.getRoles().stream().
+                    map(Roles::getRoleName).collect(Collectors.toSet());
+
+            singleUserResponse.setRoles(roleName);
 
             return ResponseEntity.ok(singleUserResponse);
         } else {
@@ -153,6 +165,7 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.notFound().build();
         }
     }
+
 
 
     @Override
