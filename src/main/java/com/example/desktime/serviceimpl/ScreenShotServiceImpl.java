@@ -47,7 +47,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
         // Append a timestamp to avoid filename conflicts
         String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = referenceId + "_" + timestamp + "_" + originalFilename; // Use the original filename
+        String fileName = user.getUsername() + "_" + timestamp + "_" + originalFilename; // Use the original filename
         Path filePath = Paths.get(directoryPath, fileName);
         Files.write(filePath, screenshotData);
 
