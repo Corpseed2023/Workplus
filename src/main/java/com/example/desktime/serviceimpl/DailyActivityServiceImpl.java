@@ -7,10 +7,14 @@ import com.example.desktime.repository.UserProcessRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.DailyActivityRequest;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
+import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.DailyActivityResponse;
 import com.example.desktime.responseDTO.LogoutUpdateResponse;
 import com.example.desktime.service.DailyActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,6 +23,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -139,4 +145,29 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setLoginTimeConvention(dailyActivity.getLoginTimeConvention());
         return response;
     }
+
+
+
+// Assuming this is within the DailyActivityService implementation class
+
+    public List<DailyActivityReportResponse> getMonthlyActivityReport(String email, LocalDate startDate, LocalDate endDate) {
+        List<DailyActivity> activities = dailyActivityRepository.findByUserEmailAndDateBetween(email, startDate, endDate);
+
+        List<DailyActivityReportResponse> response = new ArrayList<>();
+        for (DailyActivity activity : activities) {
+            DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
+            activityResponse.setUserName(activity.getUser().getUsername());
+            activityResponse.setUserEmail(activity.getUser().getEmail());
+            activityResponse.setLoginTime(activity.getLoginTime());
+            activityResponse.setLogoutTime(activity.getLogoutTime());
+            activityResponse.setDate(activity.getDate());
+            response.add(activityResponse);
+        }
+
+        return response;
+    }
+
+
+
+
 }
