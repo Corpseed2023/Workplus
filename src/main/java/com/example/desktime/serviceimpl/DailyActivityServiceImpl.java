@@ -24,6 +24,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -150,23 +151,33 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
 // Assuming this is within the DailyActivityService implementation class
 
+
     public List<DailyActivityReportResponse> getMonthlyActivityReport(String email, LocalDate startDate, LocalDate endDate) {
+        try {
+            List<DailyActivity> activities = dailyActivityRepository.findByUserEmailAndDateBetween(email, startDate, endDate);
 
-        List<DailyActivity> activities = dailyActivityRepository.findByUserEmailAndDateBetween(email, startDate, endDate);
+            if (activities == null || activities.isEmpty()) {
+                return Collections.emptyList(); // Return an empty list if no activities found
+            }
 
-        List<DailyActivityReportResponse> response = new ArrayList<>();
-        for (DailyActivity activity : activities) {
-            DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
-            activityResponse.setUserName(activity.getUser().getUsername());
-            activityResponse.setUserEmail(activity.getUser().getEmail());
-            activityResponse.setLoginTime(activity.getLoginTime());
-            activityResponse.setLogoutTime(activity.getLogoutTime());
-            activityResponse.setDate(activity.getDate());
-            activityResponse.setId(activity.getId());
-            response.add(activityResponse);
+            List<DailyActivityReportResponse> response = new ArrayList<>();
+
+            for (DailyActivity activity : activities) {
+                DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
+                activityResponse.setUserName(activity.getUser().getUsername());
+                activityResponse.setUserEmail(activity.getUser().getEmail());
+                activityResponse.setLoginTime(activity.getLoginTime());
+                activityResponse.setLogoutTime(activity.getLogoutTime());
+                activityResponse.setDate(activity.getDate());
+                activityResponse.setId(activity.getId());
+                response.add(activityResponse);
+            }
+
+            return response;
+        } catch (Exception e) {
+            // Log the exception if needed
+            throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
         }
-
-        return response;
     }
 
 
