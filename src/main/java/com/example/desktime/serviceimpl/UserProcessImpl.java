@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +28,6 @@ public class UserProcessImpl implements UserProcessService {
 
     public UserProcessResponse saveUserProcess(UserProcessRequest userProcessRequest) {
         // Check if the user exists based on email
-
         User user = userRepository.findUserByEmail(userProcessRequest.getUserMail());
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userProcessRequest.getUserMail());
@@ -51,12 +52,25 @@ public class UserProcessImpl implements UserProcessService {
         // Save the UserProcess
         UserProcess savedUserProcess = userProcessRepository.save(userProcess);
 
-        // Create a UserProcessResponse
+        // Create a UserProcessResponse and map all fields from the UserProcess entity
         UserProcessResponse userProcessResponse = new UserProcessResponse();
         userProcessResponse.setId(savedUserProcess.getId());
         userProcessResponse.setUserId(savedUserProcess.getUser().getId());
         userProcessResponse.setUserMail(savedUserProcess.getUser().getEmail());
+        userProcessResponse.setDate(savedUserProcess.getDate());
+        userProcessResponse.setProcessName(savedUserProcess.getProcessName());
+        userProcessResponse.setStartTime(savedUserProcess.getStartTime());
+        userProcessResponse.setEndTime(savedUserProcess.getEndTime());
+        userProcessResponse.setDurationMinutes(savedUserProcess.getDurationMinutes());
+        userProcessResponse.setProcessPath(savedUserProcess.getProcessPath());
+        userProcessResponse.setDeviceName(savedUserProcess.getDeviceName());
+        userProcessResponse.setOperatingSystem(savedUserProcess.getOperatingSystem());
+        userProcessResponse.setProcessId(savedUserProcess.getProcessId());
+        userProcessResponse.setProcessType(savedUserProcess.getProcessType());
+        userProcessResponse.setActivityType(savedUserProcess.getActivityType());
+        userProcessResponse.setAdditionalMetadata(savedUserProcess.getAdditionalMetadata());
 
+        // Map any additional fields from the UserProcess entity here
 
         return userProcessResponse;
     }
@@ -94,11 +108,14 @@ public class UserProcessImpl implements UserProcessService {
     }
 
 
-    @Override
     public List<UserProcessResponse> getUserProcessWithEmailAndDate(String userEmail, LocalDate date) {
         try {
             List<UserProcess> userProcesses = userProcessRepository.findByUserEmailAndDate(userEmail, date);
+
+            Set<String> processedNames = new HashSet<>(); // Set to keep track of processed names
+
             return userProcesses.stream()
+                    .filter(userProcess -> processedNames.add(userProcess.getProcessName())) // Filter out duplicates
                     .map(this::mapToResponse)
                     .collect(Collectors.toList());
         } catch (Exception e) {
@@ -106,6 +123,7 @@ public class UserProcessImpl implements UserProcessService {
             return Collections.emptyList();
         }
     }
+
 
     private UserProcessResponse mapToResponse(UserProcess userProcess) {
         UserProcessResponse response = new UserProcessResponse();
