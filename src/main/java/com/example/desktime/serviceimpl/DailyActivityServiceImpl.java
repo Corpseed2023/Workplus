@@ -170,6 +170,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 activityResponse.setLogoutTime(activity.getLogoutTime());
                 activityResponse.setDate(activity.getDate());
                 activityResponse.setId(activity.getId());
+                activityResponse.setPresent(activity.isPresent());
                 response.add(activityResponse);
             }
 
