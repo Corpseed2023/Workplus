@@ -9,7 +9,6 @@ import com.example.desktime.responseDTO.UserProcessResponse;
 import com.example.desktime.service.UserProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,6 +30,14 @@ public class UserProcessImpl implements UserProcessService {
         User user = userRepository.findUserByEmail(userProcessRequest.getUserMail());
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userProcessRequest.getUserMail());
+        }
+
+        // Check if a process with the same name exists for the user on the same date
+        LocalDate date = userProcessRequest.getDate();
+        String processName = userProcessRequest.getProcessName();
+        UserProcess existingProcess = userProcessRepository.findByUserAndDateAndProcessName(user, date, processName);
+        if (existingProcess != null) {
+            throw new IllegalArgumentException("A process with the name '" + processName + "' already exists for the user on " + date);
         }
 
         // Create a new UserProcess object
@@ -70,10 +77,10 @@ public class UserProcessImpl implements UserProcessService {
         userProcessResponse.setActivityType(savedUserProcess.getActivityType());
         userProcessResponse.setAdditionalMetadata(savedUserProcess.getAdditionalMetadata());
 
-        // Map any additional fields from the UserProcess entity here
 
         return userProcessResponse;
     }
+
 
 
     @Override
