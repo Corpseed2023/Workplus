@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 public class DailyActivityReportResponse {
 
-    private Long userId;
+    private Long id;
     private String userName;
     private String userEmail;
     private LocalDateTime loginTime;
