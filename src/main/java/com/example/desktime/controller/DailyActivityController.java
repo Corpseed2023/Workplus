@@ -91,20 +91,38 @@ public class DailyActivityController {
         }
     }
 
+//    @GetMapping("/report")
+////    public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+//    public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam(required = false) LocalDate date) {
+//
+//        try {
+//            LocalDate currentDate = (date != null) ? date : LocalDate.now();
+//            int year = currentDate.getYear();
+//            int month = currentDate.getMonthValue();
+//            LocalDate startDate = LocalDate.of(year, month, 1);
+//            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+//            List<DailyActivityReportResponse> response = dailyActivityService.getMonthlyActivityReport(email, startDate, endDate);
+//            return ResponseEntity.ok(response);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request");
+//        }
+//    }
+
     @GetMapping("/report")
-//    public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-    public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam(required = false) LocalDate date) {
+    public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam int year, @RequestParam int month) {
 
         try {
-            LocalDate currentDate = (date != null) ? date : LocalDate.now();
-            int year = currentDate.getYear();
-            int month = currentDate.getMonthValue();
             LocalDate startDate = LocalDate.of(year, month, 1);
             LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
             List<DailyActivityReportResponse> response = dailyActivityService.getMonthlyActivityReport(email, startDate, endDate);
+
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
+            }
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request: " + e.getMessage());
         }
     }
 
