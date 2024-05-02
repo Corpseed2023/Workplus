@@ -91,12 +91,11 @@ public class DailyActivityController {
         }
     }
 
-
     @GetMapping("/report")
 //    public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam(required = false) LocalDate date) {
+    public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam(required = false) LocalDate date) {
 
-            try {
+        try {
             LocalDate currentDate = (date != null) ? date : LocalDate.now();
             int year = currentDate.getYear();
             int month = currentDate.getMonthValue();
@@ -108,6 +107,7 @@ public class DailyActivityController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request");
         }
     }
+
 
 
 

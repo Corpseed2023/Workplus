@@ -151,6 +151,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 // Assuming this is within the DailyActivityService implementation class
 
     public List<DailyActivityReportResponse> getMonthlyActivityReport(String email, LocalDate startDate, LocalDate endDate) {
+
         List<DailyActivity> activities = dailyActivityRepository.findByUserEmailAndDateBetween(email, startDate, endDate);
 
         List<DailyActivityReportResponse> response = new ArrayList<>();
@@ -161,6 +162,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             activityResponse.setLoginTime(activity.getLoginTime());
             activityResponse.setLogoutTime(activity.getLogoutTime());
             activityResponse.setDate(activity.getDate());
+            activityResponse.setUserId(activity.getUser().getId());
             response.add(activityResponse);
         }
 
