@@ -33,45 +33,41 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
 
     @Override
-    public ScreenshotResponse uploadScreenshot( byte[] screenshotData, String userMail, String originalFilename) throws IOException {
-
-
+    public ScreenshotResponse uploadScreenshot(byte[] screenshotData, String userMail, String originalFilename) throws IOException {
         User user = userRepository.findUserByEmail(userMail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userMail);
         }
 
+        // Check if an image with the same name and creation date already exists
+        Screenshot existingScreenshot = screenshotRepository.findByScreenshotNameAndCreatedAt(originalFilename, new Date());
+
+        if (existingScreenshot != null) {
+            // Return a response indicating that the image already exists
+            return mapScreenshotToResponse(existingScreenshot);
+        }
+
         // Save the screenshot file on the computer drive
-        String directoryPath = "D:/DeskTimeSnap/uploadedScreenshots"; // Update the directory path as needed
+        String directoryPath = "D:/DeskTimeSnap/uploadedScreenshots";
         Files.createDirectories(Paths.get(directoryPath));
 
-        // Append a timestamp to avoid filename conflicts
         String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = user.getUsername() + "_" + timestamp + "_" + originalFilename; // Use the original filename
+        String fileName = user.getUsername() + "_" + timestamp + "_" + originalFilename;
         Path filePath = Paths.get(directoryPath, fileName);
         Files.write(filePath, screenshotData);
 
-        // Create the URL for the image (assuming it's served by the application)
-        String imageUrl = "file:///D:/DeskTimeSnap/uploadedScreenshots/" + fileName; // Adjust the URL format as needed
+        String imageUrl = "file:///D:/DeskTimeSnap/uploadedScreenshots/" + fileName;
 
-        // Create a Screenshot entity
-        Screenshot screenshot = new Screenshot();
-
-        screenshot.setUser(user);
-        screenshot.setScreenshotTime(new Date());
-        screenshot.setScreenshotUrl(imageUrl);
-        screenshot.setScreenshotName(originalFilename);
+        Screenshot screenshot = new Screenshot(user, new Date(), imageUrl, originalFilename);
         screenshot.setCreatedAt(new Date());
         screenshot.setUpdatedAt(new Date());
 
         // Save the screenshot entity in the database
-        screenshotRepository.save(screenshot);
+        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
 
-        // Convert the entity to a DTO for response
-        ScreenshotResponse screenshotResponse = mapScreenshotToResponse(screenshot);
-
-        return screenshotResponse;
+        return mapScreenshotToResponse(savedScreenshot);
     }
+
 
     // Utility method to map Screenshot entity to ScreenshotResponse DTO
     private ScreenshotResponse mapScreenshotToResponse(Screenshot screenshot) {
