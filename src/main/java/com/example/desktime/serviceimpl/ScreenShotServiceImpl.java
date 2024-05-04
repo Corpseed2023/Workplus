@@ -146,7 +146,6 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         }
     }
 
-
     @Override
     public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
 
