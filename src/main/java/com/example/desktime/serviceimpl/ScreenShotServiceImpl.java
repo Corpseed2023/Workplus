@@ -132,5 +132,4 @@ public class ScreenShotServiceImpl implements ScreenShotService {
             throw new IllegalArgumentException("You do not have permission to delete this screenshot.");
         }
     }
-
 }
