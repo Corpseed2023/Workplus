@@ -4,6 +4,7 @@ package com.example.desktime.controller;
 import com.example.desktime.config.EmailService;
 import com.example.desktime.model.User;
 import com.example.desktime.requestDTO.LoginRequest;
+import com.example.desktime.requestDTO.ResetPasswordRequest;
 import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.LoginResponse;
@@ -159,6 +160,18 @@ public class UserController {
             return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<String> forgotPassword(@RequestParam String email ,@RequestParam String password) {
+        try {
+            userService.initiatePasswordReset(email,password);
+            return new ResponseEntity<>("Password reset email sent successfully!", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error initiating password reset: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 
 }
