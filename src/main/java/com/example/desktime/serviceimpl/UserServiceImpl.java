@@ -11,6 +11,7 @@ import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.SingleUserResponse;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService {
     EmailService emailService;
 
     @Override
-    public void saveUserData(UserRequest userRequest) throws AccessDeniedException {
+    public void saveUserData(UserRequest userRequest) throws AccessDeniedException, MessagingException {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
@@ -269,6 +270,25 @@ public class UserServiceImpl implements UserService {
         user.setEnable(false);
 
         userRepository.save(user);
+    }
+
+
+
+    @Override
+    public void initiatePasswordReset(String email, String newPassword) throws MessagingException {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword);
+            userRepository.save(user);
+
+            // Send email notification
+            emailService.sendPasswordResetEmail(user.getEmail(), newPassword);
+        } else {
+            throw new IllegalArgumentException("User not found with email: " + email);
+        }
     }
 
 
