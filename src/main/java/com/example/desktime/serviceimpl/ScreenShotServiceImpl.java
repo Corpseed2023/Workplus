@@ -1,6 +1,7 @@
 package com.example.desktime.serviceimpl;
 
 
+import com.example.desktime.config.AzureBlobAdapter;
 import com.example.desktime.model.Screenshot;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.ScreenshotRepository;
@@ -9,6 +10,7 @@ import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.ScreenShotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,7 +31,18 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     @Autowired
     private ScreenshotRepository screenshotRepository;
 
+
+    @Autowired
+    AzureBlobAdapter azureAdapter;
+
     Long referenceId;
+
+
+    //	public String UPLOAD_DIR="/Users/aryanchaurasia/Documents/Corpseed-img";
+    public String UPLOAD_DIR="C:/Users/user/Documents/imageTest/image (1)";
+    //    public final String FOLDER_PATH="C:/Users/user/Documents/images/";
+    public final String PROD_PATH="https://deskstoragefast.blob.core.windows.net/test/";
+
 
 
     @Override
@@ -133,4 +146,38 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         }
     }
 
+
+    @Override
+    public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
+
+
+        User user = userRepository.findUserByEmail(userMail);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found with email: " + userMail);
+        }
+
+
+        //    		String filePath=PROD_PATH+file.getOriginalFilename();
+
+        String s=azureAdapter.uploadv2(file, 0);
+        String filePath=PROD_PATH+s;
+
+
+        Screenshot screenshot = new Screenshot();
+
+        screenshot.setUser(user);
+        screenshot.setScreenshotTime(new Date());
+        screenshot.setScreenshotUrl(filePath);
+        screenshot.setScreenshotName(s);
+        screenshot.setCreatedAt(new Date());
+        screenshot.setUpdatedAt(new Date());
+
+        // Save the screenshot entity in the database
+        screenshotRepository.save(screenshot);
+
+        // Convert the entity to a DTO for response
+        ScreenshotResponse screenshotResponse = mapScreenshotToResponse(screenshot);
+
+        return screenshotResponse;
+    }
 }
