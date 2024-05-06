@@ -55,7 +55,6 @@ public class UserServiceImpl implements UserService {
             System.out.println("User Password Is "+ passwordChars);
             String randomPassword = String.valueOf(passwordChars);
             adminUser.setPassword(passwordEncoder.encode(randomPassword));
-            adminUser.setCreatedBy(userRequest.getCreatedBy());
             adminUser.setCreatedAt(new Date());
             adminUser.setUpdatedAt(new Date());
             adminUser.setEnable(userRequest.isEnable());
@@ -73,10 +72,6 @@ public class UserServiceImpl implements UserService {
             return;
         }
 
-        if (!hasAdminRole(userRequest.getCreatedBy())) {
-            throw new AccessDeniedException("Only users with ADMIN role can create new users");
-        }
-
         // Create regular user
         User userData = new User();
         userData.setUsername(userRequest.getUsername());
@@ -84,7 +79,6 @@ public class UserServiceImpl implements UserService {
         char[] passwordChars = passwordConfig.geek_Password(7);
         String randomPassword = String.valueOf(passwordChars);
         userData.setPassword(passwordEncoder.encode(randomPassword));
-        userData.setCreatedBy(userRequest.getCreatedBy());
         userData.setCreatedAt(new Date());
         userData.setUpdatedAt(new Date());
         userData.setEnable(userRequest.isEnable());
