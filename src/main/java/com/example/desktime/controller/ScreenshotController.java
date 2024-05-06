@@ -1,6 +1,5 @@
 package com.example.desktime.controller;
 
-import com.example.desktime.model.Screenshot;
 import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.ScreenShotService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -39,9 +37,14 @@ public class ScreenshotController {
     }
 
     @GetMapping("/getUserScreenshots")
-    public ResponseEntity<?> getUserScreenshots(@RequestParam String userEmail, @RequestParam String date) {
+    public ResponseEntity<?> getUserScreenshots(@RequestParam String userEmail, @RequestParam(required = false) String date) {
         try {
-            LocalDate screenshotDate = LocalDate.parse(date); // Parse the date string to LocalDate
+            LocalDate screenshotDate;
+            if (date != null) {
+                screenshotDate = LocalDate.parse(date);
+            } else {
+                screenshotDate = LocalDate.now();
+            }
             List<ScreenshotResponse> userScreenshots = screenShotService.getUserScreenshotsByEmailAndDate(userEmail, screenshotDate);
             return new ResponseEntity<>(userScreenshots, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -50,6 +53,7 @@ public class ScreenshotController {
             return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @DeleteMapping("/deleteScreenshot")
     public ResponseEntity<?> deleteScreenshot(@RequestParam Long screenshotId,@RequestParam Long userId) {
