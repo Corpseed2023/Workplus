@@ -71,7 +71,10 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
         String imageUrl = "file:///D:/DeskTimeSnap/uploadedScreenshots/" + fileName;
 
-        Screenshot screenshot = new Screenshot(user, new Date(), imageUrl, originalFilename);
+        // Set the date field to the current date
+        LocalDate currentDate = LocalDate.now();
+
+        Screenshot screenshot = new Screenshot(user, currentDate, new Date(), imageUrl, originalFilename);
         screenshot.setCreatedAt(new Date());
         screenshot.setUpdatedAt(new Date());
 
@@ -82,6 +85,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     }
 
 
+
     // Utility method to map Screenshot entity to ScreenshotResponse DTO
     private ScreenshotResponse mapScreenshotToResponse(Screenshot screenshot) {
         ScreenshotResponse response = new ScreenshotResponse();
@@ -90,6 +94,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         response.setScreenshotName(screenshot.getScreenshotName());
         response.setCreatedAt(screenshot.getCreatedAt());
         response.setUpdatedAt(screenshot.getUpdatedAt());
+
         return response;
     }
 
@@ -101,18 +106,17 @@ public class ScreenShotServiceImpl implements ScreenShotService {
             throw new IllegalArgumentException("User not found with email: " + userEmail);
         }
 
-        // Get all screenshots for the user on the specified date
-        List<Screenshot> screenshots = screenshotRepository.findByUserAndScreenshotTimeBetween(user, date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+        List<Screenshot> screenshots = screenshotRepository.findByUserAndScreenshotTime(user, date);
+
 
         if (screenshots.isEmpty()) {
             throw new IllegalArgumentException("No screenshots found for the user " + userEmail + " on " + date);
         }
-
-        // Convert screenshots to response DTOs
         return screenshots.stream()
                 .map(this::mapScreenshotToResponseAll)
                 .collect(Collectors.toList());
     }
+
 
     private ScreenshotResponse mapScreenshotToResponseAll(Screenshot screenshot) {
         return new ScreenshotResponse(
@@ -121,9 +125,11 @@ public class ScreenShotServiceImpl implements ScreenShotService {
                 screenshot.getUser().getEmail(),
                 screenshot.getScreenshotTime(),
                 screenshot.getScreenshotUrl(),
+                screenshot.getDate(),
                 screenshot.getScreenshotName(),
                 screenshot.getCreatedAt(),
                 screenshot.getUpdatedAt()
+
         );
     }
 
@@ -148,35 +154,28 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
     @Override
     public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
-
-
         User user = userRepository.findUserByEmail(userMail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userMail);
         }
 
-
-        //    		String filePath=PROD_PATH+file.getOriginalFilename();
-
-        String s=azureAdapter.uploadv2(file, 0);
-        String filePath=PROD_PATH+s;
-
+        String s = azureAdapter.uploadv2(file, 0);
+        String filePath = PROD_PATH + s;
 
         Screenshot screenshot = new Screenshot();
-
         screenshot.setUser(user);
+        screenshot.setDate(LocalDate.now()); // Set the current date
         screenshot.setScreenshotTime(new Date());
         screenshot.setScreenshotUrl(filePath);
         screenshot.setScreenshotName(s);
         screenshot.setCreatedAt(new Date());
         screenshot.setUpdatedAt(new Date());
 
-        // Save the screenshot entity in the database
-        screenshotRepository.save(screenshot);
+        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
 
-        // Convert the entity to a DTO for response
-        ScreenshotResponse screenshotResponse = mapScreenshotToResponse(screenshot);
+        ScreenshotResponse screenshotResponse = mapScreenshotToResponse(savedScreenshot);
 
         return screenshotResponse;
     }
+
 }
