@@ -3,6 +3,7 @@ package com.example.desktime.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity(name = "screenshot")
@@ -20,6 +21,10 @@ public class Screenshot {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+
+    @Column(name = "date")
+    private LocalDate date;
 
     @Column(name = "screenshot_time")
     @Temporal(TemporalType.TIMESTAMP)
@@ -39,12 +44,14 @@ public class Screenshot {
     private Date updatedAt;
 
     // Constructor with necessary fields
-    public Screenshot(User user, Date screenshotTime, String screenshotUrl, String screenshotName) {
+    public Screenshot(User user, LocalDate date, Date screenshotTime, String screenshotUrl, String screenshotName) {
         this.user = user;
+        this.date = date;
         this.screenshotTime = screenshotTime;
         this.screenshotUrl = screenshotUrl;
         this.screenshotName = screenshotName;
         this.createdAt = new Date(); // Set the createdAt field to the current date/time
         this.updatedAt = new Date(); // Set the updatedAt field to the current date/time
     }
+
 }
