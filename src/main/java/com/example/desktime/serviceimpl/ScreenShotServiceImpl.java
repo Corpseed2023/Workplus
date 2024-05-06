@@ -1,6 +1,7 @@
 package com.example.desktime.serviceimpl;
 
 
+import com.example.desktime.config.AzureBlobAdapter;
 import com.example.desktime.model.Screenshot;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.ScreenshotRepository;
@@ -9,6 +10,7 @@ import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.ScreenShotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,44 +32,59 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     private ScreenshotRepository screenshotRepository;
 
 
+    @Autowired
+    AzureBlobAdapter azureAdapter;
+
+    Long referenceId;
+
+
+    //	public String UPLOAD_DIR="/Users/aryanchaurasia/Documents/Corpseed-img";
+    public String UPLOAD_DIR="C:/Users/user/Documents/imageTest/image (1)";
+    //    public final String FOLDER_PATH="C:/Users/user/Documents/images/";
+    public final String PROD_PATH="https://deskstoragefast.blob.core.windows.net/test/";
+
+
+
     @Override
-    public ScreenshotResponse uploadScreenshot(Long referenceId, byte[] screenshotData, String userMail, String originalFilename) throws IOException {
+    public ScreenshotResponse uploadScreenshot(byte[] screenshotData, String userMail, String originalFilename) throws IOException {
         User user = userRepository.findUserByEmail(userMail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userMail);
         }
 
+        // Check if an image with the same name and creation date already exists
+        Screenshot existingScreenshot = screenshotRepository.findByScreenshotNameAndCreatedAt(originalFilename, new Date());
+
+        if (existingScreenshot != null) {
+            // Return a response indicating that the image already exists
+            return mapScreenshotToResponse(existingScreenshot);
+        }
+
         // Save the screenshot file on the computer drive
-        String directoryPath = "D:/DeskTimeSnap/uploadedScreenshots"; // Update the directory path as needed
+        String directoryPath = "D:/DeskTimeSnap/uploadedScreenshots";
         Files.createDirectories(Paths.get(directoryPath));
 
-        // Append a timestamp to avoid filename conflicts
         String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = referenceId + "_" + timestamp + "_" + originalFilename; // Use the original filename
+        String fileName = user.getUsername() + "_" + timestamp + "_" + originalFilename;
         Path filePath = Paths.get(directoryPath, fileName);
         Files.write(filePath, screenshotData);
 
-        // Create the URL for the image (assuming it's served by the application)
-        String imageUrl = "http://localhost:8888/uploadedScreenshots/" + fileName; // Adjust the URL format as needed
+        String imageUrl = "file:///D:/DeskTimeSnap/uploadedScreenshots/" + fileName;
 
-        // Create a Screenshot entity
-        Screenshot screenshot = new Screenshot();
+        // Set the date field to the current date
+        LocalDate currentDate = LocalDate.now();
 
-        screenshot.setUser(user);
-        screenshot.setScreenshotTime(new Date());
-        screenshot.setScreenshotUrl(imageUrl);
-        screenshot.setScreenshotName(originalFilename);
+        Screenshot screenshot = new Screenshot(user, currentDate, new Date(), imageUrl, originalFilename);
         screenshot.setCreatedAt(new Date());
         screenshot.setUpdatedAt(new Date());
 
         // Save the screenshot entity in the database
-        screenshotRepository.save(screenshot);
+        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
 
-        // Convert the entity to a DTO for response
-        ScreenshotResponse screenshotResponse = mapScreenshotToResponse(screenshot);
-
-        return screenshotResponse;
+        return mapScreenshotToResponse(savedScreenshot);
     }
+
+
 
     // Utility method to map Screenshot entity to ScreenshotResponse DTO
     private ScreenshotResponse mapScreenshotToResponse(Screenshot screenshot) {
@@ -77,6 +94,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         response.setScreenshotName(screenshot.getScreenshotName());
         response.setCreatedAt(screenshot.getCreatedAt());
         response.setUpdatedAt(screenshot.getUpdatedAt());
+
         return response;
     }
 
@@ -88,18 +106,17 @@ public class ScreenShotServiceImpl implements ScreenShotService {
             throw new IllegalArgumentException("User not found with email: " + userEmail);
         }
 
-        // Get all screenshots for the user on the specified date
-        List<Screenshot> screenshots = screenshotRepository.findByUserAndScreenshotTimeBetween(user, date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+        List<Screenshot> screenshots = screenshotRepository.findByUserAndScreenshotTime(user, date);
+
 
         if (screenshots.isEmpty()) {
             throw new IllegalArgumentException("No screenshots found for the user " + userEmail + " on " + date);
         }
-
-        // Convert screenshots to response DTOs
         return screenshots.stream()
                 .map(this::mapScreenshotToResponseAll)
                 .collect(Collectors.toList());
     }
+
 
     private ScreenshotResponse mapScreenshotToResponseAll(Screenshot screenshot) {
         return new ScreenshotResponse(
@@ -108,9 +125,11 @@ public class ScreenShotServiceImpl implements ScreenShotService {
                 screenshot.getUser().getEmail(),
                 screenshot.getScreenshotTime(),
                 screenshot.getScreenshotUrl(),
+                screenshot.getDate(),
                 screenshot.getScreenshotName(),
                 screenshot.getCreatedAt(),
                 screenshot.getUpdatedAt()
+
         );
     }
 
@@ -131,6 +150,32 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         } else {
             throw new IllegalArgumentException("You do not have permission to delete this screenshot.");
         }
+    }
+
+    @Override
+    public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
+        User user = userRepository.findUserByEmail(userMail);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found with email: " + userMail);
+        }
+
+        String s = azureAdapter.uploadv2(file, 0);
+        String filePath = PROD_PATH + s;
+
+        Screenshot screenshot = new Screenshot();
+        screenshot.setUser(user);
+        screenshot.setDate(LocalDate.now()); // Set the current date
+        screenshot.setScreenshotTime(new Date());
+        screenshot.setScreenshotUrl(filePath);
+        screenshot.setScreenshotName(s);
+        screenshot.setCreatedAt(new Date());
+        screenshot.setUpdatedAt(new Date());
+
+        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
+
+        ScreenshotResponse screenshotResponse = mapScreenshotToResponse(savedScreenshot);
+
+        return screenshotResponse;
     }
 
 }

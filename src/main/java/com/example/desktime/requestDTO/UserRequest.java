@@ -16,7 +16,6 @@ public class UserRequest {
 
     private String username;
     private String email;
-    private Long createdBy;
     private Date createdAt;
     private Date updatedAt;
     private boolean isEnable;
