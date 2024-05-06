@@ -8,8 +8,10 @@ import com.example.desktime.repository.RolesRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
+import com.example.desktime.responseDTO.SingleUserResponse;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +41,7 @@ public class UserServiceImpl implements UserService {
     EmailService emailService;
 
     @Override
-    public void saveUserData(UserRequest userRequest) throws AccessDeniedException {
+    public void saveUserData(UserRequest userRequest) throws AccessDeniedException, MessagingException {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
@@ -50,9 +52,9 @@ public class UserServiceImpl implements UserService {
             adminUser.setUsername(userRequest.getUsername());
             adminUser.setEmail(userRequest.getEmail());
             char[] passwordChars = passwordConfig.geek_Password(7);
+            System.out.println("User Password Is "+ passwordChars);
             String randomPassword = String.valueOf(passwordChars);
             adminUser.setPassword(passwordEncoder.encode(randomPassword));
-            adminUser.setCreatedBy(userRequest.getCreatedBy());
             adminUser.setCreatedAt(new Date());
             adminUser.setUpdatedAt(new Date());
             adminUser.setEnable(userRequest.isEnable());
@@ -70,10 +72,6 @@ public class UserServiceImpl implements UserService {
             return;
         }
 
-        if (!hasAdminRole(userRequest.getCreatedBy())) {
-            throw new AccessDeniedException("Only users with ADMIN role can create new users");
-        }
-
         // Create regular user
         User userData = new User();
         userData.setUsername(userRequest.getUsername());
@@ -81,10 +79,11 @@ public class UserServiceImpl implements UserService {
         char[] passwordChars = passwordConfig.geek_Password(7);
         String randomPassword = String.valueOf(passwordChars);
         userData.setPassword(passwordEncoder.encode(randomPassword));
-        userData.setCreatedBy(userRequest.getCreatedBy());
         userData.setCreatedAt(new Date());
         userData.setUpdatedAt(new Date());
         userData.setEnable(userRequest.isEnable());
+        userData.setCreatedAt(userRequest.getCreatedAt());
+        userData.setUpdatedAt(userRequest.getUpdatedAt());
 
         try {
             Set<Roles> roles = getRolesFromRequest(userRequest);
@@ -134,16 +133,36 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public ResponseEntity<User> getUserdetails(User user) {
-        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
+    public ResponseEntity<SingleUserResponse> getSingleUserDetails(String usernameMail) {
+        User userDetails = userRepository.findUserByEmail(usernameMail);
 
-        if (existingUser.isPresent()) {
-            return ResponseEntity.ok(existingUser.get());
+        if (userDetails != null) {
+            SingleUserResponse singleUserResponse = new SingleUserResponse();
+            singleUserResponse.setId(userDetails.getId());
+            singleUserResponse.setUsername(userDetails.getUsername());
+            singleUserResponse.setEmail(userDetails.getEmail());
+            singleUserResponse.setCreatedBy(userDetails.getCreatedBy());
+            singleUserResponse.setEnable(userDetails.isEnable());
+            singleUserResponse.setUpdatedAt(userDetails.getUpdatedAt());
+            singleUserResponse.setCreatedAt(userDetails.getCreatedAt());
+//             Extract role names from Roles objects and set to SingleUserResponse
+//            Set<String> roleNames = userDetails.getRoles().stream()
+//                    .map(Roles::getRoleName)
+//                    .collect(Collectors.toSet());
+
+            Set<String> roleName = userDetails.getRoles().stream().
+                    map(Roles::getRoleName).collect(Collectors.toSet());
+
+            singleUserResponse.setRoles(roleName);
+
+            return ResponseEntity.ok(singleUserResponse);
         } else {
             // User not found
             return ResponseEntity.notFound().build();
         }
     }
+
+
 
     @Override
     public User getUserByUsernameAndEmail(String username, String email) {
@@ -245,6 +264,25 @@ public class UserServiceImpl implements UserService {
         user.setEnable(false);
 
         userRepository.save(user);
+    }
+
+
+
+    @Override
+    public void initiatePasswordReset(String email, String newPassword) throws MessagingException {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword);
+            userRepository.save(user);
+
+            // Send email notification
+            emailService.sendPasswordResetEmail(user.getEmail(), newPassword);
+        } else {
+            throw new IllegalArgumentException("User not found with email: " + email);
+        }
     }
 
 

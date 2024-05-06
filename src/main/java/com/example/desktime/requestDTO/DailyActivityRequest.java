@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 public class DailyActivityRequest {
     private String email;
     private LocalDate date;
-    private LocalDateTime loginTime;
 
     public DailyActivityRequest() {
     }
@@ -29,11 +28,4 @@ public class DailyActivityRequest {
         this.date = date;
     }
 
-    public LocalDateTime getLoginTime() {
-        return loginTime;
-    }
-
-    public void setLoginTime(LocalDateTime loginTime) {
-        this.loginTime = loginTime;
-    }
 }

@@ -5,7 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class UserInputForm extends JFrame {
+public class
+UserInputForm extends JFrame {
     private JTextField usernameField;
     private JTextField existingUsernameField; // New field for existing username
     private JTextArea descriptionArea;
