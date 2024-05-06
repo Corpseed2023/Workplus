@@ -51,7 +51,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
 
             // Determine AM/PM based on the current time
-            String loginTimeConvention = currentIndiaTime.getHour() < 12 || currentIndiaTime.getHour() == 12 ? "AM" : "PM";
+            String loginTimeConvention = currentIndiaTime.getHour() < 12 || (currentIndiaTime.getHour() == 12 && currentIndiaTime.getMinute() == 0) ? "AM" : "PM";
 
             Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
             if (userOptional.isPresent()) {

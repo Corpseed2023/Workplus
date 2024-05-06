@@ -79,6 +79,14 @@ public class UserServiceImpl implements UserService {
         char[] passwordChars = passwordConfig.geek_Password(7);
         String randomPassword = String.valueOf(passwordChars);
         userData.setPassword(passwordEncoder.encode(randomPassword));
+
+        if (userRequest.getCreatedAt() == null) {
+            userRequest.setCreatedAt(new Date());
+        }
+        // Check if updated date is null, set it to today's date
+        if (userRequest.getUpdatedAt() == null) {
+            userRequest.setUpdatedAt(new Date());
+        }
         userData.setCreatedAt(new Date());
         userData.setUpdatedAt(new Date());
         userData.setEnable(userRequest.isEnable());

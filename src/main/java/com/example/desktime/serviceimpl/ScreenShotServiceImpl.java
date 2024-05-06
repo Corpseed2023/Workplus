@@ -154,6 +154,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
     @Override
     public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
+
         User user = userRepository.findUserByEmail(userMail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userMail);
@@ -172,6 +173,11 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         screenshot.setUpdatedAt(new Date());
 
         Screenshot savedScreenshot = screenshotRepository.save(screenshot);
+
+
+        //after saving screenshot i want you sent mail id and setDate(LocalDate.now()) send these in LogoutUpdateRequest in this method updateLogoutTime
+
+
 
         ScreenshotResponse screenshotResponse = mapScreenshotToResponse(savedScreenshot);
 
