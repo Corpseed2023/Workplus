@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
             adminUser.setUsername(userRequest.getUsername());
             adminUser.setEmail(userRequest.getEmail());
             char[] passwordChars = passwordConfig.geek_Password(7);
-            System.out.println("User Password Is "+ passwordChars);
+//            System.out.println("User Password Is "+ passwordChars);
             String randomPassword = String.valueOf(passwordChars);
             adminUser.setPassword(passwordEncoder.encode(randomPassword));
             adminUser.setCreatedAt(new Date());
