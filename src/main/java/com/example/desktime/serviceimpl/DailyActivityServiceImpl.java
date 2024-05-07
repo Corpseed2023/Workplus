@@ -109,8 +109,10 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
                 // Check if login time is present for the current date
                 if (dailyActivity.getLoginTime() != null) {
-                    // Save the logout time
+                    // Save the logout time and logout time convention
                     dailyActivity.setLogoutTime(logoutTimeInIndianZone);
+                    // Assuming logoutTimeConvention is AM/PM based on the current hour
+                    dailyActivity.setLogoutTimeConvention(logoutTimeInIndianZone.getHour() < 12 ? "AM" : "PM");
                     dailyActivityRepository.save(dailyActivity);
 
                     // Create a response DTO with the updated logout time
@@ -154,6 +156,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setDayOfWeek(dailyActivity.getDayOfWeek());
         response.setAttendanceType(dailyActivity.getAttendanceType());
         response.setLoginTimeConvention(dailyActivity.getLoginTimeConvention());
+        response.setLogoutTimeConvention(dailyActivity.getLogoutTimeConvention());
 
         // Calculate today's total time if login time is present
         if (dailyActivity.getLoginTime() != null) {

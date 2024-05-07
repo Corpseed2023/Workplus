@@ -180,17 +180,17 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         // Save the screenshot
         Screenshot savedScreenshot = screenshotRepository.save(screenshot);
 
-        // Prepare the request for updating logout time
-        LogoutUpdateRequest logoutUpdateRequest = new LogoutUpdateRequest();
-        logoutUpdateRequest.setEmail(userMail);
-        logoutUpdateRequest.setLogoutTime(LocalDateTime.now()); // Set logout time to current time
-
-
-        ResponseEntity<?> responseEntity = dailyActivityController.updateLogoutTime(logoutUpdateRequest);
-
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-
-        }
+//        // Prepare the request for updating logout time
+//        LogoutUpdateRequest logoutUpdateRequest = new LogoutUpdateRequest();
+//        logoutUpdateRequest.setEmail(userMail);
+//        logoutUpdateRequest.setLogoutTime(LocalDateTime.now()); // Set logout time to current time
+//
+//
+//        ResponseEntity<?> responseEntity = dailyActivityController.updateLogoutTime(logoutUpdateRequest);
+//
+//        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+//
+//        }
 
         // Map the saved screenshot to response DTO
         ScreenshotResponse screenshotResponse = new ScreenshotResponse();
