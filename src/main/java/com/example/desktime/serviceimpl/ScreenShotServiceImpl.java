@@ -154,7 +154,6 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
     @Override
     public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
-
         User user = userRepository.findUserByEmail(userMail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userMail);
@@ -165,23 +164,30 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
         Screenshot screenshot = new Screenshot();
         screenshot.setUser(user);
-        screenshot.setDate(LocalDate.now()); // Set the current date
+        screenshot.setDate(LocalDate.now());
         screenshot.setScreenshotTime(new Date());
         screenshot.setScreenshotUrl(filePath);
         screenshot.setScreenshotName(s);
         screenshot.setCreatedAt(new Date());
         screenshot.setUpdatedAt(new Date());
 
+        // Save the screenshot
         Screenshot savedScreenshot = screenshotRepository.save(screenshot);
 
-
-        //after saving screenshot i want you sent mail id and setDate(LocalDate.now()) send these in LogoutUpdateRequest in this method updateLogoutTime
-
-
-
-        ScreenshotResponse screenshotResponse = mapScreenshotToResponse(savedScreenshot);
+        // Map the saved screenshot to response DTO
+        ScreenshotResponse screenshotResponse = new ScreenshotResponse();
+        screenshotResponse.setId(savedScreenshot.getId());
+        screenshotResponse.setUserId(savedScreenshot.getUser().getId()); // Assuming getId() returns the user ID
+        screenshotResponse.setUserMail(savedScreenshot.getUser().getEmail());
+        screenshotResponse.setScreenshotTime(savedScreenshot.getScreenshotTime());
+        screenshotResponse.setScreenshotUrl(savedScreenshot.getScreenshotUrl());
+        screenshotResponse.setScreenshotName(savedScreenshot.getScreenshotName());
+        screenshotResponse.setCreatedAt(savedScreenshot.getCreatedAt());
+        screenshotResponse.setUpdatedAt(savedScreenshot.getUpdatedAt());
+        screenshotResponse.setDate(savedScreenshot.getDate());
 
         return screenshotResponse;
     }
+
 
 }

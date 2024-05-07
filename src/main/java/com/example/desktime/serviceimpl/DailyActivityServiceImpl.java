@@ -94,31 +94,40 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     @Override
     public LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request) {
         String email = request.getEmail();
-        LocalDateTime logoutTime = request.getLogoutTime();
+
+        // Get the current time in Indian time zone
+        LocalDateTime logoutTimeInIndianZone = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
 
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             Optional<DailyActivity> dailyActivityOptional = dailyActivityRepository.findByUser(user);
+
+            // Check if there's an existing daily activity for the user on the current date
             if (dailyActivityOptional.isPresent()) {
                 DailyActivity dailyActivity = dailyActivityOptional.get();
-                dailyActivity.setLogoutTime(logoutTime);
-                dailyActivityRepository.save(dailyActivity);
 
-                // Create a response DTO with the updated logout time
-                return new LogoutUpdateResponse(dailyActivity.getId(), email, logoutTime);
+                // Check if login time is present for the current date
+                if (dailyActivity.getLoginTime() != null) {
+                    // Save the logout time
+                    dailyActivity.setLogoutTime(logoutTimeInIndianZone);
+                    dailyActivityRepository.save(dailyActivity);
+
+                    // Create a response DTO with the updated logout time
+                    return new LogoutUpdateResponse(dailyActivity.getId(), email, logoutTimeInIndianZone);
+                } else {
+                    // If login time is not present for the current date, do not save logout time
+                    throw new IllegalStateException("Cannot save logout time. No login time recorded for the user on the current date.");
+                }
             } else {
-                // Create a new daily activity with the provided logout time
-                DailyActivity newDailyActivity = new DailyActivity(user, LocalDate.now(), null, logoutTime, false, null);
-                dailyActivityRepository.save(newDailyActivity);
-
-                // Create a response DTO with the new daily activity's logout time
-                return new LogoutUpdateResponse(newDailyActivity.getId(), email, logoutTime);
+                // If no daily activity exists for the user on the current date, do not save logout time
+                throw new IllegalStateException("Cannot save logout time. No daily activity recorded for the user on the current date.");
             }
         } else {
             throw new IllegalArgumentException("User not found with email: " + email);
         }
     }
+
 
 
     @Override
@@ -183,8 +192,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     }
 
 
-// Assuming this is within the DailyActivityService implementation class
-
 
     public List<DailyActivityReportResponse> getMonthlyActivityReport(String email, LocalDate startDate, LocalDate endDate) {
         try {
@@ -205,6 +212,21 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 activityResponse.setDate(activity.getDate());
                 activityResponse.setId(activity.getId());
                 activityResponse.setPresent(activity.isPresent());
+
+                // Calculate total time if both login and logout times are present
+                if (activity.getLoginTime() != null && activity.getLogoutTime() != null) {
+                    LocalDateTime loginTime = activity.getLoginTime();
+                    LocalDateTime logoutTime = activity.getLogoutTime();
+
+                    Duration duration = Duration.between(loginTime, logoutTime);
+                    long hours = duration.toHours();
+                    long minutes = duration.toMinutes() % 60;
+
+                    activityResponse.setTotalTime(hours + " hours " + minutes + " minutes");
+                } else {
+                    activityResponse.setTotalTime("N/A"); // If either login or logout time is missing, set totalTime as "N/A"
+                }
+
                 response.add(activityResponse);
             }
 
@@ -214,6 +236,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
         }
     }
+
 
 
 
