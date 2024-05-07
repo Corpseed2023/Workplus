@@ -17,4 +17,6 @@ public class DailyActivityReportResponse {
     private LocalDateTime logoutTime;
     private LocalDate date;
     private boolean present;
+    private String totalTime;
+
 }
