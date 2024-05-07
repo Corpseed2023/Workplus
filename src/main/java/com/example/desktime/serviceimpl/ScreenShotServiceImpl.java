@@ -2,22 +2,26 @@ package com.example.desktime.serviceimpl;
 
 
 import com.example.desktime.config.AzureBlobAdapter;
+import com.example.desktime.controller.DailyActivityController;
 import com.example.desktime.model.Screenshot;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.ScreenshotRepository;
 import com.example.desktime.repository.UserRepository;
+import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.ScreenShotService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +35,8 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     @Autowired
     private ScreenshotRepository screenshotRepository;
 
+    @Autowired
+    private DailyActivityController dailyActivityController;
 
     @Autowired
     AzureBlobAdapter azureAdapter;
@@ -173,6 +179,18 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
         // Save the screenshot
         Screenshot savedScreenshot = screenshotRepository.save(screenshot);
+
+        // Prepare the request for updating logout time
+        LogoutUpdateRequest logoutUpdateRequest = new LogoutUpdateRequest();
+        logoutUpdateRequest.setEmail(userMail);
+        logoutUpdateRequest.setLogoutTime(LocalDateTime.now()); // Set logout time to current time
+
+
+        ResponseEntity<?> responseEntity = dailyActivityController.updateLogoutTime(logoutUpdateRequest);
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+
+        }
 
         // Map the saved screenshot to response DTO
         ScreenshotResponse screenshotResponse = new ScreenshotResponse();
