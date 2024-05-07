@@ -19,8 +19,8 @@ public class DailyActivityResponse {
     private String dayOfWeek;
     private AttendanceType attendanceType;
     private LocalDateTime todayTotalTime;
-
     private String loginTimeConvention;
+    private String logoutTimeConvention;
 
 
     // Constructors, getters, and setters
@@ -101,6 +101,22 @@ public class DailyActivityResponse {
 
     public void setLoginTimeConvention(String loginTimeConvention) {
         this.loginTimeConvention = loginTimeConvention;
+    }
+
+    public LocalDateTime getTodayTotalTime() {
+        return todayTotalTime;
+    }
+
+    public void setTodayTotalTime(LocalDateTime todayTotalTime) {
+        this.todayTotalTime = todayTotalTime;
+    }
+
+    public String getLogoutTimeConvention() {
+        return logoutTimeConvention;
+    }
+
+    public void setLogoutTimeConvention(String logoutTimeConvention) {
+        this.logoutTimeConvention = logoutTimeConvention;
     }
 }
 

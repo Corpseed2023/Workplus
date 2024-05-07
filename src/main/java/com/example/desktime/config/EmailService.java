@@ -39,6 +39,7 @@ public class EmailService {
                     + "</ul>"
                     + "<p>Please keep this information secure and do not share it with anyone.</p>"
                     + "<p>Thank you for joining us!</p>"
+                    + "<p>Login to your account <a href=\"https://record.corpseed.com/\">here</a>.</p>"
                     + "</body></html>";
 
             helper.setText(htmlContent, true);
@@ -65,6 +66,7 @@ public class EmailService {
                     + "<p style=\"font-size: 1.2em;\"><strong>" + newPassword + "</strong></p>"
                     + "<p>Please keep this information secure and do not share it with anyone.</p>"
                     + "<p>Thank you!</p>"
+                    + "<p>Login to your account <a href=\"https://record.corpseed.com/\">here</a>.</p>"
                     + "</body></html>";
 
             helper.setText(htmlContent, true);

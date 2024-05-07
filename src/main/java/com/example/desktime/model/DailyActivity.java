@@ -24,6 +24,9 @@ public class DailyActivity {
     @Column(name = "logout_time")
     private LocalDateTime logoutTime;
 
+    @Column(name = "logout_time_convention")
+    private String logoutTimeConvention;
+
     @Column(name = "present")
     private boolean present;
 
@@ -138,5 +141,13 @@ public class DailyActivity {
 
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
+    }
+
+    public String getLogoutTimeConvention() {
+        return logoutTimeConvention;
+    }
+
+    public void setLogoutTimeConvention(String logoutTimeConvention) {
+        this.logoutTimeConvention = logoutTimeConvention;
     }
 }
