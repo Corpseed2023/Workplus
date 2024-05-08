@@ -8,8 +8,6 @@ public class LogoutUpdateResponse {
     private String userEmail;
     private LocalDateTime logoutTime;
 
-    // Constructors, getters, and setters
-
     public LogoutUpdateResponse() {
     }
 
