@@ -42,6 +42,8 @@ public class DailyActivity {
 
     private String ipAddress;
 
+    private LocalDateTime lastSendReportTime;
+
 
     // Constructors, getters, and setters
     // Getters and setters omitted for brevity
@@ -149,5 +151,13 @@ public class DailyActivity {
 
     public void setLogoutTimeConvention(String logoutTimeConvention) {
         this.logoutTimeConvention = logoutTimeConvention;
+    }
+
+    public LocalDateTime getLastSendReportTime() {
+        return lastSendReportTime;
+    }
+
+    public void setLastSendReportTime(LocalDateTime lastSendReportTime) {
+        this.lastSendReportTime = lastSendReportTime;
     }
 }
