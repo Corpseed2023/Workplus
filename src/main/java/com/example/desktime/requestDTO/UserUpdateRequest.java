@@ -19,6 +19,6 @@ public class UserUpdateRequest {
     private Date createdAt;
     private Date updatedAt;
     private boolean isEnable;
-    private Set<String> roleNames; // Field to store role names
+    private String roleNames;
 
 }

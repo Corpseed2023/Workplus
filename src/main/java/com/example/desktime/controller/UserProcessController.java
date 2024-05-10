@@ -51,12 +51,9 @@ public class UserProcessController {
     @GetMapping("/getUserDateProcess")
     public List<UserProcessResponse> getUserDateProcess(@RequestParam String userEmail,  @RequestParam(required = false) LocalDate date) {
 
-
         if (date == null) {
             date = LocalDate.now();
         }
-
-
         return userProcessService.getUserProcessWithEmailAndDate(userEmail, date);
     }
 

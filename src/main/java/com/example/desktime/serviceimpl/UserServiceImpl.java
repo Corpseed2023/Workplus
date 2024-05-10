@@ -236,16 +236,29 @@ public class UserServiceImpl implements UserService {
             throw new AccessDeniedException("Only users with ADMIN role can edit user details");
         }
 
+        // Parse roleNames string and update roles of the user
+        Set<Roles> roles = new HashSet<>();
+        String[] roleNames = userUpdateRequest.getRoleNames().split(",");
+        for (String roleName : roleNames) {
+            Roles role = rolesRepository.findByRoleName(roleName.trim());
+            if (role != null) {
+                roles.add(role);
+            }
+        }
+
+        if (roles.isEmpty()) {
+            throw new NoSuchElementException("No roles found");
+        }
+
+        existingUser.setRoles(roles);
+
+        // Update other user details
         User updatedUser = updateUserFromRequest(existingUser, userUpdateRequest);
 
         try {
-//            Set<Roles> roles = getRole(userUpdateRequest);
-//            updatedUser.setRoles(roles);
             userRepository.save(updatedUser);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid user data: " + e.getMessage());
-        } catch (NoSuchElementException e) {
-            throw new NoSuchElementException("One or more roles not found");
         } catch (Exception e) {
             throw new RuntimeException("Error updating user details", e);
         }
