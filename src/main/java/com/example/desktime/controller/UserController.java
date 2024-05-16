@@ -90,7 +90,18 @@ public class UserController {
 
             String networkIp = serverRequest.getRemoteAddr();
 
+            if (networkIp.contains(":"))
+            {
+                networkIp= networkIp.split(":")[0];
+            }
+
+//            if (networkIp.contains(":")) {
+//                networkIp = networkIp.split(":")[0];
+//            }
+//
 //            System.out.println(networkIp + "Network ip ");
+//            System.out.println(serverRequest.getRemoteHost() + "Network Host ip ");
+
 
             IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
 
