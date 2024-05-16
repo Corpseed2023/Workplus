@@ -12,6 +12,7 @@ public interface IpAccessRepository extends JpaRepository<IPAccess,Long> {
 //    @Query(value = "select i from IPAccess where i.network_ip_address=:ipAddress")
 //    String findByIpAddress(@Param(ipAddress) String ipAddress);
 
-    @Query("SELECT ip FROM IPAccess ip WHERE ip.networkIpAddress = :ipAddress")
-    IPAccess findByNetworkIpAddress(@Param("ipAddress") String ipAddress);
+    @Query("SELECT ip FROM IPAccess ip WHERE ip.networkIpAddress = :networkIp")
+    IPAccess findByNetworkIpAddress(@Param("networkIp") String networkIp);
+
 }
