@@ -11,7 +11,7 @@ import java.util.List;
 public interface TicketService {
     TicketResponse raiseTicket(TicketRequest ticketRequest);
 
-    List<TicketResponse> getAllTickets();
+    List<TicketResponse> getAllTickets( String userMail);
 
     TicketResponse getTicketById(Long id);
 

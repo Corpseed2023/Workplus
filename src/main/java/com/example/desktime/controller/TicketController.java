@@ -45,8 +45,8 @@ public class TicketController {
 
 
     @GetMapping("/allTickets")
-    public ResponseEntity<List<TicketResponse>> getAllTickets() {
-        List<TicketResponse> allTickets = ticketService.getAllTickets();
+    public ResponseEntity<List<TicketResponse>> getAllTickets(@RequestParam String userMail) {
+        List<TicketResponse> allTickets = ticketService.getAllTickets(userMail);
         return ResponseEntity.ok(allTickets);
     }
 

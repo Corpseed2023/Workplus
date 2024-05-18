@@ -58,7 +58,10 @@ public class TicketServiceImpl implements TicketService {
 
 
     @Override
-    public List<TicketResponse> getAllTickets() {
+    public List<TicketResponse> getAllTickets( String userMail) {
+
+        User user = userRepository.findUserByEmail(userMail);
+
         List<Ticket> allTickets = ticketRepository.findAll();
         return allTickets.stream()
                 .map(ticket -> new TicketResponse(
