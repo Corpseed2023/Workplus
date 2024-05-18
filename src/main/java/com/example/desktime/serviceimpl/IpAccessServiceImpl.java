@@ -6,9 +6,11 @@ import com.example.desktime.model.User;
 import com.example.desktime.repository.IpAccessRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.service.IpAccessService;
+import org.bouncycastle.util.IPAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,6 +33,7 @@ public class IpAccessServiceImpl implements IpAccessService {
         if (isAdmin==true) {
             IPAccess ipAccess = new IPAccess();
             ipAccess.setNetworkIpAddress(ipAddress);
+            ipAccess.setUser(user);
             ipAccessRepository.save(ipAccess);
         } else {
             throw new IllegalStateException("User is not an admin");
@@ -49,4 +52,17 @@ public class IpAccessServiceImpl implements IpAccessService {
             return "IP Address not found";
         }
     }
+
+
+    @Override
+    public List<IPAccess> getIps(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        User user = userOptional.orElseThrow(() -> new UserNotFoundException());
+        
+        List<IPAccess> ips = ipAccessRepository.findAll();
+        
+        return ips;
+    }
+
 }
