@@ -6,4 +6,6 @@ import com.example.desktime.requestDTO.GapTrackRequest;
 public interface GapTrackService {
 
     GapTrack saveGapTrack(GapTrackRequest gapTrackRequest);
+
+    GapTrack upadateGapTrack(String status, String useMail);
 }

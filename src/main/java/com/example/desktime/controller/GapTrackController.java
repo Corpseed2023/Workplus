@@ -20,11 +20,21 @@ public class GapTrackController {
     @Autowired
     private GapTrackService gapTrackService;
 
-    @PostMapping("/save")
+    @PostMapping("/saveGap")
     public ResponseEntity<?> saveGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
         try {
             GapTrack savedGapTrack = gapTrackService.saveGapTrack(gapTrackRequest);
             return new ResponseEntity<>(savedGapTrack, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error saving GapTrack: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/updateGap")
+    public ResponseEntity<?> updateGapTrack(@RequestParam String status,@RequestParam String useMail ) {
+        try {
+            GapTrack updatedGap = gapTrackService.upadateGapTrack(status,useMail);
+            return new ResponseEntity<>(updatedGap, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Error saving GapTrack: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

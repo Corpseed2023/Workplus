@@ -240,9 +240,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     }
 
 
-
-
-
     public List<DailyActivityReportResponse> getMonthlyActivityReport(String email, LocalDate startDate, LocalDate endDate) {
         try {
             List<DailyActivity> activities = dailyActivityRepository.findByUserEmailAndDateBetween(email, startDate, endDate);
@@ -261,8 +258,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 activityResponse.setLogoutTime(activity.getLogoutTime());
                 activityResponse.setDate(activity.getDate());
                 activityResponse.setId(activity.getId());
-                activityResponse.setPresent(activity.isPresent());
-
+                activityResponse.setPresent(activity.isPresent() ? "PRESENT" :"ABSENT");
                 // Calculate total time if both login and logout times are present
                 if (activity.getLoginTime() != null && activity.getLogoutTime() != null) {
                     LocalDateTime loginTime = activity.getLoginTime();
@@ -286,9 +282,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
         }
     }
-
-
-
 
 
 }

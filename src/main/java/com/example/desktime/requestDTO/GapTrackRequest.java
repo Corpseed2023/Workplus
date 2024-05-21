@@ -6,7 +6,11 @@ import java.time.LocalDateTime;
 
 @Data
 public class GapTrackRequest {
-    private LocalDateTime dateTime;
+
+//    private LocalDateTime dateTime;
+
     private String status;
+
     private String userEmail;
+
 }
