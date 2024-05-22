@@ -65,15 +65,18 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
-                DailyActivity dailyActivity = new DailyActivity(user, activityDate, currentIndiaTime, null, true, null);
+                DailyActivity dailyActivity = new DailyActivity(user, request.getDate(), request.getLoginTime(),  request.getLoginTime(), true, null);
                 dailyActivity.setDayOfWeek(activityDate.getDayOfWeek().toString());
                 dailyActivity.setLoginTimeConvention(loginTimeConvention); // Set AM/PM
+                dailyActivity.setLogoutTime(request.getLoginTime());
 
                 DailyActivity savedActivity = dailyActivityRepository.save(dailyActivity);
 
                 DailyActivityResponse response = new DailyActivityResponse();
                 response.setId(savedActivity.getId());
                 response.setUserEmail(request.getEmail());
+                response.setDate(response.getDate());
+                response.setLoginTime(response.getLoginTime());
                 response.setDate(activityDate);
                 response.setLoginTime(currentIndiaTime); // Store login time in Indian time zone
                 response.setPresent(true);

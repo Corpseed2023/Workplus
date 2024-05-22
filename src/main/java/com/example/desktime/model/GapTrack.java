@@ -38,6 +38,9 @@ public class GapTrack {
     @Column(name = "reason")
     private String reason;
 
+    @Column(name = "gap_time")
+    private String gapTime;
+
     private String workingStatus;
 
     private Boolean availability = false;
