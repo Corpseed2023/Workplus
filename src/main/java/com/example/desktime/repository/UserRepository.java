@@ -30,7 +30,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByIsEnableTrue();
 
-
-
-
+    User findByUserId(Long userId);
 }
