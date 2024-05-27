@@ -1,12 +1,11 @@
 package com.example.desktime.controller;
 
 
-import com.example.desktime.config.EmailService;
+
 import com.example.desktime.model.IPAccess;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.IpAccessRepository;
 import com.example.desktime.requestDTO.LoginRequest;
-import com.example.desktime.requestDTO.ResetPasswordRequest;
 import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.LoginResponse;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-
 //@RequestMapping("/userRequest")
 public class UserController {
 
@@ -95,17 +93,7 @@ public class UserController {
                 networkIp= networkIp.split(":")[0];
             }
 
-//            if (networkIp.contains(":")) {
-//                networkIp = networkIp.split(":")[0];
-//            }
-//
-//            System.out.println(networkIp + "Network ip ");
-//            System.out.println(serverRequest.getRemoteHost() + "Network Host ip ");
-
-
             IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
-
-//            System.out.println(ip + ""+ networkIp);
 
             if (!ip.getNetworkIpAddress().equals(networkIp))
 
@@ -113,12 +101,6 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
             }
-
-//            if (!ip.equals(String.valueOf(networkIp))) {
-//
-//                // If network IP does not match the expected IP, return an error response
-//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Unauthorized access"));
-//            }
 
             if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
                 return ResponseEntity.badRequest().body(new LoginResponse("Email and password are required"));

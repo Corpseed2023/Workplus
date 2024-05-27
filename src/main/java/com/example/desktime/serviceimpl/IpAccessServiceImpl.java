@@ -59,9 +59,9 @@ public class IpAccessServiceImpl implements IpAccessService {
         Optional<User> userOptional = userRepository.findById(userId);
 
         User user = userOptional.orElseThrow(() -> new UserNotFoundException());
-        
+
         List<IPAccess> ips = ipAccessRepository.findAll();
-        
+
         return ips;
     }
 

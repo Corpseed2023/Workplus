@@ -6,21 +6,16 @@ import com.example.desktime.model.User;
 import com.example.desktime.repository.GapRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.GapTrackRequest;
-import com.example.desktime.responseDTO.DailyActivityReportResponse;
+import com.example.desktime.responseDTO.GapTrackResponse;
 import com.example.desktime.service.GapTrackService;
 import com.example.desktime.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.example.desktime.ApiResponse.UserNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -87,20 +82,43 @@ public class GapTrackServiceImpl implements GapTrackService {
         return updatedGap;
     }
 
+
+
+
     @Override
-    public List<GapTrack> fetchUserGapData(Long userId, LocalDate date) {
+    public List<GapTrackResponse> getUserGapData(Long userId, LocalDate date) {
+        User user = userRepository.findEnabledUserById(userId);
 
-        User user = userRepository.findByUserId(userId);
-
-        if (user==null)
-        {
+        if (user == null) {
             throw new UserNotFoundException();
-
         }
 
+        List<GapTrack> gapTracks = gapRepository.fetchUserGapData(user, date);
 
+        if (gapTracks.isEmpty()) {
+            // Handle the scenario where no data is found for the given date
+            throw new DataNotFoundException("No gap data found for user on the given date");
+        }
 
+//        gapTracks.forEach(gapTrack -> System.out.println("Gap Data: " + gapTrack));
 
-        return null;
+        return gapTracks.stream().map(gapTrack -> {
+            GapTrackResponse dto = new GapTrackResponse();
+            dto.setUserId(user.getId());
+            dto.setDate(gapTrack.getDate());
+            dto.setGapStartTime(gapTrack.getGapStartTime());
+            dto.setGapEndTime(gapTrack.getGapEndTime());
+            dto.setReason(gapTrack.getReason());
+            dto.setGapTime(gapTrack.getGapTime());
+            dto.setWorkingStatus(gapTrack.getWorkingStatus());
+            dto.setAvailability(gapTrack.getAvailability());
+            return dto;
+        }).collect(Collectors.toList());
     }
+
+
+
+
+
+
 }

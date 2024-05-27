@@ -4,6 +4,7 @@ package com.example.desktime.repository;
 import com.example.desktime.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -30,5 +31,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByIsEnableTrue();
 
-    User findByUserId(Long userId);
+//    @Query(value = "SELECT u FROM user u WHERE u.id = :userId AND u.is_enable = true", nativeQuery = true)
+//    User findEnabledUserById(@Param("userId") Long userId);
+
+    @Query(value = "SELECT * FROM user WHERE id = :userId AND is_enable = true", nativeQuery = true)
+    User findEnabledUserById(@Param("userId") Long userId);
+
+
+
+
 }

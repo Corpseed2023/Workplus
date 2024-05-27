@@ -23,7 +23,6 @@ public class IPAccess {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonBackReference
     private User user;
 
 
