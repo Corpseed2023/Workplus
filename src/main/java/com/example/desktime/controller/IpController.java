@@ -1,6 +1,7 @@
 package com.example.desktime.controller;
 
 import com.example.desktime.model.IPAccess;
+import com.example.desktime.responseDTO.IPAccessDTO;
 import com.example.desktime.service.IpAccessService;
 import org.bouncycastle.util.IPAddress;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -30,11 +32,23 @@ public class IpController {
     }
 
     @GetMapping("/checkIp")
-    public List<IPAccess> checkIp(@RequestParam Long userId) {
-
+    public List<IPAccessDTO> checkIp(@RequestParam Long userId) {
         List<IPAccess> fetchedIpAddress = ipAccessService.getIps(userId);
 
-        return fetchedIpAddress;
+        // Convert IPAccess entities to IPAccessDTOs
+        List<IPAccessDTO> ipAccessDTOs = fetchedIpAddress.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return ipAccessDTOs;
     }
+
+    private IPAccessDTO convertToDto(IPAccess ipAccess) {
+        IPAccessDTO ipdto = new IPAccessDTO();
+        ipdto.setId(ipAccess.getId());
+        ipdto.setNetworkIpAddress(ipAccess.getNetworkIpAddress());
+        return ipdto;
+    }
+
 
 }
