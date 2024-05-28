@@ -1,17 +1,20 @@
 package com.example.desktime.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity(name = "user")
-@Data
+//@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class User {
 
     @Id
@@ -23,7 +26,6 @@ public class User {
 
     @Column(unique = true)
     private String email;
-
 
     private String password;
 
@@ -49,7 +51,17 @@ public class User {
     @JoinTable(  name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
+
+    @JsonIgnore
     private Set<Roles> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<GapTrack> gapTracks;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<IPAccess> ipAccesses;
 
 
 
