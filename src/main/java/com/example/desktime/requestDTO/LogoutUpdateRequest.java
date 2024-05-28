@@ -1,11 +1,11 @@
 package com.example.desktime.requestDTO;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class LogoutUpdateRequest {
 
     private String email;
-    private LocalDateTime logoutTime;
+    private LocalDate localDate;
 
     public String getEmail() {
         return email;
@@ -15,11 +15,11 @@ public class LogoutUpdateRequest {
         this.email = email;
     }
 
-    public LocalDateTime getLogoutTime() {
-        return logoutTime;
+    public LocalDate getLocalDate() {
+        return localDate;
     }
 
-    public void setLogoutTime(LocalDateTime logoutTime) {
-        this.logoutTime = logoutTime;
+    public void setLocalDate(LocalDate localDate) {
+        this.localDate = localDate;
     }
 }

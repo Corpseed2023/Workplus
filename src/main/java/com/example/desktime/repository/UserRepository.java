@@ -4,6 +4,7 @@ package com.example.desktime.repository;
 import com.example.desktime.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT u FROM user u WHERE u.email = :userMail" )
+    @Query("SELECT u FROM user u WHERE u.email = :userMail and u.isEnable=true" )
     User findUserByEmail(String userMail);
 
 
@@ -29,6 +30,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByIdAndRolesRoleName(Long userId, String admin);
 
     List<User> findByIsEnableTrue();
+
+//    @Query(value = "SELECT u FROM user u WHERE u.id = :userId AND u.is_enable = true", nativeQuery = true)
+//    User findEnabledUserById(@Param("userId") Long userId);
+
+    @Query(value = "SELECT * FROM user WHERE id = :userId AND is_enable = true", nativeQuery = true)
+    User findEnabledUserById(@Param("userId") Long userId);
 
 
 

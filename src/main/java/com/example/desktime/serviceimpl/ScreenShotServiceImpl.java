@@ -50,60 +50,65 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     public final String PROD_PATH="https://deskstoragefast.blob.core.windows.net/test/";
 
 
+//
+//    @Override
+//    public ScreenshotResponse uploadScreenshot(byte[] screenshotData, String userMail, String originalFilename) throws IOException {
+//        User user = userRepository.findUserByEmail(userMail);
+//        if (user == null) {
+//            throw new IllegalArgumentException("User not found with email: " + userMail);
+//        }
+//
+//        // Check if an image with the same name and creation date already exists
+//        Screenshot existingScreenshot = screenshotRepository.findByScreenshotNameAndCreatedAt(originalFilename, new Date());
+//
+//        if (existingScreenshot != null) {
+//            // Return a response indicating that the image already exists
+//            return mapScreenshotToResponse(existingScreenshot);
+//        }
+//
+//        // Save the screenshot file on the computer drive
+//        String directoryPath = "D:/DeskTimeSnap/uploadedScreenshots";
+//        Files.createDirectories(Paths.get(directoryPath));
+//
+//        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//        String fileName = user.getUsername() + "_" + timestamp + "_" + originalFilename;
+//        Path filePath = Paths.get(directoryPath, fileName);
+//        Files.write(filePath, screenshotData);
+//
+//        String imageUrl = "file:///D:/DeskTimeSnap/uploadedScreenshots/" + fileName;
+//
+//        // Set the date field to the current date
+//        LocalDate currentDate = LocalDate.now();
+//
+//        Screenshot screenshot = new Screenshot(user, currentDate, new Date(), imageUrl, originalFilename);
+//        screenshot.setCreatedAt(new Date());
+//        screenshot.setUpdatedAt(new Date());
+//
+//        // Save the screenshot entity in the database
+//        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
+//
+//        return mapScreenshotToResponse(savedScreenshot);
+//    }
+//
+//
+//
+//    // Utility method to map Screenshot entity to ScreenshotResponse DTO
+//    private ScreenshotResponse mapScreenshotToResponse(Screenshot screenshot) {
+//        ScreenshotResponse response = new ScreenshotResponse();
+//        response.setScreenshotTime(screenshot.getScreenshotTime());
+//        response.setScreenshotUrl(screenshot.getScreenshotUrl());
+//        response.setScreenshotName(screenshot.getScreenshotName());
+//        response.setCreatedAt(screenshot.getCreatedAt());
+//        response.setUpdatedAt(screenshot.getUpdatedAt());
+//
+//        return response;
+//    }
+
 
     @Override
     public ScreenshotResponse uploadScreenshot(byte[] screenshotData, String userMail, String originalFilename) throws IOException {
-        User user = userRepository.findUserByEmail(userMail);
-        if (user == null) {
-            throw new IllegalArgumentException("User not found with email: " + userMail);
-        }
-
-        // Check if an image with the same name and creation date already exists
-        Screenshot existingScreenshot = screenshotRepository.findByScreenshotNameAndCreatedAt(originalFilename, new Date());
-
-        if (existingScreenshot != null) {
-            // Return a response indicating that the image already exists
-            return mapScreenshotToResponse(existingScreenshot);
-        }
-
-        // Save the screenshot file on the computer drive
-        String directoryPath = "D:/DeskTimeSnap/uploadedScreenshots";
-        Files.createDirectories(Paths.get(directoryPath));
-
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = user.getUsername() + "_" + timestamp + "_" + originalFilename;
-        Path filePath = Paths.get(directoryPath, fileName);
-        Files.write(filePath, screenshotData);
-
-        String imageUrl = "file:///D:/DeskTimeSnap/uploadedScreenshots/" + fileName;
-
-        // Set the date field to the current date
-        LocalDate currentDate = LocalDate.now();
-
-        Screenshot screenshot = new Screenshot(user, currentDate, new Date(), imageUrl, originalFilename);
-        screenshot.setCreatedAt(new Date());
-        screenshot.setUpdatedAt(new Date());
-
-        // Save the screenshot entity in the database
-        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
-
-        return mapScreenshotToResponse(savedScreenshot);
+        return null;
     }
-
-
-
-    // Utility method to map Screenshot entity to ScreenshotResponse DTO
-    private ScreenshotResponse mapScreenshotToResponse(Screenshot screenshot) {
-        ScreenshotResponse response = new ScreenshotResponse();
-        response.setScreenshotTime(screenshot.getScreenshotTime());
-        response.setScreenshotUrl(screenshot.getScreenshotUrl());
-        response.setScreenshotName(screenshot.getScreenshotName());
-        response.setCreatedAt(screenshot.getCreatedAt());
-        response.setUpdatedAt(screenshot.getUpdatedAt());
-
-        return response;
-    }
-
 
     @Override
     public List<ScreenshotResponse> getUserScreenshotsByEmailAndDate(String userEmail, LocalDate date) {

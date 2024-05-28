@@ -1,21 +1,25 @@
 package com.example.desktime.controller;
 
 
-import com.example.desktime.config.EmailService;
+
+import com.example.desktime.model.IPAccess;
 import com.example.desktime.model.User;
+import com.example.desktime.repository.IpAccessRepository;
 import com.example.desktime.requestDTO.LoginRequest;
-import com.example.desktime.requestDTO.ResetPasswordRequest;
 import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.LoginResponse;
 import com.example.desktime.responseDTO.SingleUserResponse;
 import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.netty.http.server.HttpServerRequest;
 
+import java.net.InetSocketAddress;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,12 +29,14 @@ import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-
 //@RequestMapping("/userRequest")
 public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private IpAccessRepository ipAccessRepository;
 
 
 
@@ -77,9 +83,25 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest, HttpServletRequest serverRequest) {
         try {
-            // Validate input fields
+
+            String networkIp = serverRequest.getRemoteAddr();
+
+            if (networkIp.contains(":"))
+            {
+                networkIp= networkIp.split(":")[0];
+            }
+
+            IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
+
+            if (!ip.getNetworkIpAddress().equals(networkIp))
+
+            {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+            }
+
             if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
                 return ResponseEntity.badRequest().body(new LoginResponse("Email and password are required"));
             }
@@ -108,6 +130,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Error processing the request"));
         }
     }
+
+
 
 
 

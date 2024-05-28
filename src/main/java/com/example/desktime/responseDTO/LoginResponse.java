@@ -13,7 +13,7 @@ public class LoginResponse {
     private Long id;
     private String username;
     private String email;
-    private Set<String> roles; // Change to Set of String for role names
+    private Set<String> roles;
     private Date createdAt;
     private Date updatedAt;
 
