@@ -5,6 +5,8 @@ import com.example.desktime.model.GapTrack;
 import com.example.desktime.requestDTO.GapTrackRequest;
 import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.GapTrackResponse;
+import com.example.desktime.responseDTO.GapTrackSaveResponse;
+import com.example.desktime.responseDTO.GapTrackUpdateResponse;
 import com.example.desktime.service.GapTrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,32 +28,32 @@ public class GapTrackController {
     @PostMapping("/saveGap")
     public ResponseEntity<?> saveGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
         try {
-            GapTrack savedGapTrack = gapTrackService.saveGapTrack(gapTrackRequest);
-            return new ResponseEntity<>(savedGapTrack, HttpStatus.CREATED);
+            GapTrackSaveResponse response = gapTrackService.saveGapTrack(gapTrackRequest);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Error saving GapTrack: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @PutMapping("/updateGap")
     public ResponseEntity<?> updateGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
-
-        if (gapTrackRequest== null)
-        {
-            return new ResponseEntity<>("Data Not Found " ,HttpStatus.NOT_FOUND);
+        if (gapTrackRequest == null) {
+            return new ResponseEntity<>("Data Not Found", HttpStatus.NOT_FOUND);
         }
 
         try {
-
-            GapTrack updatedGap = gapTrackService.updateGapTrack(gapTrackRequest.getStatus(),gapTrackRequest.getUserEmail(),gapTrackRequest.getDate());
-
-            return new ResponseEntity<>(updatedGap, HttpStatus.CREATED);
+            GapTrackUpdateResponse updateResponse = gapTrackService.updateGapTrack(
+                    gapTrackRequest.getStatus(),
+                    gapTrackRequest.getUserEmail(),
+                    gapTrackRequest.getDate()
+            );
+            return new ResponseEntity<>(updateResponse, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Error saving GapTrack: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-// while hitting this API
 
 
     @GetMapping("/getUserGapData")

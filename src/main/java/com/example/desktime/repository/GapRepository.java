@@ -13,10 +13,8 @@ import java.util.List;
 @Repository
 public interface GapRepository  extends JpaRepository<GapTrack, Long> {
 
-
-        @Query("SELECT g FROM GapTrack g WHERE g.user= :user AND g.date = :date and g.availability=false" )
-        GapTrack findLastAvailability(@Param("user") User user, @Param("date") LocalDate date);
-
+        @Query("SELECT g FROM GapTrack g WHERE g.user = :user AND g.date = :date AND g.availability = false ORDER BY g.gapEndTime DESC")
+        List<GapTrack> findLastAvailability(@Param("user") User user, @Param("date") LocalDate date);
 
 //        @Query("select g from GapTrack g where g.user = :user and g.date = :date")
 //        List<GapTrack> fetchUserGapData(User user, LocalDate date);
