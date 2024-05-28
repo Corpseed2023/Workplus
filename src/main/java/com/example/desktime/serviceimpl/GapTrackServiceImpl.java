@@ -7,8 +7,11 @@ import com.example.desktime.repository.GapRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.GapTrackRequest;
 import com.example.desktime.responseDTO.GapTrackResponse;
+import com.example.desktime.responseDTO.GapTrackSaveResponse;
+import com.example.desktime.responseDTO.GapTrackUpdateResponse;
 import com.example.desktime.service.GapTrackService;
 import com.example.desktime.util.CommonUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.desktime.ApiResponse.UserNotFoundException;
@@ -29,8 +32,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
 
     @Override
-    public GapTrack saveGapTrack(GapTrackRequest gapTrackRequest) {
-
+    public GapTrackSaveResponse saveGapTrack(GapTrackRequest gapTrackRequest) {
         User user = userRepository.findUserByEmail(gapTrackRequest.getUserEmail());
 
         // Check if user exists
@@ -46,22 +48,39 @@ public class GapTrackServiceImpl implements GapTrackService {
         gapTrack.setDate(LocalDate.now());
         gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
 
-        return gapRepository.save(gapTrack);
+        GapTrack savedGapTrack = gapRepository.save(gapTrack);
+
+        // Convert to response DTO
+        GapTrackSaveResponse response = new GapTrackSaveResponse();
+        response.setId(savedGapTrack.getId());
+        response.setUserId(savedGapTrack.getUser().getId());
+        response.setDate(savedGapTrack.getDate());
+        response.setGapStartTime(savedGapTrack.getGapStartTime());
+        response.setGapEndTime(savedGapTrack.getGapEndTime());
+        response.setReason(savedGapTrack.getReason());
+        response.setGapTime(savedGapTrack.getGapTime());
+        response.setWorkingStatus(savedGapTrack.getWorkingStatus());
+        response.setAvailability(savedGapTrack.getAvailability());
+
+        return response;
     }
 
 
-    public GapTrack updateGapTrack(String status, String userMail, LocalDate date) {
+//    @Transactional
+    public GapTrackUpdateResponse updateGapTrack(String status, String userMail, LocalDate date) {
         User user = userRepository.findUserByEmail(userMail);
 
         if (user == null) {
             throw new UserNotFoundException();
         }
 
-        GapTrack availabilityData = gapRepository.findLastAvailability(user, date);
+        List<GapTrack> availabilityDataList = gapRepository.findLastAvailability(user, date);
 
-        if (availabilityData == null) {
+        if (availabilityDataList == null || availabilityDataList.isEmpty()) {
             throw new DataNotFoundException("Data not found for the given user and date");
         }
+
+        GapTrack availabilityData = availabilityDataList.get(0);
 
         Date currentTime = CommonUtil.getCurrentTimeInIndia();
         availabilityData.setGapEndTime(currentTime);
@@ -70,18 +89,25 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         if (availabilityData.getGapStartTime() != null) {
             long diffInMillies = Math.abs(currentTime.getTime() - availabilityData.getGapStartTime().getTime());
-            System.out.println("Minus Tim" + diffInMillies);
             long diffInMinutes = diffInMillies / (60 * 1000);
-            System.out.println("Minus Tim" + diffInMillies);
-
             availabilityData.setGapTime(String.valueOf(diffInMinutes) + " minutes");
         }
 
         GapTrack updatedGap = gapRepository.save(availabilityData);
 
-        return updatedGap;
-    }
+        GapTrackUpdateResponse response = new GapTrackUpdateResponse();
+        response.setId(updatedGap.getId());
+        response.setUserId(updatedGap.getUser().getId());
+        response.setDate(updatedGap.getDate());
+        response.setGapStartTime(updatedGap.getGapStartTime());
+        response.setGapEndTime(updatedGap.getGapEndTime());
+        response.setReason(updatedGap.getReason());
+        response.setGapTime(updatedGap.getGapTime());
+        response.setWorkingStatus(updatedGap.getWorkingStatus());
+        response.setAvailability(updatedGap.getAvailability());
 
+        return response;
+    }
 
 
 
@@ -103,16 +129,16 @@ public class GapTrackServiceImpl implements GapTrackService {
 //        gapTracks.forEach(gapTrack -> System.out.println("Gap Data: " + gapTrack));
 
         return gapTracks.stream().map(gapTrack -> {
-            GapTrackResponse dto = new GapTrackResponse();
-            dto.setUserId(user.getId());
-            dto.setDate(gapTrack.getDate());
-            dto.setGapStartTime(gapTrack.getGapStartTime());
-            dto.setGapEndTime(gapTrack.getGapEndTime());
-            dto.setReason(gapTrack.getReason());
-            dto.setGapTime(gapTrack.getGapTime());
-            dto.setWorkingStatus(gapTrack.getWorkingStatus());
-            dto.setAvailability(gapTrack.getAvailability());
-            return dto;
+            GapTrackResponse gapTrackResponse = new GapTrackResponse();
+            gapTrackResponse.setUserId(user.getId());
+            gapTrackResponse.setDate(gapTrack.getDate());
+            gapTrackResponse.setGapStartTime(gapTrack.getGapStartTime());
+            gapTrackResponse.setGapEndTime(gapTrack.getGapEndTime());
+            gapTrackResponse.setReason(gapTrack.getReason());
+            gapTrackResponse.setGapTime(gapTrack.getGapTime());
+            gapTrackResponse.setWorkingStatus(gapTrack.getWorkingStatus());
+            gapTrackResponse.setAvailability(gapTrack.getAvailability());
+            return gapTrackResponse;
         }).collect(Collectors.toList());
     }
 
