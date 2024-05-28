@@ -65,15 +65,18 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
-                DailyActivity dailyActivity = new DailyActivity(user, activityDate, currentIndiaTime, null, true, null);
+                DailyActivity dailyActivity = new DailyActivity(user, request.getDate(), request.getLoginTime(),  request.getLoginTime(), true, null);
                 dailyActivity.setDayOfWeek(activityDate.getDayOfWeek().toString());
                 dailyActivity.setLoginTimeConvention(loginTimeConvention); // Set AM/PM
+                dailyActivity.setLogoutTime(request.getLoginTime());
 
                 DailyActivity savedActivity = dailyActivityRepository.save(dailyActivity);
 
                 DailyActivityResponse response = new DailyActivityResponse();
                 response.setId(savedActivity.getId());
                 response.setUserEmail(request.getEmail());
+                response.setDate(response.getDate());
+                response.setLoginTime(response.getLoginTime());
                 response.setDate(activityDate);
                 response.setLoginTime(currentIndiaTime); // Store login time in Indian time zone
                 response.setPresent(true);
@@ -90,45 +93,92 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     }
 
 
-
     @Override
     public LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request) {
-        String email = request.getEmail();
+        // Check if the user exists
+        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
 
-        // Get the current time in Indian time zone
-        LocalDateTime logoutTimeInIndianZone = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
-
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            Optional<DailyActivity> dailyActivityOptional = dailyActivityRepository.findByUser(user);
-
-            // Check if there's an existing daily activity for the user on the current date
-            if (dailyActivityOptional.isPresent()) {
-                DailyActivity dailyActivity = dailyActivityOptional.get();
-
-                // Check if login time is present for the current date
-                if (dailyActivity.getLoginTime() != null) {
-                    // Save the logout time and logout time convention
-                    dailyActivity.setLogoutTime(logoutTimeInIndianZone);
-                    // Assuming logoutTimeConvention is AM/PM based on the current hour
-                    dailyActivity.setLogoutTimeConvention(logoutTimeInIndianZone.getHour() < 12 ? "AM" : "PM");
-                    dailyActivityRepository.save(dailyActivity);
-
-                    // Create a response DTO with the updated logout time
-                    return new LogoutUpdateResponse(dailyActivity.getId(), email, logoutTimeInIndianZone);
-                } else {
-                    // If login time is not present for the current date, do not save logout time
-                    throw new IllegalStateException("Cannot save logout time. No login time recorded for the user on the current date.");
-                }
-            } else {
-                // If no daily activity exists for the user on the current date, do not save logout time
-                throw new IllegalStateException("Cannot save logout time. No daily activity recorded for the user on the current date.");
-            }
-        } else {
-            throw new IllegalArgumentException("User not found with email: " + email);
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException("User not found with email: " + request.getEmail());
         }
+
+        // Retrieve the user from Optional
+        User user = userOptional.get();
+
+        // Check if the specified date is today's date or a future date
+        LocalDate currentDate = LocalDate.now();
+        if (request.getLocalDate().isBefore(currentDate)) {
+            throw new IllegalArgumentException("Cannot update logout time for a previous date");
+        }
+
+        // Check if daily activity data exists for the user and the specified date
+        Optional<DailyActivity> dailyActivityOptional = dailyActivityRepository.findByUserIdAndDate(user.getId(), request.getLocalDate());
+
+        if (dailyActivityOptional.isEmpty()) {
+            throw new IllegalArgumentException("No daily activity found for user with email: " + request.getEmail() + " and date: " + request.getLocalDate());
+        }
+
+        // Retrieve the daily activity from Optional
+        DailyActivity dailyActivity = dailyActivityOptional.get();
+
+        // Update the logout time of daily activity to the current time in India
+        LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+        dailyActivity.setLogoutTime(currentIndiaTime);
+
+        // Determine AM/PM based on the current time
+        String logoutTimeConvention = currentIndiaTime.getHour() < 12 || (currentIndiaTime.getHour() == 12 && currentIndiaTime.getMinute() == 0) ? "AM" : "PM";
+
+        // Save the logout time convention
+        dailyActivity.setLogoutTimeConvention(logoutTimeConvention);
+
+        // Save the changes to the database
+        dailyActivityRepository.save(dailyActivity);
+
+        // Prepare response
+        return new LogoutUpdateResponse(dailyActivity.getId(), user.getEmail(), dailyActivity.getLogoutTime());
     }
+
+
+
+//    @Override
+//    public LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request) {
+//        String email = request.getEmail();
+//
+//        // Get the current time in Indian time zone
+//        LocalDateTime logoutTimeInIndianZone = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+//
+//        Optional<User> userOptional = userRepository.findByEmail(email);
+//        if (userOptional.isPresent()) {
+//            User user = userOptional.get();
+//            Optional<DailyActivity> dailyActivityOptional = dailyActivityRepository.findByUser(user);
+//
+//            System.out.println("Testing Logout time " + dailyActivityOptional );
+//
+//            if (dailyActivityOptional.isPresent()) {
+//                DailyActivity dailyActivity = dailyActivityOptional.get();
+//
+//                // Check if login time is present for the current date
+//                if (dailyActivity.getLoginTime() != null) {
+//                    // Save the logout time and logout time convention
+//                    dailyActivity.setLogoutTime(logoutTimeInIndianZone);
+//                    // Assuming logoutTimeConvention is AM/PM based on the current hour
+//                    dailyActivity.setLogoutTimeConvention(logoutTimeInIndianZone.getHour() < 12 ? "AM" : "PM");
+//                    dailyActivityRepository.save(dailyActivity);
+//
+//                    // Create a response DTO with the updated logout time
+//                    return new LogoutUpdateResponse(dailyActivity.getId(), email, logoutTimeInIndianZone);
+//                } else {
+//                    // If login time is not present for the current date, do not save logout time
+//                    throw new IllegalStateException("Cannot save logout time. No login time recorded for the user on the current date.");
+//                }
+//            } else {
+//                // If no daily activity exists for the user on the current date, do not save logout time
+//                throw new IllegalStateException("Cannot save logout time. No daily activity recorded for the user on the current date.");
+//            }
+//        } else {
+//            throw new IllegalArgumentException("User not found with email: " + email);
+//        }
+//    }
 
 
 
@@ -144,7 +194,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             return response;
         }
     }
-
     public DailyActivityResponse convertToResponse(DailyActivity dailyActivity) {
         DailyActivityResponse response = new DailyActivityResponse();
         response.setId(dailyActivity.getId());
@@ -158,42 +207,40 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setLoginTimeConvention(dailyActivity.getLoginTimeConvention());
         response.setLogoutTimeConvention(dailyActivity.getLogoutTimeConvention());
 
-        // Calculate today's total time if login time is present
-        if (dailyActivity.getLoginTime() != null) {
-            LocalDateTime currentTime = LocalDateTime.now();
-            LocalDate currentDate = LocalDate.now();
+        // Calculate today's total time if login time and logout time are present
+        if (dailyActivity.getLoginTime() != null && dailyActivity.getLogoutTime() != null) {
+            LocalDateTime loginTime = dailyActivity.getLoginTime();
+            LocalDateTime logoutTime = dailyActivity.getLogoutTime();
 
-            // If the current date is the same as the activity date, calculate elapsed time
-            if (currentDate.equals(dailyActivity.getDate())) {
-                LocalDateTime loginTime = dailyActivity.getLoginTime();
-                long minutesPassed = Duration.between(loginTime, currentTime).toMinutes();
-                long hours = minutesPassed / 60;
-                long minutes = minutesPassed % 60;
+            long minutesPassed = Duration.between(loginTime, logoutTime).toMinutes();
+            long hours = minutesPassed / 60;
+            long minutes = minutesPassed % 60;
 
-                // Check if the elapsed time exceeds 9 hours
-
-//                if (hours > 9) {
-//                    // If elapsed time is more than 9 hours, limit it to 9 hours
-//
-//                    hours = 9;
-//                    minutes = 0; // Reset minutes to ensure total time is exactly 9 hours
-//
-//                } else if (hours == 9 && minutes > 0) {
-//
-//                    // If elapsed time is exactly 9 hours and there are extra minutes, adjust to 9 hours
-//
-//                    minutes = 0;
-//                }
-
-                // Calculate today's total time considering the limit
-                LocalDateTime todayTotalTime = loginTime.plusHours(hours).plusMinutes(minutes);
-                response.setTodayTotalTime(todayTotalTime);
+            // Ensure total time does not exceed 9 hours
+            if (hours > 9) {
+                hours = 9;
+                minutes = 0;
             }
+
+            // Set today's total time
+            response.setTodayTotalTime(LocalDateTime.of(1, 1, 1, (int)hours, (int)minutes));
+
+            // Format the total time as "X hours Y minutes"
+            String totalTime = "";
+            if (hours > 0) {
+                totalTime += hours + " hours";
+                if (minutes > 0) {
+                    totalTime += " ";
+                }
+            }
+            if (minutes > 0) {
+                totalTime += minutes + " minutes";
+            }
+            response.setLoginTimeToLogoutTime(totalTime);
         }
 
         return response;
     }
-
 
 
     public List<DailyActivityReportResponse> getMonthlyActivityReport(String email, LocalDate startDate, LocalDate endDate) {
@@ -214,8 +261,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 activityResponse.setLogoutTime(activity.getLogoutTime());
                 activityResponse.setDate(activity.getDate());
                 activityResponse.setId(activity.getId());
-                activityResponse.setPresent(activity.isPresent());
-
+                activityResponse.setPresent(activity.isPresent() ? "PRESENT" :"ABSENT");
                 // Calculate total time if both login and logout times are present
                 if (activity.getLoginTime() != null && activity.getLogoutTime() != null) {
                     LocalDateTime loginTime = activity.getLoginTime();
@@ -239,9 +285,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
         }
     }
-
-
-
 
 
 }

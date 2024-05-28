@@ -41,8 +41,6 @@ public class DailyActivityController {
         }
     }
 
-
-    //Suppose user not using system then this API will run to update the logout time of user which the latest one by Windows Scheduler
     @PatchMapping("/updateLogoutTime")
     public ResponseEntity<?> updateLogoutTime(@RequestBody LogoutUpdateRequest request) {
         try {
@@ -121,10 +119,5 @@ public class DailyActivityController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request: " + e.getMessage());
         }
     }
-
-
-
-
-
 
 }

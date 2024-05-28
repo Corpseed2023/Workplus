@@ -1,12 +1,14 @@
 package com.example.desktime.requestDTO;
 
-
-
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class DailyActivityRequest {
     private String email;
     private LocalDate date;
+
+    private LocalDateTime loginTime; // New field
+
 
     public DailyActivityRequest() {
     }
@@ -27,4 +29,11 @@ public class DailyActivityRequest {
         this.date = date;
     }
 
+    public LocalDateTime getLoginTime() {
+        return loginTime;
+    }
+
+    public void setLoginTime(LocalDateTime loginTime) {
+        this.loginTime = loginTime;
+    }
 }
