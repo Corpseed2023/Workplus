@@ -317,8 +317,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 dailyActivity.setLoginTime(request.getLoginTime());
                 dailyActivity.setLogoutTime(request.getLogoutTime());
                 dailyActivity.setPresent(request.isPresent());
-                dailyActivity.setAttendanceType(AttendanceType.valueOf(request.getAttendanceType()));
-                dailyActivity.setDayOfWeek(request.getDate().getDayOfWeek().toString());
 
                 // Save the updated activity
                 DailyActivity updatedActivity = dailyActivityRepository.save(dailyActivity);
