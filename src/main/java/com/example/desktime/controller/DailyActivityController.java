@@ -1,6 +1,7 @@
 package com.example.desktime.controller;
 
 import com.example.desktime.requestDTO.DailyActivityRequest;
+import com.example.desktime.requestDTO.EditDailyActivityRequest;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.DailyActivityResponse;
@@ -120,4 +121,15 @@ public class DailyActivityController {
         }
     }
 
+    @PutMapping("/editDailyActivity")
+    public ResponseEntity<?> editDailyActivity(@RequestBody EditDailyActivityRequest request,@RequestParam Long userId) {
+        try {
+            DailyActivityResponse response = dailyActivityService.editDailyActivity(request ,userId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

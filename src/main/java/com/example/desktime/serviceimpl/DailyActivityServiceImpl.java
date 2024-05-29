@@ -1,22 +1,20 @@
 package com.example.desktime.serviceimpl;
 
+import com.example.desktime.model.AttendanceType;
 import com.example.desktime.model.DailyActivity;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.DailyActivityRepository;
 import com.example.desktime.repository.UserProcessRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.DailyActivityRequest;
+import com.example.desktime.requestDTO.EditDailyActivityRequest;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.DailyActivityResponse;
 import com.example.desktime.responseDTO.LogoutUpdateResponse;
 import com.example.desktime.service.DailyActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -287,4 +285,58 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     }
 
 
+    @Override
+    public DailyActivityResponse editDailyActivity(EditDailyActivityRequest request, Long userId) {
+        try {
+            // Check if the user exists in the UserRepository
+            Optional<User> userOptional = userRepository.findById(userId);
+            if (userOptional.isEmpty()) {
+                throw new IllegalArgumentException("User not found with ID: " + userId);
+            }
+
+            User user = userOptional.get();
+
+            // Check if the user has the ADMIN role
+            boolean isAdmin = user.getRoles().stream().anyMatch(role -> "ADMIN".equals(role.getRoleName()));
+            if (!isAdmin) {
+                throw new IllegalArgumentException("Only ADMIN users can edit daily activities.");
+            }
+
+            // Check if the daily activity exists in the DailyActivityRepository
+            Optional<DailyActivity> dailyActivityOptional = dailyActivityRepository.findById(request.getId());
+            if (dailyActivityOptional.isPresent()) {
+                DailyActivity dailyActivity = dailyActivityOptional.get();
+
+                // Check if the user email matches
+                if (!dailyActivity.getUser().getEmail().equals(request.getEmail())) {
+                    throw new IllegalArgumentException("Email mismatch for the given activity.");
+                }
+
+                // Update fields
+                dailyActivity.setDate(request.getDate());
+                dailyActivity.setLoginTime(request.getLoginTime());
+                dailyActivity.setLogoutTime(request.getLogoutTime());
+                dailyActivity.setPresent(request.isPresent());
+                dailyActivity.setAttendanceType(AttendanceType.valueOf(request.getAttendanceType()));
+                dailyActivity.setDayOfWeek(request.getDate().getDayOfWeek().toString());
+
+                // Save the updated activity
+                DailyActivity updatedActivity = dailyActivityRepository.save(dailyActivity);
+
+                // Return the updated response
+                return convertToResponse(updatedActivity);
+            } else {
+                throw new IllegalArgumentException("Daily activity not found for the given ID.");
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating the daily activity: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<String> getAllUserEmails() {
+        return null;
+    }
 }
