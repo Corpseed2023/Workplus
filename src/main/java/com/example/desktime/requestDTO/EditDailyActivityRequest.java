@@ -16,6 +16,5 @@ public class EditDailyActivityRequest {
     private LocalDateTime loginTime;
     private LocalDateTime logoutTime;
     private boolean present;
-    private String attendanceType;
 
 }
