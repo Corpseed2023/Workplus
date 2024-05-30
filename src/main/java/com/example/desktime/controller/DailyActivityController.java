@@ -42,6 +42,7 @@ public class DailyActivityController {
         }
     }
 
+
     @PatchMapping("/updateLogoutTime")
     public ResponseEntity<?> updateLogoutTime(@RequestBody LogoutUpdateRequest request) {
         try {
@@ -132,4 +133,9 @@ public class DailyActivityController {
             return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
+
+
 }
