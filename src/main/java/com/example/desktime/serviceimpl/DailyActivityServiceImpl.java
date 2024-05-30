@@ -42,11 +42,9 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     @Override
     public DailyActivityResponse saveDailyActivity(DailyActivityRequest request) {
         try {
-            // Get the current date in Indian time zone
-            LocalDate activityDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
-
-            // Get the current time in Indian time zone
+            // Get the current date and time in Indian time zone
             LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+            LocalDate activityDate = currentIndiaTime.toLocalDate();
 
             // Determine AM/PM based on the current time
             String loginTimeConvention = currentIndiaTime.getHour() < 12 || (currentIndiaTime.getHour() == 12 && currentIndiaTime.getMinute() == 0) ? "AM" : "PM";
@@ -63,24 +61,22 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
-                DailyActivity dailyActivity = new DailyActivity(user, request.getDate(), request.getLoginTime(),  request.getLoginTime(), true, null);
+                DailyActivity dailyActivity = new DailyActivity(user, activityDate, currentIndiaTime, currentIndiaTime, true, null);
                 dailyActivity.setDayOfWeek(activityDate.getDayOfWeek().toString());
-                dailyActivity.setLoginTimeConvention(loginTimeConvention); // Set AM/PM
-                dailyActivity.setLogoutTime(request.getLoginTime());
+                dailyActivity.setLoginTimeConvention(loginTimeConvention);
+                dailyActivity.setLogoutTime(currentIndiaTime);
 
                 DailyActivity savedActivity = dailyActivityRepository.save(dailyActivity);
 
                 DailyActivityResponse response = new DailyActivityResponse();
                 response.setId(savedActivity.getId());
                 response.setUserEmail(request.getEmail());
-                response.setDate(response.getDate());
-                response.setLoginTime(response.getLoginTime());
                 response.setDate(activityDate);
-                response.setLoginTime(currentIndiaTime); // Store login time in Indian time zone
+                response.setLoginTime(currentIndiaTime);
                 response.setPresent(true);
                 response.setDayOfWeek(savedActivity.getDayOfWeek());
                 response.setAttendanceType(savedActivity.getAttendanceType());
-                response.setLoginTimeConvention(loginTimeConvention); // Set AM/PM in response
+                response.setLoginTimeConvention(loginTimeConvention);
                 return response;
             } else {
                 throw new IllegalArgumentException("User with email " + request.getEmail() + " not found");
