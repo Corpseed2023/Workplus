@@ -1,22 +1,20 @@
 package com.example.desktime.serviceimpl;
 
+import com.example.desktime.model.AttendanceType;
 import com.example.desktime.model.DailyActivity;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.DailyActivityRepository;
 import com.example.desktime.repository.UserProcessRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.DailyActivityRequest;
+import com.example.desktime.requestDTO.EditDailyActivityRequest;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.DailyActivityResponse;
 import com.example.desktime.responseDTO.LogoutUpdateResponse;
 import com.example.desktime.service.DailyActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -44,11 +42,9 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     @Override
     public DailyActivityResponse saveDailyActivity(DailyActivityRequest request) {
         try {
-            // Get the current date in Indian time zone
-            LocalDate activityDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
-
-            // Get the current time in Indian time zone
+            // Get the current date and time in Indian time zone
             LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+            LocalDate activityDate = currentIndiaTime.toLocalDate();
 
             // Determine AM/PM based on the current time
             String loginTimeConvention = currentIndiaTime.getHour() < 12 || (currentIndiaTime.getHour() == 12 && currentIndiaTime.getMinute() == 0) ? "AM" : "PM";
@@ -65,24 +61,22 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
-                DailyActivity dailyActivity = new DailyActivity(user, request.getDate(), request.getLoginTime(),  request.getLoginTime(), true, null);
+                DailyActivity dailyActivity = new DailyActivity(user, activityDate, currentIndiaTime, currentIndiaTime, true, null);
                 dailyActivity.setDayOfWeek(activityDate.getDayOfWeek().toString());
-                dailyActivity.setLoginTimeConvention(loginTimeConvention); // Set AM/PM
-                dailyActivity.setLogoutTime(request.getLoginTime());
+                dailyActivity.setLoginTimeConvention(loginTimeConvention);
+                dailyActivity.setLogoutTime(currentIndiaTime);
 
                 DailyActivity savedActivity = dailyActivityRepository.save(dailyActivity);
 
                 DailyActivityResponse response = new DailyActivityResponse();
                 response.setId(savedActivity.getId());
                 response.setUserEmail(request.getEmail());
-                response.setDate(response.getDate());
-                response.setLoginTime(response.getLoginTime());
                 response.setDate(activityDate);
-                response.setLoginTime(currentIndiaTime); // Store login time in Indian time zone
+                response.setLoginTime(currentIndiaTime);
                 response.setPresent(true);
                 response.setDayOfWeek(savedActivity.getDayOfWeek());
                 response.setAttendanceType(savedActivity.getAttendanceType());
-                response.setLoginTimeConvention(loginTimeConvention); // Set AM/PM in response
+                response.setLoginTimeConvention(loginTimeConvention);
                 return response;
             } else {
                 throw new IllegalArgumentException("User with email " + request.getEmail() + " not found");
@@ -287,4 +281,56 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     }
 
 
+    @Override
+    public DailyActivityResponse editDailyActivity(EditDailyActivityRequest request, Long userId) {
+        try {
+            // Check if the user exists in the UserRepository
+            Optional<User> userOptional = userRepository.findById(userId);
+            if (userOptional.isEmpty()) {
+                throw new IllegalArgumentException("User not found with ID: " + userId);
+            }
+
+            User user = userOptional.get();
+
+            // Check if the user has the ADMIN role
+            boolean isAdmin = user.getRoles().stream().anyMatch(role -> "ADMIN".equals(role.getRoleName()));
+            if (!isAdmin) {
+                throw new IllegalArgumentException("Only ADMIN users can edit daily activities.");
+            }
+
+            // Check if the daily activity exists in the DailyActivityRepository
+            Optional<DailyActivity> dailyActivityOptional = dailyActivityRepository.findById(request.getId());
+            if (dailyActivityOptional.isPresent()) {
+                DailyActivity dailyActivity = dailyActivityOptional.get();
+
+                // Check if the user email matches
+                if (!dailyActivity.getUser().getEmail().equals(request.getEmail())) {
+                    throw new IllegalArgumentException("Email mismatch for the given activity.");
+                }
+
+                // Update fields
+                dailyActivity.setDate(request.getDate());
+                dailyActivity.setLoginTime(request.getLoginTime());
+                dailyActivity.setLogoutTime(request.getLogoutTime());
+                dailyActivity.setPresent(request.isPresent());
+
+                // Save the updated activity
+                DailyActivity updatedActivity = dailyActivityRepository.save(dailyActivity);
+
+                // Return the updated response
+                return convertToResponse(updatedActivity);
+            } else {
+                throw new IllegalArgumentException("Daily activity not found for the given ID.");
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating the daily activity: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<String> getAllUserEmails() {
+        return null;
+    }
 }
