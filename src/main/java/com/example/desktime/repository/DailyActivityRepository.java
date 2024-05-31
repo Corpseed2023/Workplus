@@ -28,7 +28,12 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
     @Query(value = "SELECT * FROM daily_activity WHERE user_id = :userId AND date = :date", nativeQuery = true)
     Optional<DailyActivity> findByUserIdAndDate(Long userId, LocalDate date);
 
-    @Query(value = "SELECT * FROM workpulse.daily_activity WHERE date BETWEEN :startDate AND :endDate ORDER BY user_id", nativeQuery = true)
-    List<DailyActivity> findAllUserMonthlyReport(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    @Query(value = "SELECT da.id, da.date, da.login_time, da.logout_time, da.present, u.username, u.email " +
+            "FROM daily_activity da " +
+            "JOIN user u ON da.user_id = u.id " +
+            "WHERE da.date BETWEEN :startDate AND :endDate " +
+            "ORDER BY u.id", nativeQuery = true)
+    List<Object[]> findAllUserMonthlyReport(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
 
 }
