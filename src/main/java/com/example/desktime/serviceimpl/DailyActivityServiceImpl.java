@@ -333,4 +333,50 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     public List<String> getAllUserEmails() {
         return null;
     }
+
+    @Override
+    public List<DailyActivityReportResponse> getAllUserMonthlyReport(LocalDate startDate, LocalDate endDate) {
+            try {
+                List<DailyActivity> activities = dailyActivityRepository.findAllUserMonthlyReport(startDate, endDate);
+
+                if (activities == null || activities.isEmpty()) {
+                    return Collections.emptyList(); // Return an empty list if no activities found
+                }
+
+                List<DailyActivityReportResponse> response = new ArrayList<>();
+
+                for (DailyActivity activity : activities) {
+                    DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
+                    activityResponse.setUserName(activity.getUser().getUsername());
+                    activityResponse.setUserEmail(activity.getUser().getEmail());
+                    activityResponse.setLoginTime(activity.getLoginTime());
+                    activityResponse.setLogoutTime(activity.getLogoutTime());
+                    activityResponse.setDate(activity.getDate());
+                    activityResponse.setId(activity.getId());
+                    activityResponse.setPresent(activity.isPresent() ? "PRESENT" :"ABSENT");
+                    // Calculate total time if both login and logout times are present
+                    if (activity.getLoginTime() != null && activity.getLogoutTime() != null) {
+                        LocalDateTime loginTime = activity.getLoginTime();
+                        LocalDateTime logoutTime = activity.getLogoutTime();
+
+                        Duration duration = Duration.between(loginTime, logoutTime);
+                        long hours = duration.toHours();
+                        long minutes = duration.toMinutes() % 60;
+
+                        activityResponse.setTotalTime(hours + " hours " + minutes + " minutes");
+                    } else {
+                        activityResponse.setTotalTime("N/A"); // If either login or logout time is missing, set totalTime as "N/A"
+                    }
+
+                    response.add(activityResponse);
+                }
+
+                return response;
+            } catch (Exception e) {
+                // Log the exception if needed
+                throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
+            }
+        }
+
+
 }

@@ -4,6 +4,7 @@ import com.example.desktime.model.DailyActivity;
 import com.example.desktime.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -26,4 +27,8 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
 
     @Query(value = "SELECT * FROM daily_activity WHERE user_id = :userId AND date = :date", nativeQuery = true)
     Optional<DailyActivity> findByUserIdAndDate(Long userId, LocalDate date);
+
+    @Query(value = "SELECT * FROM workpulse.daily_activity WHERE date BETWEEN :startDate AND :endDate ORDER BY user_id", nativeQuery = true)
+    List<DailyActivity> findAllUserMonthlyReport(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
 }

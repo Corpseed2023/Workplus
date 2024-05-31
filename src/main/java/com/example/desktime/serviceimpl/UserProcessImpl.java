@@ -1,15 +1,18 @@
 package com.example.desktime.serviceimpl;
 
+import com.example.desktime.controller.DailyActivityController;
 import com.example.desktime.model.User;
 import com.example.desktime.model.UserProcess;
 import com.example.desktime.repository.UserProcessRepository;
 import com.example.desktime.repository.UserRepository;
+import com.example.desktime.requestDTO.DailyActivityRequest;
 import com.example.desktime.requestDTO.UserProcessRequest;
 import com.example.desktime.responseDTO.UserProcessResponse;
 import com.example.desktime.service.UserProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +26,9 @@ public class UserProcessImpl implements UserProcessService {
     private UserProcessRepository userProcessRepository;
 
     @Autowired
+    private DailyActivityController dailyActivityController;
+
+    @Autowired
     private UserRepository userRepository;
 
     public UserProcessResponse saveUserProcess(UserProcessRequest userProcessRequest) {
@@ -31,6 +37,13 @@ public class UserProcessImpl implements UserProcessService {
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userProcessRequest.getUserMail());
         }
+
+        DailyActivityRequest dailyActivityRequest = new DailyActivityRequest();
+        dailyActivityRequest.setEmail(userProcessRequest.getUserMail());
+        dailyActivityRequest.setDate(userProcessRequest.getDate());
+        dailyActivityRequest.setLoginTime(LocalDateTime.now()); // or set based on your logic
+
+        dailyActivityController.saveDailyActivity(dailyActivityRequest);
 
         // Check if a process with the same name exists for the user on the same date
         LocalDate date = userProcessRequest.getDate();
