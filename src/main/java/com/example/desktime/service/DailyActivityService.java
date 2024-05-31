@@ -26,4 +26,6 @@ public interface DailyActivityService {
     DailyActivityResponse editDailyActivity(EditDailyActivityRequest request ,Long userId);
 
     List<String> getAllUserEmails();
+
+    List<DailyActivityReportResponse> getAllUserMonthlyReport(LocalDate startDate, LocalDate endDate);
 }

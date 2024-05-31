@@ -27,6 +27,8 @@ public class DailyActivityController {
     @PostMapping("/saveDailyActivity")
     public ResponseEntity<?> saveDailyActivity(@RequestBody DailyActivityRequest request) {
         try {
+
+//            System.out.println("Get Hit By Process");
             if (request.getEmail() == null || !request.getEmail().endsWith("@corpseed.com")) {
                 return new ResponseEntity<>("User not found within the domain corpseed.com. Email is null or doesn't contain the specified domain.", HttpStatus.NOT_FOUND);
             }
@@ -104,6 +106,7 @@ public class DailyActivityController {
 //        }
 //    }
 
+    //User Wise Report Fetch
     @GetMapping("/report")
     public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam int year, @RequestParam int month) {
 
@@ -111,6 +114,25 @@ public class DailyActivityController {
             LocalDate startDate = LocalDate.of(year, month, 1);
             LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
             List<DailyActivityReportResponse> response = dailyActivityService.getMonthlyActivityReport(email, startDate, endDate);
+
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request: " + e.getMessage());
+        }
+    }
+
+    //Fetch all user Report accordingly Year And Month
+    @GetMapping("/allUserMonthlyReport")
+    public ResponseEntity<?> getAllUserMonthlyReport(@RequestParam int year, @RequestParam int month) {
+
+        try {
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            List<DailyActivityReportResponse> response = dailyActivityService.getAllUserMonthlyReport(startDate, endDate);
 
             if (response == null || response.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
