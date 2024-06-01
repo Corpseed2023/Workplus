@@ -96,8 +96,6 @@ public class UserController {
             {
                 networkIp= networkIp.split(":")[0];
             }
-
-
             IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
             if (!ip.getNetworkIpAddress().equals(networkIp))
 
@@ -105,9 +103,6 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
             }
-
-
-
 
             if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
                 return ResponseEntity.badRequest().body(new LoginResponse("Email and password are required"));
