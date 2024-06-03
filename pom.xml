@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.lead</groupId>
-    <artifactId>lead-service</artifactId>
+    <artifactId>Workplus</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>WorkPlus</name>
     <description>support project for Spring Boot</description>
