@@ -15,13 +15,13 @@ import com.example.desktime.responseDTO.LogoutUpdateResponse;
 import com.example.desktime.service.DailyActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class DailyActivityServiceImpl implements DailyActivityService {
@@ -333,4 +333,56 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     public List<String> getAllUserEmails() {
         return null;
     }
+
+    @Override
+    public List<DailyActivityReportResponse> getAllUserMonthlyReport(LocalDate startDate, LocalDate endDate) {
+        try {
+            List<Object[]> results = dailyActivityRepository.findAllUserMonthlyReport(startDate, endDate);
+            if (results == null || results.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<DailyActivityReportResponse> response = new ArrayList<>();
+
+            for (Object[] result : results) {
+
+                Long id = ((Number) result[0]).longValue();
+
+                LocalDate date = ((java.sql.Date) result[1]).toLocalDate();
+                LocalDateTime loginTime = result[2] != null ? ((Timestamp) result[2]).toLocalDateTime() : null;
+                LocalDateTime logoutTime = result[3] != null ? ((Timestamp) result[3]).toLocalDateTime() : null;
+                boolean present = (boolean) result[4];
+                String username = (String) result[5];
+                String email = (String) result[6];
+
+                DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
+                activityResponse.setId(id);
+                activityResponse.setDate(date);
+                activityResponse.setLoginTime(loginTime);
+                activityResponse.setLogoutTime(logoutTime);
+                activityResponse.setPresent(present ? "PRESENT" : "ABSENT");
+                activityResponse.setUserName(username);
+                activityResponse.setUserEmail(email);
+
+                if (loginTime != null && logoutTime != null) {
+                    Duration duration = Duration.between(loginTime, logoutTime);
+                    long hours = duration.toHours();
+                    long minutes = duration.toMinutes() % 60;
+                    activityResponse.setTotalTime(hours + " hours " + minutes + " minutes");
+                } else {
+                    activityResponse.setTotalTime("N/A");
+                }
+
+                response.add(activityResponse);
+            }
+
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
+        }
+    }
+
+
+
+
 }

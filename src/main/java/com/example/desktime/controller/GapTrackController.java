@@ -1,9 +1,7 @@
 package com.example.desktime.controller;
 
 
-import com.example.desktime.model.GapTrack;
 import com.example.desktime.requestDTO.GapTrackRequest;
-import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.GapTrackResponse;
 import com.example.desktime.responseDTO.GapTrackSaveResponse;
 import com.example.desktime.responseDTO.GapTrackUpdateResponse;
@@ -12,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 
