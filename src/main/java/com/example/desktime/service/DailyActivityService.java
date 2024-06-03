@@ -6,6 +6,7 @@ import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.DailyActivityResponse;
 import com.example.desktime.responseDTO.LogoutUpdateResponse;
+
 import java.time.LocalDate;
 import java.util.List;
 
