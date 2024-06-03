@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.lead</groupId>
-    <artifactId>lead-service</artifactId>
+    <artifactId>Workplus</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>WorkPlus</name>
     <description>support project for Spring Boot</description>
@@ -154,6 +154,22 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
             <version>3.4.19</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jxls</groupId>
+            <artifactId>jxls-jexcel</artifactId>
+            <version>1.0.9</version>
         </dependency>
 
         <dependency>

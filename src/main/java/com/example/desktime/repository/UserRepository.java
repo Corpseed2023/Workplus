@@ -29,6 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByIdAndRolesRoleName(Long userId, String admin);
 
+    @Query(value = "Select * from user where isEnable = : true",nativeQuery = true)
     List<User> findByIsEnableTrue();
 
 //    @Query(value = "SELECT u FROM user u WHERE u.id = :userId AND u.is_enable = true", nativeQuery = true)
@@ -38,6 +39,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findEnabledUserById(@Param("userId") Long userId);
 
 
-
+    @Query("SELECT u.id, u.username, u.email, u.createdAt, r.roleName FROM user u JOIN u.roles r WHERE u.isEnable = true")
+    List<Object[]> findEnabledUsersWithRoles();
 
 }
