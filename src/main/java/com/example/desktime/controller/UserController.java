@@ -5,6 +5,7 @@ package com.example.desktime.controller;
 import com.example.desktime.model.IPAccess;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.IpAccessRepository;
+import com.example.desktime.requestDTO.DailyActivityRequest;
 import com.example.desktime.requestDTO.LoginRequest;
 import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
@@ -21,6 +22,7 @@ import reactor.netty.http.server.HttpServerRequest;
 
 import java.net.InetSocketAddress;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -37,6 +39,9 @@ public class UserController {
 
     @Autowired
     private IpAccessRepository ipAccessRepository;
+
+    @Autowired
+    private DailyActivityController dailyActivityController;
 
 
 
@@ -87,14 +92,11 @@ public class UserController {
         try {
 
             String networkIp = serverRequest.getRemoteAddr();
-
             if (networkIp.contains(":"))
             {
                 networkIp= networkIp.split(":")[0];
             }
-
             IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
-
             if (!ip.getNetworkIpAddress().equals(networkIp))
 
             {
@@ -120,6 +122,11 @@ public class UserController {
                 response.setUsername(authenticatedUser.getUsername());
                 response.setEmail(authenticatedUser.getEmail());
                 response.setRoles(roles);
+
+                DailyActivityRequest dailyActivityRequest = new DailyActivityRequest();
+                dailyActivityRequest.setEmail(loginRequest.getEmail());
+
+                dailyActivityController.saveDailyActivity(dailyActivityRequest);
 
                 return ResponseEntity.ok(response);
             } else {

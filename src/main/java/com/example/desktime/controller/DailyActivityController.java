@@ -7,12 +7,21 @@ import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.DailyActivityResponse;
 import com.example.desktime.responseDTO.LogoutUpdateResponse;
 import com.example.desktime.service.DailyActivityService;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
@@ -27,6 +36,8 @@ public class DailyActivityController {
     @PostMapping("/saveDailyActivity")
     public ResponseEntity<?> saveDailyActivity(@RequestBody DailyActivityRequest request) {
         try {
+
+//            System.out.println("Get Hit By Process");
             if (request.getEmail() == null || !request.getEmail().endsWith("@corpseed.com")) {
                 return new ResponseEntity<>("User not found within the domain corpseed.com. Email is null or doesn't contain the specified domain.", HttpStatus.NOT_FOUND);
             }
@@ -104,6 +115,7 @@ public class DailyActivityController {
 //        }
 //    }
 
+    //User Wise Report Fetch
     @GetMapping("/report")
     public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam int year, @RequestParam int month) {
 
@@ -111,6 +123,25 @@ public class DailyActivityController {
             LocalDate startDate = LocalDate.of(year, month, 1);
             LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
             List<DailyActivityReportResponse> response = dailyActivityService.getMonthlyActivityReport(email, startDate, endDate);
+
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request: " + e.getMessage());
+        }
+    }
+
+    //Fetch all user Report accordingly Year And Month
+    @GetMapping("/allUserMonthlyReport")
+    public ResponseEntity<?> getAllUserMonthlyReport(@RequestParam int year, @RequestParam int month) {
+
+        try {
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            List<DailyActivityReportResponse> response = dailyActivityService.getAllUserMonthlyReport(startDate, endDate);
 
             if (response == null || response.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
@@ -134,6 +165,62 @@ public class DailyActivityController {
         }
     }
 
+    @GetMapping("/autoAllUserMonthlyReport")
+    public ResponseEntity<?> autoGetAllUserMonthlyReport(@RequestParam int year, @RequestParam int month) {
+        try {
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            List<DailyActivityReportResponse> response = dailyActivityService.getAllUserMonthlyReport(startDate, endDate);
+
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
+            }
+
+            // Create Excel file
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("User Monthly Report");
+
+            // Create header row
+            Row headerRow = sheet.createRow(0);
+            String[] headersArray = {"ID", "User Name", "User Email", "Date", "Login Time", "Logout Time", "Present", "Total Time"};
+            for (int i = 0; i < headersArray.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headersArray[i]);
+            }
+
+            // Populate rows
+            int rowNum = 1;
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            for (DailyActivityReportResponse activity : response) {
+                Row row = sheet.createRow(rowNum++);
+
+                row.createCell(0).setCellValue(activity.getId());
+                row.createCell(1).setCellValue(activity.getUserName());
+                row.createCell(2).setCellValue(activity.getUserEmail());
+                row.createCell(3).setCellValue(activity.getDate().format(dateFormatter));
+                row.createCell(4).setCellValue(activity.getLoginTime() != null ? activity.getLoginTime().format(timeFormatter) : "N/A");
+                row.createCell(5).setCellValue(activity.getLogoutTime() != null ? activity.getLogoutTime().format(timeFormatter) : "N/A");
+                row.createCell(6).setCellValue(activity.getPresent());
+                row.createCell(7).setCellValue(activity.getTotalTime());
+            }
+
+            workbook.write(out);
+            workbook.close();
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Content-Disposition", "attachment; filename=user_monthly_report.xlsx");
+
+            return ResponseEntity.ok()
+                    .headers(httpHeaders)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(out.toByteArray());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request: " + e.getMessage());
+        }
+    }
 
 
 

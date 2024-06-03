@@ -7,25 +7,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
-public class CommonUtil {
+public class ExcelGenerator {
 
-    private static final ZoneId INDIA_ZONE_ID = ZoneId.of("Asia/Kolkata");
-
-    /**
-     * Returns the current date and time according to the Indian time zone.
-     *
-     * @return the current date and time as a Date object
-     */
-    public static Date getCurrentTimeInIndia() {
-        return Date.from(LocalDateTime.now().atZone(INDIA_ZONE_ID).toInstant());
-    }
-
-    private ByteArrayInputStream generateExcel(List<DailyActivityReportResponse> reportData) throws IOException {
+    public ByteArrayInputStream generateExcel(List<DailyActivityReportResponse> reportData) throws IOException {
         String[] columns = {"ID", "User Name", "User Email", "Login Time", "Logout Time", "Date", "Present", "Total Time"};
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -68,4 +54,3 @@ public class CommonUtil {
 
     }
 }
-

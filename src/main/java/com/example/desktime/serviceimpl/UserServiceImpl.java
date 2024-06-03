@@ -179,18 +179,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findByIsEnableTrue();
-        return users.stream()
-                .map(user -> new UserResponse(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getEmail(),
-                        user.getRoles().stream() // Stream over roles
-                                .map(Roles::getRoleName) // Extract roleName
-                                .collect(Collectors.toSet()), // Collect roleNames to a Set
-                        user.getCreatedAt())) // Include createdAt
-                .collect(Collectors.toList());
+
+        List<Object[]> results = userRepository.findEnabledUsersWithRoles();
+
+        Map<Long, UserResponse> userMap = new HashMap<>();
+
+        for (Object[] result : results) {
+            Long userId = (Long) result[0];
+            String username = (String) result[1];
+            String email = (String) result[2];
+            Date createdAt = (Date) result[3];
+            String roleName = (String) result[4];
+
+            UserResponse userResponse = userMap.get(userId);
+            if (userResponse == null) {
+                userResponse = new UserResponse(userId, username, email, new HashSet<>(), createdAt);
+                userMap.put(userId, userResponse);
+            }
+            userResponse.getRoles().add(roleName);
+        }
+
+        return new ArrayList<>(userMap.values());
     }
+
 
 
 
