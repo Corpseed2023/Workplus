@@ -13,7 +13,7 @@ public interface GapTrackService {
 
 
 
-    List<GapTrackResponse> getUserGapData(Long userId, LocalDate date);
+    List<GapTrackResponse> getUserGapData(String userMailId, LocalDate date);
 
     GapTrackSaveResponse saveGapTrack(GapTrackRequest gapTrackRequest);
 

@@ -112,8 +112,8 @@ public class GapTrackServiceImpl implements GapTrackService {
 
 
     @Override
-    public List<GapTrackResponse> getUserGapData(Long userId, LocalDate date) {
-        User user = userRepository.findEnabledUserById(userId);
+    public List<GapTrackResponse> getUserGapData(String userMailId, LocalDate date) {
+        User user = userRepository.findUserByEmail(userMailId);
 
         if (user == null) {
             throw new UserNotFoundException();
