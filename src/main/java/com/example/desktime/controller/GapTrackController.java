@@ -54,7 +54,7 @@ public class GapTrackController {
 
 
     @GetMapping("/getUserGapData")
-    public ResponseEntity<?> getUserGapData(@RequestParam Long userId, @RequestParam(required = false) LocalDate date) {
+    public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @RequestParam(required = false) LocalDate date) {
         try {
 
             LocalDate currentDate;
@@ -63,7 +63,7 @@ public class GapTrackController {
             } else {
                 currentDate = LocalDate.now();
             }
-            List<GapTrackResponse> userGapData = gapTrackService.getUserGapData(userId, currentDate);
+            List<GapTrackResponse> userGapData = gapTrackService.getUserGapData(userMailId, currentDate);
 
             if (userGapData!=null){
 

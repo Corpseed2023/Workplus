@@ -91,12 +91,16 @@ public class UserController {
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest, HttpServletRequest serverRequest) {
         try {
 
+//            System.out.println(loginRequest.getEmail()+"email"+loginRequest.getPassword()+"password");
+
             String networkIp = serverRequest.getRemoteAddr();
             if (networkIp.contains(":"))
             {
                 networkIp= networkIp.split(":")[0];
             }
             IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
+
+//            System.out.println(ip);
             if (!ip.getNetworkIpAddress().equals(networkIp))
 
             {

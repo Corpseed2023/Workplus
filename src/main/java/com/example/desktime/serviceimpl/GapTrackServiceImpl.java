@@ -11,11 +11,11 @@ import com.example.desktime.responseDTO.GapTrackSaveResponse;
 import com.example.desktime.responseDTO.GapTrackUpdateResponse;
 import com.example.desktime.service.GapTrackService;
 import com.example.desktime.util.CommonUtil;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.desktime.ApiResponse.UserNotFoundException;
-import java.time.LocalDate;
+
+import java.time.*;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,12 +40,17 @@ public class GapTrackServiceImpl implements GapTrackService {
             throw new UserNotFoundException();
         }
 
+        ZonedDateTime currentUTCTime = ZonedDateTime.now(ZoneId.of("UTC"));
+
+
+        ZonedDateTime currentIndiaTime = currentUTCTime.plusHours(5).plusMinutes(30);
+
         GapTrack gapTrack = new GapTrack();
         gapTrack.setUser(user);
-        gapTrack.setGapStartTime(CommonUtil.getCurrentTimeInIndia());
+        gapTrack.setGapStartTime(Date.from(currentIndiaTime.toInstant()));
         gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
-        gapTrack.setGapEndTime(CommonUtil.getCurrentTimeInIndia());
-        gapTrack.setDate(LocalDate.now());
+        gapTrack.setGapEndTime(Date.from(currentIndiaTime.toInstant()));
+        gapTrack.setDate(currentIndiaTime.toLocalDate());
         gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
 
         GapTrack savedGapTrack = gapRepository.save(gapTrack);
@@ -66,7 +71,7 @@ public class GapTrackServiceImpl implements GapTrackService {
     }
 
 
-//    @Transactional
+
     public GapTrackUpdateResponse updateGapTrack(String status, String userMail, LocalDate date) {
         User user = userRepository.findUserByEmail(userMail);
 
@@ -82,19 +87,30 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         GapTrack availabilityData = availabilityDataList.get(0);
 
-        Date currentTime = CommonUtil.getCurrentTimeInIndia();
-        availabilityData.setGapEndTime(currentTime);
+        ZonedDateTime currentUTCTime = ZonedDateTime.now(ZoneId.of("UTC"));
+        // Add 5 hours and 30 minutes
+        ZonedDateTime currentIndiaTime = currentUTCTime.plusHours(5).plusMinutes(30);
+        // Update the availability data
+        availabilityData.setGapEndTime(Date.from(currentIndiaTime.toInstant()));
         availabilityData.setAvailability(true);
         availabilityData.setWorkingStatus(status);
 
+        // Calculate the time difference in minutes
         if (availabilityData.getGapStartTime() != null) {
-            long diffInMillies = Math.abs(currentTime.getTime() - availabilityData.getGapStartTime().getTime());
+            ZonedDateTime gapStartTime = availabilityData.getGapStartTime().toInstant().atZone(ZoneId.of("Asia/Kolkata"));
+            long diffInMillies = Math.abs(currentIndiaTime.toInstant().toEpochMilli() - gapStartTime.toInstant().toEpochMilli());
             long diffInMinutes = diffInMillies / (60 * 1000);
-            availabilityData.setGapTime(String.valueOf(diffInMinutes) + " minutes");
+
+            if (diffInMinutes == 0) {
+                availabilityData.setGapTime("5");
+            } else {
+                availabilityData.setGapTime(String.valueOf(diffInMinutes));
+            }
         }
 
         GapTrack updatedGap = gapRepository.save(availabilityData);
 
+        // Create response DTO
         GapTrackUpdateResponse response = new GapTrackUpdateResponse();
         response.setId(updatedGap.getId());
         response.setUserId(updatedGap.getUser().getId());
@@ -110,10 +126,9 @@ public class GapTrackServiceImpl implements GapTrackService {
     }
 
 
-
     @Override
-    public List<GapTrackResponse> getUserGapData(Long userId, LocalDate date) {
-        User user = userRepository.findEnabledUserById(userId);
+    public List<GapTrackResponse> getUserGapData(String userMailId, LocalDate date) {
+        User user = userRepository.findUserByEmail(userMailId);
 
         if (user == null) {
             throw new UserNotFoundException();
@@ -130,6 +145,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         return gapTracks.stream().map(gapTrack -> {
             GapTrackResponse gapTrackResponse = new GapTrackResponse();
+            gapTrackResponse.setId(gapTrack.getId());
             gapTrackResponse.setUserId(user.getId());
             gapTrackResponse.setDate(gapTrack.getDate());
             gapTrackResponse.setGapStartTime(gapTrack.getGapStartTime());
