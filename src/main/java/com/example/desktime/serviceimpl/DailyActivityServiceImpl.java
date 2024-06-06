@@ -63,7 +63,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
-                LocalTime timeThreshHold= LocalTime.of(10,10);
+                LocalTime timeThreshHold= LocalTime.of(10,5);
 
                 AttendanceType attendanceType = currentIndiaTime.toLocalTime().isAfter(timeThreshHold) ? AttendanceType.HALF_DAY : AttendanceType.NORMAL_DAY;
 
