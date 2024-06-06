@@ -25,4 +25,6 @@ public interface GapRepository  extends JpaRepository<GapTrack, Long> {
 
         @Query("SELECT g FROM GapTrack g WHERE g.user = :user")
         List<GapTrack> fetchAllUserGapData(@Param("user") User user);
-}
+
+        @Query("SELECT g.gapTime FROM GapTrack g WHERE g.user.email = :email AND g.date = :date")
+        List<String> findTotalUserGapTime(@Param("email") String email, @Param("date") LocalDate date);}

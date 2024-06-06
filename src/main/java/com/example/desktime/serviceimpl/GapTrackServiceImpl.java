@@ -99,9 +99,9 @@ public class GapTrackServiceImpl implements GapTrackService {
             long diffInMinutes = diffInMillies / (60 * 1000);
 
             if (diffInMinutes == 0) {
-                availabilityData.setGapTime("5 minutes");
+                availabilityData.setGapTime("5");
             } else {
-                availabilityData.setGapTime(diffInMinutes + " minutes");
+                availabilityData.setGapTime(String.valueOf(diffInMinutes));
             }
         }
 
