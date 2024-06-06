@@ -19,4 +19,6 @@ public interface GapTrackService {
 
 
     GapTrackUpdateResponse updateGapTrack(String status, String userEmail, LocalDate date);
+
+    void updateUserGapReason(String userEmail, Long gapId, String gapReason);
 }

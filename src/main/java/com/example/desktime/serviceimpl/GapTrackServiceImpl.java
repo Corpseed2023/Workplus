@@ -18,6 +18,7 @@ import com.example.desktime.ApiResponse.UserNotFoundException;
 import java.time.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -159,8 +160,24 @@ public class GapTrackServiceImpl implements GapTrackService {
     }
 
 
+    public void updateUserGapReason(String userEmail, Long gapId, String gapReason) {
+        User user = userRepository.findUserByEmail(userEmail);
 
+        if (user != null) {
+            Optional<GapTrack> gapData = gapRepository.findById(gapId);
 
-
+            if (gapData.isPresent()) {
+                GapTrack gapTrack = gapData.get();
+                gapTrack.setReason(gapReason);
+                gapRepository.save(gapTrack);
+            } else {
+                // Handle the case where the gapId does not exist
+                System.out.println("Gap ID not found: " + gapId);
+            }
+        } else {
+            // Handle the case where the user does not exist
+            System.out.println("User not found: " + userEmail);
+        }
+    }
 
 }
