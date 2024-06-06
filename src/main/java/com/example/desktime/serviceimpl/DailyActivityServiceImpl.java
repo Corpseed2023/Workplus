@@ -4,6 +4,7 @@ import com.example.desktime.model.AttendanceType;
 import com.example.desktime.model.DailyActivity;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.DailyActivityRepository;
+import com.example.desktime.repository.GapRepository;
 import com.example.desktime.repository.UserProcessRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.DailyActivityRequest;
@@ -29,6 +30,9 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
     @Autowired
     private UserProcessRepository userProcessRepository;
+
+    @Autowired
+    private GapRepository gapRepository;
 
 
     @Autowired
@@ -137,50 +141,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         return new LogoutUpdateResponse(dailyActivity.getId(), user.getEmail(), dailyActivity.getLogoutTime());
     }
 
-
-
-//    @Override
-//    public LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request) {
-//        String email = request.getEmail();
-//
-//        // Get the current time in Indian time zone
-//        LocalDateTime logoutTimeInIndianZone = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
-//
-//        Optional<User> userOptional = userRepository.findByEmail(email);
-//        if (userOptional.isPresent()) {
-//            User user = userOptional.get();
-//            Optional<DailyActivity> dailyActivityOptional = dailyActivityRepository.findByUser(user);
-//
-//            System.out.println("Testing Logout time " + dailyActivityOptional );
-//
-//            if (dailyActivityOptional.isPresent()) {
-//                DailyActivity dailyActivity = dailyActivityOptional.get();
-//
-//                // Check if login time is present for the current date
-//                if (dailyActivity.getLoginTime() != null) {
-//                    // Save the logout time and logout time convention
-//                    dailyActivity.setLogoutTime(logoutTimeInIndianZone);
-//                    // Assuming logoutTimeConvention is AM/PM based on the current hour
-//                    dailyActivity.setLogoutTimeConvention(logoutTimeInIndianZone.getHour() < 12 ? "AM" : "PM");
-//                    dailyActivityRepository.save(dailyActivity);
-//
-//                    // Create a response DTO with the updated logout time
-//                    return new LogoutUpdateResponse(dailyActivity.getId(), email, logoutTimeInIndianZone);
-//                } else {
-//                    // If login time is not present for the current date, do not save logout time
-//                    throw new IllegalStateException("Cannot save logout time. No login time recorded for the user on the current date.");
-//                }
-//            } else {
-//                // If no daily activity exists for the user on the current date, do not save logout time
-//                throw new IllegalStateException("Cannot save logout time. No daily activity recorded for the user on the current date.");
-//            }
-//        } else {
-//            throw new IllegalArgumentException("User not found with email: " + email);
-//        }
-//    }
-
-
-
     @Override
     public DailyActivityResponse getDailyActivityByEmail(String email, LocalDate currentDate) {
         DailyActivity dailyActivity = dailyActivityRepository.findByUserEmailAndDate(email, currentDate);
@@ -205,6 +165,24 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setAttendanceType(dailyActivity.getAttendanceType());
         response.setLoginTimeConvention(dailyActivity.getLoginTimeConvention());
         response.setLogoutTimeConvention(dailyActivity.getLogoutTimeConvention());
+
+
+        List<String> gapTimeCounts =gapRepository.findTotalUserGapTime(dailyActivity.getUser().getEmail(),dailyActivity.getDate());
+
+        long totalGapMinutes = 0;
+
+        for (String gapTime : gapTimeCounts) {
+            if (gapTime != null && !gapTime.isEmpty()) {
+                try {
+                    totalGapMinutes += Integer.valueOf(gapTime);
+//                    System.out.println("Total Time: " + totalGapMinutes);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid gap time: " + gapTime);
+                }
+            }
+        }
+//        System.out.println("Total Gap Minutes: " + totalGapMinutes);
+
 
         // Calculate today's total time if login time and logout time are present
         if (dailyActivity.getLoginTime() != null && dailyActivity.getLogoutTime() != null) {
@@ -236,6 +214,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 totalTime += minutes + " minutes";
             }
             response.setLoginTimeToLogoutTime(totalTime);
+            response.setGapTime(String.valueOf(totalGapMinutes));
         }
 
         return response;
