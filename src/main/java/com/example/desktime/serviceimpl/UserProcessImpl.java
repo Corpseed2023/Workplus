@@ -3,9 +3,11 @@ package com.example.desktime.serviceimpl;
 import com.example.desktime.controller.DailyActivityController;
 import com.example.desktime.model.User;
 import com.example.desktime.model.UserProcess;
+import com.example.desktime.repository.DailyActivityRepository;
 import com.example.desktime.repository.UserProcessRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.DailyActivityRequest;
+import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.requestDTO.UserProcessRequest;
 import com.example.desktime.responseDTO.UserProcessResponse;
 import com.example.desktime.service.UserProcessService;
@@ -30,6 +32,9 @@ public class UserProcessImpl implements UserProcessService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DailyActivityServiceImpl dailyActivityService;
 
     public UserProcessResponse saveUserProcess(UserProcessRequest userProcessRequest) {
         // Check if the user exists based on email
@@ -71,6 +76,14 @@ public class UserProcessImpl implements UserProcessService {
 
         // Save the UserProcess
         UserProcess savedUserProcess = userProcessRepository.save(userProcess);
+
+        LogoutUpdateRequest logoutUpdateRequest = new LogoutUpdateRequest();
+
+        logoutUpdateRequest.setEmail(userProcessRequest.getUserMail());
+        logoutUpdateRequest.setLocalDate(userProcessRequest.getDate());
+
+        dailyActivityService.updateLogoutTime(logoutUpdateRequest);
+
 
         // Create a UserProcessResponse and map all fields from the UserProcess entity
         UserProcessResponse userProcessResponse = new UserProcessResponse();

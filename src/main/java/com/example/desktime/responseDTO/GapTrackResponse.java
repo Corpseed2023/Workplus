@@ -14,6 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class GapTrackResponse {
 
+    private Long id;
     private Long userId;
     private LocalDate date;
     private Date gapStartTime;
