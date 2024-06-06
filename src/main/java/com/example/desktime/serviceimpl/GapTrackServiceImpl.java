@@ -11,11 +11,13 @@ import com.example.desktime.responseDTO.GapTrackSaveResponse;
 import com.example.desktime.responseDTO.GapTrackUpdateResponse;
 import com.example.desktime.service.GapTrackService;
 import com.example.desktime.util.CommonUtil;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.desktime.ApiResponse.UserNotFoundException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,11 +42,15 @@ public class GapTrackServiceImpl implements GapTrackService {
             throw new UserNotFoundException();
         }
 
+        LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+        Instant currentIndiaInstant = currentIndiaTime.atZone(ZoneId.of("Asia/Kolkata")).toInstant();
+        Date currentIndiaDate = Date.from(currentIndiaInstant);
+
         GapTrack gapTrack = new GapTrack();
         gapTrack.setUser(user);
-        gapTrack.setGapStartTime(CommonUtil.getCurrentTimeInIndia());
+        gapTrack.setGapStartTime(currentIndiaDate);
         gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
-        gapTrack.setGapEndTime(CommonUtil.getCurrentTimeInIndia());
+        gapTrack.setGapEndTime(currentIndiaDate);
         gapTrack.setDate(LocalDate.now());
         gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
 
@@ -82,6 +88,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         GapTrack availabilityData = availabilityDataList.get(0);
 
+
         Date currentTime = CommonUtil.getCurrentTimeInIndia();
         availabilityData.setGapEndTime(currentTime);
         availabilityData.setAvailability(true);
@@ -90,7 +97,12 @@ public class GapTrackServiceImpl implements GapTrackService {
         if (availabilityData.getGapStartTime() != null) {
             long diffInMillies = Math.abs(currentTime.getTime() - availabilityData.getGapStartTime().getTime());
             long diffInMinutes = diffInMillies / (60 * 1000);
-            availabilityData.setGapTime(String.valueOf(diffInMinutes) + " minutes");
+
+            if (diffInMinutes == 0) {
+                availabilityData.setGapTime("5 minutes");
+            } else {
+                availabilityData.setGapTime(diffInMinutes + " minutes");
+            }
         }
 
         GapTrack updatedGap = gapRepository.save(availabilityData);
@@ -130,6 +142,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         return gapTracks.stream().map(gapTrack -> {
             GapTrackResponse gapTrackResponse = new GapTrackResponse();
+            gapTrackResponse.setId(gapTrack.getId());
             gapTrackResponse.setUserId(user.getId());
             gapTrackResponse.setDate(gapTrack.getDate());
             gapTrackResponse.setGapStartTime(gapTrack.getGapStartTime());

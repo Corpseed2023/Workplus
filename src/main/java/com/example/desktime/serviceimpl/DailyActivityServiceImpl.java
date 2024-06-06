@@ -15,8 +15,6 @@ import com.example.desktime.responseDTO.LogoutUpdateResponse;
 import com.example.desktime.service.DailyActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -61,10 +59,17 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
+                LocalTime timeThreshHold= LocalTime.of(10,10);
+
+                AttendanceType attendanceType = currentIndiaTime.toLocalTime().isAfter(timeThreshHold) ? AttendanceType.HALF_DAY : AttendanceType.NORMAL_DAY;
+
+
                 DailyActivity dailyActivity = new DailyActivity(user, activityDate, currentIndiaTime, currentIndiaTime, true, null);
                 dailyActivity.setDayOfWeek(activityDate.getDayOfWeek().toString());
                 dailyActivity.setLoginTimeConvention(loginTimeConvention);
                 dailyActivity.setLogoutTime(currentIndiaTime);
+                dailyActivity.setAttendanceType(attendanceType);
+
 
                 DailyActivity savedActivity = dailyActivityRepository.save(dailyActivity);
 
