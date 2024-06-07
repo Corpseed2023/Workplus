@@ -43,7 +43,6 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         ZonedDateTime currentUTCTime = ZonedDateTime.now(ZoneId.of("UTC"));
 
-
         ZonedDateTime currentIndiaTime = currentUTCTime.plusHours(5).plusMinutes(30);
 
         GapTrack gapTrack = new GapTrack();
