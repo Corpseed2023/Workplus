@@ -1,7 +1,12 @@
 package com.example.desktime.requestDTO;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
+@Getter
+@Setter
 public class LogoutUpdateRequest {
 
     private String email;
