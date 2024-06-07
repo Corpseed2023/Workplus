@@ -80,5 +80,15 @@ public class GapTrackController {
     }
 
 
+    @PutMapping("/editReason")
+    public void updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody String gapReason) {
+        try {
+            if (gapId != null && gapReason != null && !gapReason.trim().isEmpty()) {
+                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
+            }
+        } catch (Exception e) {
+            System.out.println("An error occurred while updating the gap reason: " + e.getMessage());
+        }
+    }
 }
 

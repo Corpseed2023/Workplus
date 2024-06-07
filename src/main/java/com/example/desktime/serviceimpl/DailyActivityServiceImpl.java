@@ -130,9 +130,18 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
         // Determine AM/PM based on the current time
         String logoutTimeConvention = currentIndiaTime.getHour() < 12 || (currentIndiaTime.getHour() == 12 && currentIndiaTime.getMinute() == 0) ? "AM" : "PM";
-
-        // Save the logout time convention
         dailyActivity.setLogoutTimeConvention(logoutTimeConvention);
+
+        // Calculate the duration between loginTime and logoutTime
+        if (dailyActivity.getLoginTime() != null) {
+            Duration duration = Duration.between(dailyActivity.getLoginTime(), currentIndiaTime);
+            long hours = duration.toHours();
+
+            // Update attendanceType to FULL_DAY if the duration is 9 hours or more
+            if (hours >= 9) {
+                dailyActivity.setAttendanceType(AttendanceType.FULL_DAY);
+            }
+        }
 
         // Save the changes to the database
         dailyActivityRepository.save(dailyActivity);
@@ -140,6 +149,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         // Prepare response
         return new LogoutUpdateResponse(dailyActivity.getId(), user.getEmail(), dailyActivity.getLogoutTime());
     }
+
 
     @Override
     public DailyActivityResponse getDailyActivityByEmail(String email, LocalDate currentDate) {
