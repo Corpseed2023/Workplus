@@ -153,6 +153,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
     @Override
     public DailyActivityResponse getDailyActivityByEmail(String email, LocalDate currentDate) {
+
         DailyActivity dailyActivity = dailyActivityRepository.findByUserEmailAndDate(email, currentDate);
 
         DailyActivityResponse response = new DailyActivityResponse();
