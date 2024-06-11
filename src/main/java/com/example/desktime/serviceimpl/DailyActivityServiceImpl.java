@@ -164,6 +164,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             return response;
         }
     }
+
     public DailyActivityResponse convertToResponse(DailyActivity dailyActivity) {
         DailyActivityResponse response = new DailyActivityResponse();
         response.setId(dailyActivity.getId());
