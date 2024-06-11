@@ -21,7 +21,8 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
 
     DailyActivity findByUserEmailAndDate(String email, LocalDate currentDate);
 
-    Optional<DailyActivity> findByUserAndDate(User user, LocalDate now);
+    @Query(value = "SELECT da FROM DailyActivity da WHERE da.user = :user AND da.date = :date")
+    Optional<DailyActivity> findByUserAndDate(@Param("user") User user, @Param("date") LocalDate date);
 
     List<DailyActivity> findByUserEmailAndDateBetween(String email, LocalDate startDate, LocalDate endDate);
 
