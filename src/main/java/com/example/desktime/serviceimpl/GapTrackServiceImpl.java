@@ -137,19 +137,23 @@ public class GapTrackServiceImpl implements GapTrackService {
         List<GapTrack> gapTracks = gapRepository.fetchUserGapData(user, date);
 
         if (gapTracks.isEmpty()) {
-            // Handle the scenario where no data is found for the given date
             throw new DataNotFoundException("No gap data found for user on the given date");
         }
-
-//        gapTracks.forEach(gapTrack -> System.out.println("Gap Data: " + gapTrack));
 
         return gapTracks.stream().map(gapTrack -> {
             GapTrackResponse gapTrackResponse = new GapTrackResponse();
             gapTrackResponse.setId(gapTrack.getId());
             gapTrackResponse.setUserId(user.getId());
             gapTrackResponse.setDate(gapTrack.getDate());
-            gapTrackResponse.setGapStartTime(gapTrack.getGapStartTime());
-            gapTrackResponse.setGapEndTime(gapTrack.getGapEndTime());
+
+            // Adjust start time
+            Date startTime = CommonUtil.addHoursAndMinutes(gapTrack.getGapStartTime(), 5, 30);
+            gapTrackResponse.setGapStartTime(startTime);
+
+            // Adjust end time
+            Date endTime = CommonUtil.addHoursAndMinutes(gapTrack.getGapEndTime(), 5, 30);
+            gapTrackResponse.setGapEndTime(endTime);
+
             gapTrackResponse.setReason(gapTrack.getReason());
             gapTrackResponse.setGapTime(gapTrack.getGapTime());
             gapTrackResponse.setWorkingStatus(gapTrack.getWorkingStatus());
@@ -157,6 +161,7 @@ public class GapTrackServiceImpl implements GapTrackService {
             return gapTrackResponse;
         }).collect(Collectors.toList());
     }
+
 
 
     public void updateUserGapReason(String userEmail, Long gapId, String gapReason) {

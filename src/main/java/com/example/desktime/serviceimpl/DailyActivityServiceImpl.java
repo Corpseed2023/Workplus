@@ -59,7 +59,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 Optional<DailyActivity> existingActivity = dailyActivityRepository.findByUserAndDate(user, activityDate);
 
                 // If data already exists for today, return a response indicating that the data was not saved
-                if (existingActivity.isPresent()) {
+                if (existingActivity!=null && existingActivity.isPresent()) {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
