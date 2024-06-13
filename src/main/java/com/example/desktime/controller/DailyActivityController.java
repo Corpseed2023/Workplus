@@ -1,5 +1,6 @@
 package com.example.desktime.controller;
 
+import com.example.desktime.repository.DailyActivityRepository;
 import com.example.desktime.requestDTO.DailyActivityRequest;
 import com.example.desktime.requestDTO.EditDailyActivityRequest;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
@@ -32,6 +33,9 @@ public class DailyActivityController {
     @Autowired
     private DailyActivityService dailyActivityService;
 
+    @Autowired
+    private DailyActivityRepository dailyActivityRepository;
+
 
     @PostMapping("/saveDailyActivity")
     public ResponseEntity<?> saveDailyActivity(@RequestBody DailyActivityRequest request) {
@@ -41,6 +45,8 @@ public class DailyActivityController {
             if (request.getEmail() == null || !request.getEmail().endsWith("@corpseed.com")) {
                 return new ResponseEntity<>("User not found within the domain corpseed.com. Email is null or doesn't contain the specified domain.", HttpStatus.NOT_FOUND);
             }
+
+
             // No need to parse LocalDate again, it's already a LocalDate object
             DailyActivityResponse response = dailyActivityService.saveDailyActivity(request);
             return new ResponseEntity<>(response, HttpStatus.OK);
