@@ -67,5 +67,12 @@ public class CommonUtil {
         }
 
     }
+
+    public static Date addHoursAndMinutes(Date date, int hoursToAdd, int minutesToAdd) {
+        long timeInMillis = date.getTime();
+        timeInMillis += hoursToAdd * 60 * 60 * 1000;
+        timeInMillis += minutesToAdd * 60 * 1000;
+        return new Date(timeInMillis);
+    }
 }
 
