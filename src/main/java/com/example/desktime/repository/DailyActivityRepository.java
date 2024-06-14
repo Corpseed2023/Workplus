@@ -19,7 +19,14 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
 
     DailyActivity findByUserEmail(String email);
 
-    DailyActivity findByUserEmailAndDate(String email, LocalDate currentDate);
+    //complete the method here and also put limit so it can fetch single data for this mail id and current date
+
+//    @Query(value = "Select * from daily_activity da where da.user = : (select id from user where email =: email) and da.date= : date limit 1" ,nativeQuery = true)
+//    DailyActivity findByUserEmailAndDate(@Param("email") String email, @Param("date") LocalDate date);
+
+    @Query(value = "SELECT * FROM daily_activity da WHERE da.user_id = (SELECT id FROM user WHERE email = :email) AND da.date = :date LIMIT 1", nativeQuery = true)
+    DailyActivity findByUserEmailAndDate(@Param("email") String email, @Param("date") LocalDate date);
+
 
     @Query(value = "SELECT da FROM DailyActivity da WHERE da.user = :user AND da.date = :date")
     Optional<DailyActivity> findByUserAndDate(@Param("user") User user, @Param("date") LocalDate date);
