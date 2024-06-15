@@ -119,7 +119,7 @@ public class UserController {
                 // Set roles separately
                 Set<String> roles = authenticatedUser.getRoles().stream()
                         .map(role -> role.getRoleName())
-                        .collect(Collectors.toSet());
+                        .collect(Collectors.toSet());//
                 // Create LoginResponse object with roles
                 LoginResponse response = new LoginResponse("Login successful");
                 response.setId(authenticatedUser.getId());
@@ -141,7 +141,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Error processing the request"));
         }
     }
-
 
 
 

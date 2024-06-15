@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     EmailService emailService;
 
     @Override
-    public void saveUserData(UserRequest userRequest) throws AccessDeniedException, MessagingException {
+    public void saveUserData(UserRequest userRequest) throws MessagingException {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
@@ -74,8 +74,11 @@ public class UserServiceImpl implements UserService {
 
         // Create regular user
         User userData = new User();
+
+
         userData.setUsername(userRequest.getUsername());
         userData.setEmail(userRequest.getEmail());
+
         char[] passwordChars = passwordConfig.geek_Password(7);
         String randomPassword = String.valueOf(passwordChars);
         userData.setPassword(passwordEncoder.encode(randomPassword));
