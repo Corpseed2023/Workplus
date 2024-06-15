@@ -44,10 +44,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     Long referenceId;
 
 
-    //	public String UPLOAD_DIR="/Users/aryanchaurasia/Documents/Corpseed-img";
-    public String UPLOAD_DIR="C:/Users/user/Documents/imageTest/image (1)";
-    //    public final String FOLDER_PATH="C:/Users/user/Documents/images/";
-    public final String PROD_PATH="https://deskstoragefast.blob.core.windows.net/test/";
+    public final String PROD_PATH="https://recordplus.blob.core.windows.net/test/";
 
 
 //
@@ -185,19 +182,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         // Save the screenshot
         Screenshot savedScreenshot = screenshotRepository.save(screenshot);
 
-//        // Prepare the request for updating logout time
-//        LogoutUpdateRequest logoutUpdateRequest = new LogoutUpdateRequest();
-//        logoutUpdateRequest.setEmail(userMail);
-//        logoutUpdateRequest.setLogoutTime(LocalDateTime.now()); // Set logout time to current time
-//
-//
-//        ResponseEntity<?> responseEntity = dailyActivityController.updateLogoutTime(logoutUpdateRequest);
-//
-//        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-//
-//        }
 
-        // Map the saved screenshot to response DTO
         ScreenshotResponse screenshotResponse = new ScreenshotResponse();
         screenshotResponse.setId(savedScreenshot.getId());
         screenshotResponse.setUserId(savedScreenshot.getUser().getId()); // Assuming getId() returns the user ID
