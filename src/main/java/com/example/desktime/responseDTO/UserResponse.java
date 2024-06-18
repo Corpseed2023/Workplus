@@ -14,10 +14,10 @@ public class UserResponse {
     private Long id;
     private String username;
     private String email;
-    private Set<String> roles;
+    private String roles;
     private Date createdAt;
 
-    public UserResponse(Long id, String username, String email, Set<String> roles, Date createdAt) {
+    public UserResponse(Long id, String username, String email, String roles, Date createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
