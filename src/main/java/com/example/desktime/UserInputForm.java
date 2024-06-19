@@ -55,9 +55,9 @@ UserInputForm extends JFrame {
                 String existingUsername = existingUsernameField.getText(); // Get existing username input
                 String description = descriptionArea.getText();
                 // Do something with the data, for example:
-                System.out.println("Username: " + username);
-                System.out.println("Existing Username: " + existingUsername); // Print existing username
-                System.out.println("Description: " + description);
+//                System.out.println("Username: " + username);
+//                System.out.println("Existing Username: " + existingUsername); // Print existing username
+//                System.out.println("Description: " + description);
             }
         });
 

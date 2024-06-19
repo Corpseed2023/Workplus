@@ -62,8 +62,15 @@ public class DailyActivityController {
 
     @PatchMapping("/updateLogoutTime")
     public ResponseEntity<?> updateLogoutTime(@RequestBody LogoutUpdateRequest request) {
+//        System.out.println("Error Test 1123");
+
         try {
+
+//            System.out.println("Error Test");
+
             LogoutUpdateResponse response = dailyActivityService.updateLogoutTime(request);
+//            System.out.println("Error Test5");
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -125,10 +132,13 @@ public class DailyActivityController {
     @GetMapping("/report")
     public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam int year, @RequestParam int month) {
 
+
+
         try {
             LocalDate startDate = LocalDate.of(year, month, 1);
             LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
             List<DailyActivityReportResponse> response = dailyActivityService.getMonthlyActivityReport(email, startDate, endDate);
+
 
             if (response == null || response.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
