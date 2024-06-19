@@ -38,9 +38,9 @@ public class Test
 
             for (int j = 0; j < newarray[i].length; j++) {
 
-                System.out.print(newarray[i][j] + " ");
+//                System.out.print(newarray[i][j] + " ");
             }
-            System.out.println();
+//            System.out.println();
         }
         int inc=0;
 

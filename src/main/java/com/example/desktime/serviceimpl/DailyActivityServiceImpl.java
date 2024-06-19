@@ -99,6 +99,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     @Override
     public LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request) {
         // Check if the user exists
+
         Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
 
         if (userOptional.isEmpty()) {
@@ -131,6 +132,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         // Determine AM/PM based on the current time
         String logoutTimeConvention = currentIndiaTime.getHour() < 12 || (currentIndiaTime.getHour() == 12 && currentIndiaTime.getMinute() == 0) ? "AM" : "PM";
         dailyActivity.setLogoutTimeConvention(logoutTimeConvention);
+//        System.out.println("Error Test91");
 
         // Calculate the duration between loginTime and logoutTime
         if (dailyActivity.getLoginTime() != null) {
@@ -142,9 +144,11 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 dailyActivity.setAttendanceType(AttendanceType.FULL_DAY);
             }
         }
+//        System.out.println("Error Test92");
 
         // Save the changes to the database
         dailyActivityRepository.save(dailyActivity);
+//        System.out.println("Error Test93");
 
         // Prepare response
         return new LogoutUpdateResponse(dailyActivity.getId(), user.getEmail(), dailyActivity.getLogoutTime());
