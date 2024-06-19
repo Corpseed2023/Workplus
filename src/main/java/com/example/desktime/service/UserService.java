@@ -26,7 +26,6 @@ public interface UserService {
 
     boolean existofUserDetails(String username, String email);
 
-    void editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException;
 
     void softDeleteUser(Long userId);
 
@@ -34,4 +33,6 @@ public interface UserService {
 
 
     void initiatePasswordReset(String email, String password) throws MessagingException;
+
+    UserResponse editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException ;
 }

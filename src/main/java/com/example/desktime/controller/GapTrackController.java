@@ -87,7 +87,7 @@ public class GapTrackController {
                 gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
             }
         } catch (Exception e) {
-            System.out.println("An error occurred while updating the gap reason: " + e.getMessage());
+//            System.out.println("An error occurred while updating the gap reason: " + e.getMessage());
         }
     }
 }
