@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
 
-        System.out.println(user);
+//        System.out.println(user);
 
 
         return user.getRoles().stream().anyMatch(role -> role.getRoleName().equals("ADMIN"));
@@ -243,18 +243,20 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     @Override
-    public void editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException {
+    public UserResponse editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException {
+
         Optional<User> optionalUser = userRepository.findById(userId);
+
         User existingUser = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        if (!hasAdminRole(userUpdateRequest.getCreatedBy())) {
+        if (!hasAdminRole(userUpdateRequest.getUpdatedBy())) {
             throw new AccessDeniedException("Only users with ADMIN role can edit user details");
         }
 
         // Parse roleNames string and update roles of the user
         Set<Roles> roles = new HashSet<>();
+
         String[] roleNames = userUpdateRequest.getRoleNames().split(",");
         for (String roleName : roleNames) {
             Roles role = rolesRepository.findByRoleName(roleName.trim());
@@ -273,7 +275,9 @@ public class UserServiceImpl implements UserService {
         User updatedUser = updateUserFromRequest(existingUser, userUpdateRequest);
 
         try {
-            userRepository.save(updatedUser);
+            User updatedUserData = userRepository.save(updatedUser);
+            // Convert the updated user to UserResponse
+            return convertToUserResponse(updatedUserData);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid user data: " + e.getMessage());
         } catch (Exception e) {
@@ -283,14 +287,27 @@ public class UserServiceImpl implements UserService {
 
     private User updateUserFromRequest(User existingUser, UserUpdateRequest userRequest) {
         existingUser.setUsername(userRequest.getUsername());
-        if (userRequest.getPassword() != null) {
-            // Update the password only if it exists in the request
-            existingUser.setPassword(userRequest.getPassword());
-        }
         existingUser.setEnable(userRequest.isEnable());
         existingUser.setUpdatedAt(new Date());
         return existingUser;
     }
+
+
+
+    private UserResponse convertToUserResponse(User updatedUserData) {
+        String rolesString = updatedUserData.getRoles().stream()
+                .map(Roles::getRoleName)
+                .collect(Collectors.joining(","));
+
+        return new UserResponse(
+                updatedUserData.getId(),
+                updatedUserData.getUsername(),
+                updatedUserData.getEmail(),
+                rolesString,
+                updatedUserData.getCreatedAt()
+        );
+    }
+
 
 
     @Override
