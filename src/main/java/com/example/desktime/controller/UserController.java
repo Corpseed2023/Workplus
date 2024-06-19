@@ -18,11 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.netty.http.server.HttpServerRequest;
-
-import java.net.InetSocketAddress;
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -167,10 +163,11 @@ public class UserController {
 
 
     @PutMapping("/editUser")
-    public ResponseEntity<String> editUserDetails(@RequestParam Long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
+    public ResponseEntity<?> editUserDetails(@RequestParam Long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
         try {
-            userService.editUserDetails(userId, userUpdateRequest);
-            return new ResponseEntity<>("User details updated successfully!", HttpStatus.OK);
+            UserResponse editedUserDetails= userService.editUserDetails(userId, userUpdateRequest);
+            return new ResponseEntity<>(editedUserDetails,HttpStatus.OK);
+
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("Invalid user data: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (NoSuchElementException e) {
@@ -181,6 +178,9 @@ public class UserController {
             return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
 
 
     @DeleteMapping("/deleteUser")

@@ -13,10 +13,7 @@ import java.util.Set;
 public class UserUpdateRequest {
 
     private String username;
-    private String email;
-    private Long createdBy;
-    private String password;
-    private Date createdAt;
+    private Long updatedBy;
     private Date updatedAt;
     private boolean isEnable;
     private String roleNames;

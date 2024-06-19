@@ -176,11 +176,11 @@ public class GapTrackServiceImpl implements GapTrackService {
                 gapRepository.save(gapTrack);
             } else {
                 // Handle the case where the gapId does not exist
-                System.out.println("Gap ID not found: " + gapId);
+//                System.out.println("Gap ID not found: " + gapId);
             }
         } else {
             // Handle the case where the user does not exist
-            System.out.println("User not found: " + userEmail);
+//            System.out.println("User not found: " + userEmail);
         }
     }
 
