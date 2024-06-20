@@ -1,15 +1,20 @@
 package com.example.desktime.responseDTO;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class LogoutUpdateResponse {
 
     private Long id;
     private String userEmail;
     private LocalDateTime logoutTime;
 
-    public LogoutUpdateResponse() {
-    }
 
     public LogoutUpdateResponse(Long id, String userEmail, LocalDateTime logoutTime) {
         this.id = id;

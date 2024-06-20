@@ -66,10 +66,7 @@ public class DailyActivityController {
 
         try {
 
-//            System.out.println("Error Test");
-
             LogoutUpdateResponse response = dailyActivityService.updateLogoutTime(request);
-//            System.out.println("Error Test5");
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -199,7 +196,7 @@ public class DailyActivityController {
 
             // Create header row
             Row headerRow = sheet.createRow(0);
-            String[] headersArray = {"ID", "User Name", "User Email", "Date", "Login Time", "Logout Time", "Present", "Total Time"};
+            String[] headersArray = {"ID", "User Name", "User Email", "Date", "Login Time", "Logout Time", "Present", "Total Time", "Day of Week", "Attendance Type"};
             for (int i = 0; i < headersArray.length; i++) {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(headersArray[i]);
@@ -220,6 +217,8 @@ public class DailyActivityController {
                 row.createCell(5).setCellValue(activity.getLogoutTime() != null ? activity.getLogoutTime().format(timeFormatter) : "N/A");
                 row.createCell(6).setCellValue(activity.getPresent());
                 row.createCell(7).setCellValue(activity.getTotalTime());
+                row.createCell(8).setCellValue(activity.getDayOfWeek());
+                row.createCell(9).setCellValue(activity.getAttendanceType());
             }
 
             workbook.write(out);
