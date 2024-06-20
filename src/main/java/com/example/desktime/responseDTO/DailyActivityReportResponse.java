@@ -18,5 +18,7 @@ public class DailyActivityReportResponse {
     private LocalDate date;
     private String present;
     private String totalTime;
+    private String dayOfWeek;
+    private String attendanceType;
 
 }

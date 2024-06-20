@@ -33,10 +33,11 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
 
     List<DailyActivity> findByUserEmailAndDateBetween(String email, LocalDate startDate, LocalDate endDate);
 
-    @Query(value = "SELECT * FROM daily_activity WHERE user_id = :userId AND date = :date", nativeQuery = true)
-    Optional<DailyActivity> findByUserIdAndDate(Long userId, LocalDate date);
+    @Query(value = "SELECT * FROM daily_activity WHERE user_id = :userId AND date = :date LIMIT 1", nativeQuery = true)
+    List<DailyActivity> findByUserIdAndDate(Long userId, LocalDate date);
 
-    @Query(value = "SELECT da.id, da.date, da.login_time, da.logout_time, da.present, u.username, u.email " +
+
+    @Query(value = "SELECT da.id, da.date, da.login_time, da.logout_time, da.present, da.day_of_week, da.attendance_type, u.username, u.email " +
             "FROM daily_activity da " +
             "JOIN user u ON da.user_id = u.id " +
             "WHERE da.date BETWEEN :startDate AND :endDate " +
