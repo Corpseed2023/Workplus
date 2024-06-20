@@ -72,6 +72,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 dailyActivity.setDayOfWeek(activityDate.getDayOfWeek().toString());
                 dailyActivity.setLoginTimeConvention(loginTimeConvention);
                 dailyActivity.setLogoutTime(currentIndiaTime);
+                dailyActivity.setLoginTimeConvention(loginTimeConvention);
                 dailyActivity.setAttendanceType(attendanceType);
 
 
@@ -99,15 +100,10 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     @Override
     public LogoutUpdateResponse updateLogoutTime(LogoutUpdateRequest request) {
         // Check if the user exists
-
-        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-
-        if (userOptional.isEmpty()) {
+        User userData = userRepository.findUserByEmail(request.getEmail());
+        if (userData == null) {
             throw new IllegalArgumentException("User not found with email: " + request.getEmail());
         }
-
-        // Retrieve the user from Optional
-        User user = userOptional.get();
 
         // Check if the specified date is today's date or a future date
         LocalDate currentDate = LocalDate.now();
@@ -116,23 +112,25 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         }
 
         // Check if daily activity data exists for the user and the specified date
-        Optional<DailyActivity> dailyActivityOptional = dailyActivityRepository.findByUserIdAndDate(user.getId(), request.getLocalDate());
+        List<DailyActivity> dailyActivities = dailyActivityRepository.findByUserIdAndDate(userData.getId(), request.getLocalDate());
 
-        if (dailyActivityOptional.isEmpty()) {
-            throw new IllegalArgumentException("No daily activity found for user with email: " + request.getEmail() + " and date: " + request.getLocalDate());
+        if (dailyActivities.isEmpty()) {
+            throw new IllegalArgumentException("No daily activity found for user with email: " +
+                    request.getEmail() + " and date: " + request.getLocalDate());
         }
 
-        // Retrieve the daily activity from Optional
-        DailyActivity dailyActivity = dailyActivityOptional.get();
+        // Retrieve the first daily activity from the list
+        DailyActivity dailyActivity = dailyActivities.get(0);
 
         // Update the logout time of daily activity to the current time in India
         LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
         dailyActivity.setLogoutTime(currentIndiaTime);
 
         // Determine AM/PM based on the current time
-        String logoutTimeConvention = currentIndiaTime.getHour() < 12 || (currentIndiaTime.getHour() == 12 && currentIndiaTime.getMinute() == 0) ? "AM" : "PM";
+        String logoutTimeConvention = currentIndiaTime.getHour() < 12 || (currentIndiaTime.getHour() == 12 &&
+                currentIndiaTime.getMinute() == 0) ? "AM" : "PM";
+
         dailyActivity.setLogoutTimeConvention(logoutTimeConvention);
-//        System.out.println("Error Test91");
 
         // Calculate the duration between loginTime and logoutTime
         if (dailyActivity.getLoginTime() != null) {
@@ -144,15 +142,12 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 dailyActivity.setAttendanceType(AttendanceType.FULL_DAY);
             }
         }
-//        System.out.println("Error Test92");
 
-        // Save the changes to the database
         dailyActivityRepository.save(dailyActivity);
-//        System.out.println("Error Test93");
 
-        // Prepare response
-        return new LogoutUpdateResponse(dailyActivity.getId(), user.getEmail(), dailyActivity.getLogoutTime());
+        return new LogoutUpdateResponse(dailyActivity.getId(), userData.getEmail(), dailyActivity.getLogoutTime());
     }
+
 
 
     @Override
@@ -345,15 +340,15 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             List<DailyActivityReportResponse> response = new ArrayList<>();
 
             for (Object[] result : results) {
-
                 Long id = ((Number) result[0]).longValue();
-
-                LocalDate date = ((java.sql.Date) result[1]).toLocalDate();
-                LocalDateTime loginTime = result[2] != null ? ((Timestamp) result[2]).toLocalDateTime() : null;
-                LocalDateTime logoutTime = result[3] != null ? ((Timestamp) result[3]).toLocalDateTime() : null;
+                LocalDate date = result[1] != null ? ((java.sql.Date) result[1]).toLocalDate() : null;
+                LocalDateTime loginTime = result[2] != null ? ((java.sql.Timestamp) result[2]).toLocalDateTime() : null;
+                LocalDateTime logoutTime = result[3] != null ? ((java.sql.Timestamp) result[3]).toLocalDateTime() : null;
                 boolean present = (boolean) result[4];
-                String username = (String) result[5];
-                String email = (String) result[6];
+                String dayOfWeek = (String) result[5];
+                String attendanceType = (String) result[6];
+                String username = (String) result[7];
+                String email = (String) result[8];
 
                 DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
                 activityResponse.setId(id);
@@ -363,6 +358,8 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 activityResponse.setPresent(present ? "PRESENT" : "ABSENT");
                 activityResponse.setUserName(username);
                 activityResponse.setUserEmail(email);
+                activityResponse.setDayOfWeek(dayOfWeek);
+                activityResponse.setAttendanceType(attendanceType);
 
                 if (loginTime != null && logoutTime != null) {
                     Duration duration = Duration.between(loginTime, logoutTime);
@@ -381,6 +378,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
         }
     }
+
 
 
 
