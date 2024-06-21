@@ -16,7 +16,7 @@ public interface GapTrackService {
     GapTrackSaveResponse saveGapTrack(GapTrackRequest gapTrackRequest);
 
 
-    GapTrackUpdateResponse updateGapTrack(String status, String userEmail, LocalDate date);
-
-    void updateUserGapReason(String userEmail, Long gapId, String gapReason);
+//    GapTrackUpdateResponse updateGapTrack(String status, String userEmail, LocalDate date);
+//
+//    void updateUserGapReason(String userEmail, Long gapId, String gapReason);
 }
