@@ -4,7 +4,7 @@ package com.example.desktime.controller;
 import com.example.desktime.requestDTO.GapTrackRequest;
 import com.example.desktime.responseDTO.GapTrackResponse;
 import com.example.desktime.responseDTO.GapTrackSaveResponse;
-import com.example.desktime.responseDTO.GapTrackUpdateResponse;
+import com.example.desktime.responseDTO.GapUserResponse;
 import com.example.desktime.service.GapTrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,6 +32,8 @@ public class GapTrackController {
         }
     }
 
+//    @GetMapping("/getUserData")
+//    public ResponseEntity<?> userGap
 
 //    @PutMapping("/updateGap")
 //    public ResponseEntity<?> updateGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
@@ -79,5 +81,22 @@ public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @Reques
 ////            System.out.println("An error occurred while updating the gap reason: " + e.getMessage());
 //        }
 //    }
+
+
+   @GetMapping("/gapActivity")
+   public ResponseEntity<GapUserResponse> getUserActivity(
+        @RequestParam("email") String userEmail, @RequestParam(required = false) LocalDate date) {
+    try {
+        LocalDate currentDate = (date != null) ? date : LocalDate.now();
+
+        GapUserResponse response = gapTrackService.getUserActivity(userEmail, currentDate);
+        return ResponseEntity.ok(response);
+    } catch (Exception e) {
+        return ResponseEntity.notFound().build();
+    }
+}
+
+
+
 }
 

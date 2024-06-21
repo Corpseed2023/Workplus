@@ -178,23 +178,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setLogoutTimeConvention(dailyActivity.getLogoutTimeConvention());
 
 
-//        List<String> gapTimeCounts =gapRepository.findTotalUserGapTime(dailyActivity.getUser().getEmail(),dailyActivity.getDate());
-//
-//        long totalGapMinutes = 0;
-//
-//        for (String gapTime : gapTimeCounts) {
-//            if (gapTime != null && !gapTime.isEmpty()) {
-//                try {
-//                    totalGapMinutes += Integer.valueOf(gapTime);
-////                    System.out.println("Total Time: " + totalGapMinutes);
-//                } catch (NumberFormatException e) {
-//                    System.err.println("Invalid gap time: " + gapTime);
-//                }
-//            }
-//        }
-//        System.out.println("Total Gap Minutes: " + totalGapMinutes);
-
-
         // Calculate today's total time if login time and logout time are present
         if (dailyActivity.getLoginTime() != null && dailyActivity.getLogoutTime() != null) {
             LocalDateTime loginTime = dailyActivity.getLoginTime();
@@ -225,7 +208,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 totalTime += minutes + " minutes";
             }
             response.setLoginTimeToLogoutTime(totalTime);
-//            response.setGapTime(String.valueOf(totalGapMinutes));
         }
 
         return response;
