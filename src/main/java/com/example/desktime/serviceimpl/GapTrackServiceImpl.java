@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import com.example.desktime.ApiResponse.UserNotFoundException;
 
 import java.time.*;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -42,16 +44,13 @@ public class GapTrackServiceImpl implements GapTrackService {
         }
 
         ZonedDateTime currentUTCTime = ZonedDateTime.now(ZoneId.of("UTC"));
-
         ZonedDateTime currentIndiaTime = currentUTCTime.plusHours(5).plusMinutes(30);
 
         GapTrack gapTrack = new GapTrack();
         gapTrack.setUser(user);
-        gapTrack.setGapStartTime(Date.from(currentIndiaTime.toInstant()));
         gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
-        gapTrack.setGapEndTime(Date.from(currentIndiaTime.toInstant()));
         gapTrack.setDate(currentIndiaTime.toLocalDate());
-        gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
+        gapTrack.setGapStartTime(currentIndiaTime.toLocalDateTime()); // Set gapStartTime
 
         GapTrack savedGapTrack = gapRepository.save(gapTrack);
 
@@ -61,9 +60,7 @@ public class GapTrackServiceImpl implements GapTrackService {
         response.setUserId(savedGapTrack.getUser().getId());
         response.setDate(savedGapTrack.getDate());
         response.setGapStartTime(savedGapTrack.getGapStartTime());
-        response.setGapEndTime(savedGapTrack.getGapEndTime());
         response.setReason(savedGapTrack.getReason());
-        response.setGapTime(savedGapTrack.getGapTime());
         response.setWorkingStatus(savedGapTrack.getWorkingStatus());
         response.setAvailability(savedGapTrack.getAvailability());
 
@@ -71,59 +68,58 @@ public class GapTrackServiceImpl implements GapTrackService {
     }
 
 
-
-    public GapTrackUpdateResponse updateGapTrack(String status, String userMail, LocalDate date) {
-        User user = userRepository.findUserByEmail(userMail);
-
-        if (user == null) {
-            throw new UserNotFoundException();
-        }
-
-        List<GapTrack> availabilityDataList = gapRepository.findLastAvailability(user, date);
-
-        if (availabilityDataList == null || availabilityDataList.isEmpty()) {
-            throw new DataNotFoundException("Data not found for the given user and date");
-        }
-
-        GapTrack availabilityData = availabilityDataList.get(0);
-
-        ZonedDateTime currentUTCTime = ZonedDateTime.now(ZoneId.of("UTC"));
-        // Add 5 hours and 30 minutes
-        ZonedDateTime currentIndiaTime = currentUTCTime.plusHours(5).plusMinutes(30);
-        // Update the availability data
-        availabilityData.setGapEndTime(Date.from(currentIndiaTime.toInstant()));
-        availabilityData.setAvailability(true);
-        availabilityData.setWorkingStatus(status);
-
-        // Calculate the time difference in minutes
-        if (availabilityData.getGapStartTime() != null) {
-            ZonedDateTime gapStartTime = availabilityData.getGapStartTime().toInstant().atZone(ZoneId.of("Asia/Kolkata"));
-            long diffInMillies = Math.abs(currentIndiaTime.toInstant().toEpochMilli() - gapStartTime.toInstant().toEpochMilli());
-            long diffInMinutes = diffInMillies / (60 * 1000);
-
-            if (diffInMinutes == 0) {
-                availabilityData.setGapTime("5");
-            } else {
-                availabilityData.setGapTime(String.valueOf(diffInMinutes));
-            }
-        }
-
-        GapTrack updatedGap = gapRepository.save(availabilityData);
-
-        // Create response DTO
-        GapTrackUpdateResponse response = new GapTrackUpdateResponse();
-        response.setId(updatedGap.getId());
-        response.setUserId(updatedGap.getUser().getId());
-        response.setDate(updatedGap.getDate());
-        response.setGapStartTime(updatedGap.getGapStartTime());
-        response.setGapEndTime(updatedGap.getGapEndTime());
-        response.setReason(updatedGap.getReason());
-        response.setGapTime(updatedGap.getGapTime());
-        response.setWorkingStatus(updatedGap.getWorkingStatus());
-        response.setAvailability(updatedGap.getAvailability());
-
-        return response;
-    }
+//    public GapTrackUpdateResponse updateGapTrack(String status, String userMail, LocalDate date) {
+//        User user = userRepository.findUserByEmail(userMail);
+//
+//        if (user == null) {
+//            throw new UserNotFoundException();
+//        }
+//
+//        List<GapTrack> availabilityDataList = gapRepository.findLastAvailability(user, date);
+//
+//        if (availabilityDataList == null || availabilityDataList.isEmpty()) {
+//            throw new DataNotFoundException("Data not found for the given user and date");
+//        }
+//
+//        GapTrack availabilityData = availabilityDataList.get(0);
+//
+//        ZonedDateTime currentUTCTime = ZonedDateTime.now(ZoneId.of("UTC"));
+//        // Add 5 hours and 30 minutes
+//        ZonedDateTime currentIndiaTime = currentUTCTime.plusHours(5).plusMinutes(30);
+//        // Update the availability data
+//        availabilityData.setAvailability(true);
+//        availabilityData.setWorkingStatus(status);
+//
+//        // Calculate the time difference in minutes
+//        if (availabilityData.getGapStartTime() != null) {
+//            ZonedDateTime gapStartTime = availabilityData.getGapStartTime().toInstant().atZone(ZoneId.of("Asia/Kolkata"));
+//            long diffInMillies = Math.abs(currentIndiaTime.toInstant().toEpochMilli() - gapStartTime.toInstant().toEpochMilli());
+//            long diffInMinutes = diffInMillies / (60 * 1000);
+//
+//            if (diffInMinutes == 0) {
+//                availabilityData.setGapTime("5");
+//            } else {
+//                availabilityData.setGapTime(String.valueOf(diffInMinutes));
+//            }
+//        }
+//
+//        GapTrack updatedGap = gapRepository.save(availabilityData);
+//
+//        // Create response DTO
+//        GapTrackUpdateResponse response = new GapTrackUpdateResponse();
+//        response.setId(updatedGap.getId());
+//        response.setUserId(updatedGap.getUser().getId());
+//        response.setDate(updatedGap.getDate());
+//        response.setGapStartTime(updatedGap.getGapStartTime());
+//        response.setReason(updatedGap.getReason());
+//        response.setGapTime(updatedGap.getGapTime());
+//        response.setWorkingStatus(updatedGap.getWorkingStatus());
+//        response.setAvailability(updatedGap.getAvailability());
+//
+//        return response;
+//    }
+//
+//
 
 
     @Override
@@ -140,48 +136,53 @@ public class GapTrackServiceImpl implements GapTrackService {
             throw new DataNotFoundException("No gap data found for user on the given date");
         }
 
-        return gapTracks.stream().map(gapTrack -> {
-            GapTrackResponse gapTrackResponse = new GapTrackResponse();
-            gapTrackResponse.setId(gapTrack.getId());
-            gapTrackResponse.setUserId(user.getId());
-            gapTrackResponse.setDate(gapTrack.getDate());
+        List<GapTrackResponse> responseList = new ArrayList<>();
 
-            // Adjust start time
-            Date startTime = CommonUtil.addHoursAndMinutes(gapTrack.getGapStartTime(), 5, 30);
-            gapTrackResponse.setGapStartTime(startTime);
+        for (int i = 1; i < gapTracks.size(); i++) {
+            GapTrack current = gapTracks.get(i);
+            GapTrack previous = gapTracks.get(i - 1);
 
-            // Adjust end time
-            Date endTime = CommonUtil.addHoursAndMinutes(gapTrack.getGapEndTime(), 5, 30);
-            gapTrackResponse.setGapEndTime(endTime);
+            // Calculate the offline period
+            if ("offline".equals(previous.getWorkingStatus()) && "online".equals(current.getWorkingStatus())) {
+                LocalDateTime gapStartTime = previous.getGapStartTime();
+                LocalDateTime gapEndTime = current.getGapStartTime(); // Start of the online period
 
-            gapTrackResponse.setReason(gapTrack.getReason());
-            gapTrackResponse.setGapTime(gapTrack.getGapTime());
-            gapTrackResponse.setWorkingStatus(gapTrack.getWorkingStatus());
-            gapTrackResponse.setAvailability(gapTrack.getAvailability());
-            return gapTrackResponse;
-        }).collect(Collectors.toList());
-    }
+                long offlineDurationMinutes = ChronoUnit.MINUTES.between(gapStartTime, gapEndTime);
 
+                GapTrackResponse gapTrackResponse = new GapTrackResponse();
+                gapTrackResponse.setId(current.getId());
+                gapTrackResponse.setUserId(user.getId());
+                gapTrackResponse.setDate(current.getDate());
+                gapTrackResponse.setGapStartTime(gapStartTime);
+                gapTrackResponse.setReason(current.getReason());
+                gapTrackResponse.setWorkingStatus(previous.getWorkingStatus());
+                gapTrackResponse.setAvailability(current.getAvailability());
 
-
-    public void updateUserGapReason(String userEmail, Long gapId, String gapReason) {
-        User user = userRepository.findUserByEmail(userEmail);
-
-        if (user != null) {
-            Optional<GapTrack> gapData = gapRepository.findById(gapId);
-
-            if (gapData.isPresent()) {
-                GapTrack gapTrack = gapData.get();
-                gapTrack.setReason(gapReason);
-                gapRepository.save(gapTrack);
-            } else {
-                // Handle the case where the gapId does not exist
-//                System.out.println("Gap ID not found: " + gapId);
+                responseList.add(gapTrackResponse);
             }
-        } else {
-            // Handle the case where the user does not exist
-//            System.out.println("User not found: " + userEmail);
         }
+
+        return responseList;
     }
+
+//    public void updateUserGapReason(String userEmail, Long gapId, String gapReason) {
+//        User user = userRepository.findUserByEmail(userEmail);
+//
+//        if (user != null) {
+//            Optional<GapTrack> gapData = gapRepository.findById(gapId);
+//
+//            if (gapData.isPresent()) {
+//                GapTrack gapTrack = gapData.get();
+//                gapTrack.setReason(gapReason);
+//                gapRepository.save(gapTrack);
+//            } else {
+//                // Handle the case where the gapId does not exist
+////                System.out.println("Gap ID not found: " + gapId);
+//            }
+//        } else {
+//            // Handle the case where the user does not exist
+////            System.out.println("User not found: " + userEmail);
+//        }
+//    }
 
 }
