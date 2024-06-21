@@ -6,9 +6,7 @@ import com.example.desktime.model.User;
 import com.example.desktime.repository.GapRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.GapTrackRequest;
-import com.example.desktime.responseDTO.GapTrackResponse;
-import com.example.desktime.responseDTO.GapTrackSaveResponse;
-import com.example.desktime.responseDTO.GapTrackUpdateResponse;
+import com.example.desktime.responseDTO.*;
 import com.example.desktime.service.GapTrackService;
 import com.example.desktime.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +15,7 @@ import com.example.desktime.ApiResponse.UserNotFoundException;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -184,5 +179,65 @@ public class GapTrackServiceImpl implements GapTrackService {
 ////            System.out.println("User not found: " + userEmail);
 //        }
 //    }
+
+    @Override
+    public GapUserResponse getUserActivity(String userEmail, LocalDate date) {
+        User user = userRepository.findUserByEmail(userEmail);
+
+        if (user == null) {
+            throw new UserNotFoundException();
+        }
+
+        // Fetch all gap activities for the user on the specified date
+        List<GapTrack> gapTracks = gapRepository.fetchUserGapData(user, date);
+
+        // Sort gap activities by gap_start_time to ensure correct sequence
+        gapTracks.sort(Comparator.comparing(GapTrack::getGapStartTime));
+
+        LocalDateTime lastOfflineTime = null;
+        List<GapDetail> gapDetails = new ArrayList<>();
+
+        for (GapTrack gapTrack : gapTracks) {
+            if ("offline".equals(gapTrack.getWorkingStatus())) {
+                if (lastOfflineTime == null) {
+                    lastOfflineTime = gapTrack.getGapStartTime();
+                }
+            } else if ("online".equals(gapTrack.getWorkingStatus())) {
+                if (lastOfflineTime != null) {
+                    LocalDateTime lastOnlineTime = gapTrack.getGapStartTime();
+
+                    // Calculate the gap time
+                    Duration gapDuration = Duration.between(lastOfflineTime, lastOnlineTime);
+                    String gapTime = formatDuration(gapDuration);
+
+                    // Add gap details to the list
+                    gapDetails.add(new GapDetail(lastOfflineTime, lastOnlineTime, gapTime));
+
+                    // Reset the lastOfflineTime after pairing with an online event
+                    lastOfflineTime = null;
+                }
+            }
+        }
+
+        // Prepare response DTO
+        GapUserResponse response = new GapUserResponse();
+        response.setUserEmail(userEmail);
+        response.setDate(date);
+        response.setGapDetails(gapDetails);
+
+        return response;
+    }
+
+    // Helper method to format duration as a string
+    private String formatDuration(Duration duration) {
+        long minutes = duration.toMinutes();
+        return minutes + " Minutes";
+    }
+
+
+
+
+
+
 
 }
