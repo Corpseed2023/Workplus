@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Data
@@ -28,12 +27,8 @@ public class GapTrack {
     @Column(name = "gap_start_time", nullable = false)
     private LocalDateTime gapStartTime;
 
-
     @Column(name = "reason")
     private String reason;
-
-//    @Column(name = "gap_time")
-//    private String gapTime;
 
     private String workingStatus;
 
