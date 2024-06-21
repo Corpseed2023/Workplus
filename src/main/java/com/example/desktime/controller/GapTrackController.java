@@ -33,62 +33,51 @@ public class GapTrackController {
     }
 
 
-    @PutMapping("/updateGap")
-    public ResponseEntity<?> updateGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
-        if (gapTrackRequest == null) {
-            return new ResponseEntity<>("Data Not Found", HttpStatus.NOT_FOUND);
-        }
+//    @PutMapping("/updateGap")
+//    public ResponseEntity<?> updateGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
+//        if (gapTrackRequest == null) {
+//            return new ResponseEntity<>("Data Not Found", HttpStatus.NOT_FOUND);
+//        }
+//
+//        try {
+//            GapTrackUpdateResponse updateResponse = gapTrackService.updateGapTrack(
+//                    gapTrackRequest.getStatus(),
+//                    gapTrackRequest.getUserEmail(),
+//                    gapTrackRequest.getDate()
+//            );
+//            return new ResponseEntity<>(updateResponse, HttpStatus.CREATED);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>("Error saving GapTrack: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
+//
+//
+//
+@GetMapping("/getUserGapData")
+public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @RequestParam(required = false) LocalDate date) {
+    try {
+        LocalDate currentDate = (date != null) ? date : LocalDate.now();
+        List<GapTrackResponse> userGapData = gapTrackService.getUserGapData(userMailId, currentDate);
 
-        try {
-            GapTrackUpdateResponse updateResponse = gapTrackService.updateGapTrack(
-                    gapTrackRequest.getStatus(),
-                    gapTrackRequest.getUserEmail(),
-                    gapTrackRequest.getDate()
-            );
-            return new ResponseEntity<>(updateResponse, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error saving GapTrack: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        if (!userGapData.isEmpty()) {
+            return new ResponseEntity<>(userGapData, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Data not Found", HttpStatus.NOT_FOUND);
         }
+    } catch (Exception e) {
+        return new ResponseEntity<>("Error fetching user gap data: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-
-
-    @GetMapping("/getUserGapData")
-    public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @RequestParam(required = false) LocalDate date) {
-        try {
-
-            LocalDate currentDate;
-            if (date != null) {
-                currentDate = date;
-            } else {
-                currentDate = LocalDate.now();
-            }
-            List<GapTrackResponse> userGapData = gapTrackService.getUserGapData(userMailId, currentDate);
-
-            if (userGapData!=null){
-
-                return new ResponseEntity<>(userGapData, HttpStatus.OK);
-
-            }
-
-            else {
-                return new ResponseEntity<>("Data not Found",HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error fetching user gap data: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
-    @PutMapping("/editReason")
-    public void updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody String gapReason) {
-        try {
-            if (gapId != null && gapReason != null && !gapReason.trim().isEmpty()) {
-                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
-            }
-        } catch (Exception e) {
-//            System.out.println("An error occurred while updating the gap reason: " + e.getMessage());
-        }
-    }
+}
+//
+//    @PutMapping("/editReason")
+//    public void updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody String gapReason) {
+//        try {
+//            if (gapId != null && gapReason != null && !gapReason.trim().isEmpty()) {
+//                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
+//            }
+//        } catch (Exception e) {
+////            System.out.println("An error occurred while updating the gap reason: " + e.getMessage());
+//        }
+//    }
 }
 
