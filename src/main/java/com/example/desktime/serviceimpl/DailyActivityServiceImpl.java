@@ -12,6 +12,7 @@ import com.example.desktime.requestDTO.EditDailyActivityRequest;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.responseDTO.DailyActivityReportResponse;
 import com.example.desktime.responseDTO.DailyActivityResponse;
+import com.example.desktime.responseDTO.GapUserResponse;
 import com.example.desktime.responseDTO.LogoutUpdateResponse;
 import com.example.desktime.service.DailyActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
     @Autowired
     private DailyActivityRepository dailyActivityRepository;
+
+    @Autowired
+    private GapTrackServiceImpl gapTrackService;
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -152,17 +156,38 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
     @Override
     public DailyActivityResponse getDailyActivityByEmail(String email, LocalDate currentDate) {
-
         DailyActivity dailyActivity = dailyActivityRepository.findByUserEmailAndDate(email, currentDate);
-
         DailyActivityResponse response = new DailyActivityResponse();
 
         if (dailyActivity != null) {
-            return convertToResponse(dailyActivity);
-        } else {
-            return response;
+            response = convertToResponse(dailyActivity);
         }
+
+        // Fetch gap data and calculate total gap time
+        GapUserResponse gapUserResponse = gapTrackService.getUserActivity(email, currentDate);
+        long totalGapMinutes = gapUserResponse.getGapDetails().stream()
+                .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
+                .sum();
+
+        long gapHours = totalGapMinutes / 60;
+        long gapMinutes = totalGapMinutes % 60;
+
+        // Format the total gap time as "X hours Y minutes"
+        String totalGapTime = "";
+        if (gapHours > 0) {
+            totalGapTime += gapHours + " hours";
+            if (gapMinutes > 0) {
+                totalGapTime += " ";
+            }
+        }
+        if (gapMinutes > 0) {
+            totalGapTime += gapMinutes + " minutes";
+        }
+        response.setGapTime(totalGapTime);
+
+        return response;
     }
+
 
     public DailyActivityResponse convertToResponse(DailyActivity dailyActivity) {
         DailyActivityResponse response = new DailyActivityResponse();
