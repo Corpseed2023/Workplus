@@ -160,25 +160,10 @@ public class GapTrackServiceImpl implements GapTrackService {
         return responseList;
     }
 
-//    public void updateUserGapReason(String userEmail, Long gapId, String gapReason) {
-//        User user = userRepository.findUserByEmail(userEmail);
-//
-//        if (user != null) {
-//            Optional<GapTrack> gapData = gapRepository.findById(gapId);
-//
-//            if (gapData.isPresent()) {
-//                GapTrack gapTrack = gapData.get();
-//                gapTrack.setReason(gapReason);
-//                gapRepository.save(gapTrack);
-//            } else {
-//                // Handle the case where the gapId does not exist
-////                System.out.println("Gap ID not found: " + gapId);
-//            }
-//        } else {
-//            // Handle the case where the user does not exist
-////            System.out.println("User not found: " + userEmail);
-//        }
-//    }
+    @Override
+    public void updateUserGapReason(String userEmail, Long gapId, String gapReason) {
+
+    }
 
     @Override
     public GapUserResponse getUserActivity(String userEmail, LocalDate date) {

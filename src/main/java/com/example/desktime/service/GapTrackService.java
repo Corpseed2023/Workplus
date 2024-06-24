@@ -3,9 +3,7 @@ package com.example.desktime.service;
 import com.example.desktime.requestDTO.GapTrackRequest;
 import com.example.desktime.responseDTO.GapTrackResponse;
 import com.example.desktime.responseDTO.GapTrackSaveResponse;
-import com.example.desktime.responseDTO.GapTrackUpdateResponse;
 import com.example.desktime.responseDTO.GapUserResponse;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,8 +17,6 @@ public interface GapTrackService {
 
     GapUserResponse getUserActivity(String userEmail, LocalDate date);
 
+    void updateUserGapReason(String userEmail, Long gapId, String gapReason);
 
-//    GapTrackUpdateResponse updateGapTrack(String status, String userEmail, LocalDate date);
-//
-//    void updateUserGapReason(String userEmail, Long gapId, String gapReason);
 }
