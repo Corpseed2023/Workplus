@@ -1,6 +1,7 @@
 package com.example.desktime.controller;
 
 
+import com.example.desktime.ApiResponse.UserNotFoundException;
 import com.example.desktime.requestDTO.GapTrackRequest;
 import com.example.desktime.responseDTO.GapTrackResponse;
 import com.example.desktime.responseDTO.GapTrackSaveResponse;
@@ -32,29 +33,7 @@ public class GapTrackController {
         }
     }
 
-//    @GetMapping("/getUserData")
-//    public ResponseEntity<?> userGap
 
-//    @PutMapping("/updateGap")
-//    public ResponseEntity<?> updateGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
-//        if (gapTrackRequest == null) {
-//            return new ResponseEntity<>("Data Not Found", HttpStatus.NOT_FOUND);
-//        }
-//
-//        try {
-//            GapTrackUpdateResponse updateResponse = gapTrackService.updateGapTrack(
-//                    gapTrackRequest.getStatus(),
-//                    gapTrackRequest.getUserEmail(),
-//                    gapTrackRequest.getDate()
-//            );
-//            return new ResponseEntity<>(updateResponse, HttpStatus.CREATED);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("Error saving GapTrack: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//
-//
-//
 @GetMapping("/getUserGapData")
 public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @RequestParam(required = false) LocalDate date) {
     try {
@@ -70,20 +49,26 @@ public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @Reques
         return new ResponseEntity<>("Error fetching user gap data: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-//
-//    @PutMapping("/editReason")
-//    public void updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody String gapReason) {
-//        try {
-//            if (gapId != null && gapReason != null && !gapReason.trim().isEmpty()) {
-//                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
-//            }
-//        } catch (Exception e) {
-////            System.out.println("An error occurred while updating the gap reason: " + e.getMessage());
-//        }
-//    }
+
+    @PutMapping("/editReason")
+    public ResponseEntity<String> updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody String gapReason) {
+        try {
+            if (gapId != null && gapReason != null && !gapReason.trim().isEmpty()) {
+                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
+                return ResponseEntity.ok("Gap reason updated successfully.");
+            } else {
+                return ResponseEntity.badRequest().body("Invalid input data.");
+            }
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the gap reason.");
+        }
+    }
 
 
-   @GetMapping("/gapActivity")
+
+    @GetMapping("/gapActivity")
    public ResponseEntity<GapUserResponse> getUserActivity(
         @RequestParam("email") String userEmail, @RequestParam(required = false) LocalDate date) {
     try {
