@@ -70,17 +70,16 @@ public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @Reques
         return new ResponseEntity<>("Error fetching user gap data: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-//
-//    @PutMapping("/editReason")
-//    public void updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody String gapReason) {
-//        try {
-//            if (gapId != null && gapReason != null && !gapReason.trim().isEmpty()) {
-//                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
-//            }
-//        } catch (Exception e) {
-////            System.out.println("An error occurred while updating the gap reason: " + e.getMessage());
-//        }
-//    }
+
+    @PutMapping("/editReason")
+    public void updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody String gapReason) {
+        try {
+            if (gapId != null && gapReason != null && !gapReason.trim().isEmpty()) {
+                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
+            }
+        } catch (Exception e) {
+        }
+    }
 
 
    @GetMapping("/gapActivity")
