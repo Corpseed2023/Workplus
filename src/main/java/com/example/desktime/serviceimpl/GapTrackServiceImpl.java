@@ -33,7 +33,6 @@ public class GapTrackServiceImpl implements GapTrackService {
     public GapTrackSaveResponse saveGapTrack(GapTrackRequest gapTrackRequest) {
         User user = userRepository.findUserByEmail(gapTrackRequest.getUserEmail());
 
-        // Check if user exists
         if (user == null) {
             throw new UserNotFoundException();
         }
@@ -109,16 +108,23 @@ public class GapTrackServiceImpl implements GapTrackService {
     @Override
     public void updateUserGapReason(String userEmail, Long gapId, String gapReason) {
 
-        User user =  userRepository.findUserByEmail(userEmail);
+        User user = userRepository.findUserByEmail(userEmail);
 
-        if (user== null)
-        {
-            throw  new UserNotFoundException();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
+        Optional<GapTrack> gapTrackData = gapRepository.findById(gapId);
 
-
+        if (gapTrackData.isPresent()) {
+            GapTrack gapTrack = gapTrackData.get();
+            gapTrack.setReason(gapReason);
+            gapRepository.save(gapTrack);  // Save the updated object
+        } else {
+            throw  new DataNotFoundException("Gap Data Not Found");
+        }
     }
+
 
     @Override
     public GapUserResponse getUserActivity(String userEmail, LocalDate date) {
@@ -149,12 +155,14 @@ public class GapTrackServiceImpl implements GapTrackService {
                     Long lastOnlineId = gapTrack.getId();
                     LocalDateTime lastOnlineTime = gapTrack.getGapStartTime();
 
+
                     // Calculate the gap time
                     Duration gapDuration = Duration.between(lastOfflineTime, lastOnlineTime);
                     String gapTime = formatDuration(gapDuration);
+                    String reason = gapTrack.getReason();
 
                     // Add gap details to the list
-                    gapDetails.add(new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime));
+                    gapDetails.add(new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason));
 
                     // Reset the lastOfflineTime and lastOfflineId after pairing with an online event
                     lastOfflineId = null;
