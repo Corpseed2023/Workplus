@@ -28,8 +28,6 @@ public class DailyActivityResponse {
     private String gapTime ;
 
 
-
-
     public DailyActivityResponse() {
     }
 

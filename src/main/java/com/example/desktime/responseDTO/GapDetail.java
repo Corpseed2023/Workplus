@@ -11,13 +11,19 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class GapDetail {
 
+    private Long lastOfflineId;
     private LocalDateTime lastOfflineTime;
+    private Long lastOnlineId;
     private LocalDateTime lastOnlineTime;
     private String gapTime;
+    private String reason;
 
-    public GapDetail(LocalDateTime lastOfflineTime, LocalDateTime lastOnlineTime, String gapTime) {
+    public GapDetail(Long lastOfflineId, LocalDateTime lastOfflineTime, Long lastOnlineId, LocalDateTime lastOnlineTime, String gapTime, String reason) {
+        this.lastOfflineId = lastOfflineId;
         this.lastOfflineTime = lastOfflineTime;
+        this.lastOnlineId = lastOnlineId;
         this.lastOnlineTime = lastOnlineTime;
         this.gapTime = gapTime;
+        this.reason = reason;
     }
 }
