@@ -239,5 +239,10 @@ public class DailyActivityController {
 
 
 
+    @GetMapping("/hello")
+    public static String test()
+    {
+        return "hello word";
+    }
 
 }
