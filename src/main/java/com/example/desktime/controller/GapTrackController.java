@@ -32,29 +32,7 @@ public class GapTrackController {
         }
     }
 
-//    @GetMapping("/getUserData")
-//    public ResponseEntity<?> userGap
 
-//    @PutMapping("/updateGap")
-//    public ResponseEntity<?> updateGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
-//        if (gapTrackRequest == null) {
-//            return new ResponseEntity<>("Data Not Found", HttpStatus.NOT_FOUND);
-//        }
-//
-//        try {
-//            GapTrackUpdateResponse updateResponse = gapTrackService.updateGapTrack(
-//                    gapTrackRequest.getStatus(),
-//                    gapTrackRequest.getUserEmail(),
-//                    gapTrackRequest.getDate()
-//            );
-//            return new ResponseEntity<>(updateResponse, HttpStatus.CREATED);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("Error saving GapTrack: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//
-//
-//
 @GetMapping("/getUserGapData")
 public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @RequestParam(required = false) LocalDate date) {
     try {
