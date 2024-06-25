@@ -119,7 +119,6 @@ public class GapTrackServiceImpl implements GapTrackService {
         if (gapTrackData.isPresent()) {
             GapTrack gapTrack = gapTrackData.get();
             gapTrack.setReason(gapReason);
-            gapTrack.setReasonUpdatedFlag(true);
             gapRepository.save(gapTrack);  // Save the updated object
         } else {
             throw  new DataNotFoundException("Gap Data Not Found");
