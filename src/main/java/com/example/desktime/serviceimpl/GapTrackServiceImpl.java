@@ -119,6 +119,7 @@ public class GapTrackServiceImpl implements GapTrackService {
         if (gapTrackData.isPresent()) {
             GapTrack gapTrack = gapTrackData.get();
             gapTrack.setReason(gapReason);
+            gapTrack.setReasonUpdatedFlag(true);
             gapRepository.save(gapTrack);  // Save the updated object
         } else {
             throw  new DataNotFoundException("Gap Data Not Found");
@@ -142,6 +143,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         Long lastOfflineId = null;
         LocalDateTime lastOfflineTime = null;
+        String reason = null;
         List<GapDetail> gapDetails = new ArrayList<>();
 
         for (GapTrack gapTrack : gapTracks) {
@@ -149,24 +151,24 @@ public class GapTrackServiceImpl implements GapTrackService {
                 if (lastOfflineTime == null) {
                     lastOfflineId = gapTrack.getId();
                     lastOfflineTime = gapTrack.getGapStartTime();
+                    reason = gapTrack.getReason(); // Update the reason here
                 }
             } else if ("online".equals(gapTrack.getWorkingStatus())) {
                 if (lastOfflineTime != null) {
                     Long lastOnlineId = gapTrack.getId();
                     LocalDateTime lastOnlineTime = gapTrack.getGapStartTime();
 
-
                     // Calculate the gap time
                     Duration gapDuration = Duration.between(lastOfflineTime, lastOnlineTime);
                     String gapTime = formatDuration(gapDuration);
-                    String reason = gapTrack.getReason();
 
                     // Add gap details to the list
                     gapDetails.add(new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason));
 
-                    // Reset the lastOfflineTime and lastOfflineId after pairing with an online event
+                    // Reset the lastOfflineTime, lastOfflineId, and reason after pairing with an online event
                     lastOfflineId = null;
                     lastOfflineTime = null;
+                    reason = null;
                 }
             }
         }
@@ -179,6 +181,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         return response;
     }
+
 
 
     // Helper method to format duration as a string
