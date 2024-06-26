@@ -22,6 +22,8 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -160,6 +162,22 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         }
     }
 
+    // Utility method to parse date and time from the file name
+    private LocalDateTime parseDateTimeFromFileName(String fileName) {
+
+        String[] parts = fileName.split("_");
+        String datePart = parts[1];
+        String timePart = parts[2].split("\\.")[0]; // Remove the file extension
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate date = LocalDate.parse(datePart, dateFormatter);
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmmss");
+        LocalTime time = LocalTime.parse(timePart, timeFormatter);
+
+        return LocalDateTime.of(date, time);
+    }
+
     @Override
     public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
         User user = userRepository.findUserByEmail(userMail);
@@ -167,21 +185,26 @@ public class ScreenShotServiceImpl implements ScreenShotService {
             throw new IllegalArgumentException("User not found with email: " + userMail);
         }
 
+        // Parse the date and time from the file name
+        LocalDateTime dateTime = parseDateTimeFromFileName(originalFilename);
+        LocalDate date = dateTime.toLocalDate();
+        Date screenshotTime = java.sql.Timestamp.valueOf(dateTime);
+        Date currentDate = new Date();
+
         String s = azureAdapter.uploadv2(file, 0);
         String filePath = PROD_PATH + s;
 
         Screenshot screenshot = new Screenshot();
         screenshot.setUser(user);
-        screenshot.setDate(LocalDate.now());
-        screenshot.setScreenshotTime(new Date());
+        screenshot.setDate(date);
+        screenshot.setScreenshotTime(screenshotTime);
         screenshot.setScreenshotUrl(filePath);
         screenshot.setScreenshotName(s);
-        screenshot.setCreatedAt(new Date());
-        screenshot.setUpdatedAt(new Date());
+        screenshot.setCreatedAt(currentDate);
+        screenshot.setUpdatedAt(currentDate);
 
         // Save the screenshot
         Screenshot savedScreenshot = screenshotRepository.save(screenshot);
-
 
         ScreenshotResponse screenshotResponse = new ScreenshotResponse();
         screenshotResponse.setId(savedScreenshot.getId());
@@ -196,6 +219,5 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
         return screenshotResponse;
     }
-
 
 }
