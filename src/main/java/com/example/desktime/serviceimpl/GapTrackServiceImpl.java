@@ -182,6 +182,7 @@ public class GapTrackServiceImpl implements GapTrackService {
         response.setUserEmail(userEmail);
         response.setDate(date);
         response.setGapDetails(gapDetails);
+        response.setUserName(user.getUsername());
 
         return response;
     }
