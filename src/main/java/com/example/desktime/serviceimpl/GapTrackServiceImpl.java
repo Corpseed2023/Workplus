@@ -159,10 +159,15 @@ public class GapTrackServiceImpl implements GapTrackService {
 
                     // Calculate the gap time
                     Duration gapDuration = Duration.between(lastOfflineTime, lastOnlineTime);
-                    String gapTime = formatDuration(gapDuration);
+                    long gapMinutes = gapDuration.toMinutes();
 
-                    // Add gap details to the list
-                    gapDetails.add(new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason));
+                    // Filter gaps with a duration greater than 4 minutes
+                    if (gapMinutes > 4) {
+                        String gapTime = formatDuration(gapDuration);
+
+                        // Add gap details to the list
+                        gapDetails.add(new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason));
+                    }
 
                     // Reset the lastOfflineTime, lastOfflineId, and reason after pairing with an online event
                     lastOfflineId = null;
