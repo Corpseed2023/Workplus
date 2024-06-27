@@ -8,6 +8,7 @@ import com.example.desktime.model.User;
 import com.example.desktime.repository.ScreenshotRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
+import com.example.desktime.responseDTO.ScreenShotAllResponse;
 import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.ScreenShotService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -110,38 +110,34 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     }
 
     @Override
-    public List<ScreenshotResponse> getUserScreenshotsByEmailAndDate(String userEmail, LocalDate date) {
+    public List<ScreenShotAllResponse> getUserScreenshotsByEmailAndDate(String userEmail, LocalDate date) {
         User user = userRepository.findUserByEmail(userEmail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userEmail);
         }
 
-        List<Screenshot> screenshots = screenshotRepository.findByUserAndScreenshotTime(user, date);
+        List<Screenshot> screenshots = screenshotRepository.findByUserAndDate(user, date);
 
-
-        if (screenshots.isEmpty()) {
-            throw new IllegalArgumentException("No screenshots found for the user " + userEmail + " on " + date);
-        }
         return screenshots.stream()
-                .map(this::mapScreenshotToResponseAll)
+                .map(screenshot -> {
+                    Instant screenshotTimeInstant = screenshot.getScreenshotTime().toInstant();
+                    Instant screenshotTimeIndianInstant = screenshotTimeInstant.plus(5, ChronoUnit.HOURS).plus(30, ChronoUnit.MINUTES);
+                    Date screenshotTimeIndianDate = Date.from(screenshotTimeIndianInstant);
+
+                    return new ScreenShotAllResponse(
+                            screenshot.getId(),
+                            user.getEmail(),
+                            screenshot.getDate(),
+                            screenshotTimeIndianDate,
+                            screenshot.getScreenshotUrl(),
+                            screenshot.getScreenshotName());
+
+                })
                 .collect(Collectors.toList());
     }
 
 
-    private ScreenshotResponse mapScreenshotToResponseAll(Screenshot screenshot) {
-        return new ScreenshotResponse(
-                screenshot.getId(),
-                screenshot.getUser().getId(),
-                screenshot.getUser().getEmail(),
-                screenshot.getScreenshotTime(),
-                screenshot.getScreenshotUrl(),
-                screenshot.getDate(),
-                screenshot.getScreenshotName(),
-                screenshot.getCreatedAt(),
-                screenshot.getUpdatedAt()
 
-        );
-    }
 
     @Override
     public void deleteScreenshotById(Long screenshotId, Long userId) {
