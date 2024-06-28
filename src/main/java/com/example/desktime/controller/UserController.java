@@ -184,7 +184,7 @@ public class UserController {
 
 
     @DeleteMapping("/deleteUsers")
-    public ResponseEntity<String> softDeleteUsers(@RequestParam List<Long> userIds) {
+    public ResponseEntity<String> softDeleteUsers(@RequestBody List<Long> userIds) {
         try {
             userService.softDeleteUsers(userIds);
             return new ResponseEntity<>("Users soft deleted successfully!", HttpStatus.OK);
