@@ -27,7 +27,6 @@ public interface UserService {
     boolean existofUserDetails(String username, String email);
 
 
-    void softDeleteUser(Long userId);
 
     ResponseEntity<SingleUserResponse> getSingleUserDetails(String usernameMail);
 
@@ -35,4 +34,6 @@ public interface UserService {
     void initiatePasswordReset(String email, String password) throws MessagingException;
 
     UserResponse editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException ;
+
+    void softDeleteUsers(List<Long> userIds);
 }
