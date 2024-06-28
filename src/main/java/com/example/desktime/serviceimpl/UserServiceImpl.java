@@ -311,18 +311,20 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void softDeleteUser(Long userId) throws IllegalArgumentException {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        User user = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+    public void softDeleteUsers(List<Long> userIds) throws IllegalArgumentException {
+        for (Long userId : userIds) {
+            Optional<User> optionalUser = userRepository.findById(userId);
 
-        // Set isEnable to false for soft delete
-        user.setEnable(false);
+            User user = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        userRepository.save(user);
+            user.setEnable(false);
+
+            userRepository.save(user);
+        }
     }
 
 
-
+// i want to send multiple userid which need to soft dele
     @Override
     public void initiatePasswordReset(String email, String newPassword) throws MessagingException {
         Optional<User> optionalUser = userRepository.findByEmail(email);

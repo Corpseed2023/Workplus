@@ -121,7 +121,7 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         return screenshots.stream()
                 .map(screenshot -> {
                     Instant screenshotTimeInstant = screenshot.getScreenshotTime().toInstant();
-                    Instant screenshotTimeIndianInstant = screenshotTimeInstant.plus(5, ChronoUnit.HOURS).plus(30, ChronoUnit.MINUTES);
+                    Instant screenshotTimeIndianInstant = screenshotTimeInstant.minus(5, ChronoUnit.HOURS).plus(30, ChronoUnit.MINUTES);
                     Date screenshotTimeIndianDate = Date.from(screenshotTimeIndianInstant);
 
                     return new ScreenShotAllResponse(
