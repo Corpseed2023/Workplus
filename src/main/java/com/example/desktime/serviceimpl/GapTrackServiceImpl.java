@@ -126,7 +126,6 @@ public class GapTrackServiceImpl implements GapTrackService {
     @Override
     public GapUserResponse getUserActivity(String userEmail, LocalDate date) {
         User user = userRepository.findUserByEmail(userEmail);
-
         if (user == null) {
             throw new UserNotFoundException();
         }
@@ -134,7 +133,9 @@ public class GapTrackServiceImpl implements GapTrackService {
         // Fetch all gap activities for the user on the specified date
         List<GapTrack> gapTracks = gapRepository.fetchUserGapData(user, date);
 
-        // Sort gap activities by gap_start_time to ensure correct sequence
+
+        // Sort gap activities by gap_start_time to
+        // ensure correct sequence
         gapTracks.sort(Comparator.comparing(GapTrack::getGapStartTime));
 
         Long lastOfflineId = null;
@@ -147,7 +148,7 @@ public class GapTrackServiceImpl implements GapTrackService {
                 if (lastOfflineTime == null) {
                     lastOfflineId = gapTrack.getId();
                     lastOfflineTime = gapTrack.getGapStartTime();
-                    reason = gapTrack.getReason(); // Update the reason here
+                    reason = gapTrack.getReason();
                 }
             } else if ("online".equals(gapTrack.getWorkingStatus())) {
                 if (lastOfflineTime != null) {
@@ -156,15 +157,10 @@ public class GapTrackServiceImpl implements GapTrackService {
 
                     // Calculate the gap time
                     Duration gapDuration = Duration.between(lastOfflineTime, lastOnlineTime);
-                    long gapMinutes = gapDuration.toMinutes();
+                    String gapTime = formatDuration(gapDuration);
 
-                    // Filter gaps with a duration greater than 4 minutes
-                    if (gapMinutes > 4) {
-                        String gapTime = formatDuration(gapDuration);
-
-                        // Add gap details to the list
-                        gapDetails.add(new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason));
-                    }
+                    // Add gap details to the list
+                    gapDetails.add(new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason));
 
                     // Reset the lastOfflineTime, lastOfflineId, and reason after pairing with an online event
                     lastOfflineId = null;
@@ -179,7 +175,6 @@ public class GapTrackServiceImpl implements GapTrackService {
         response.setUserEmail(userEmail);
         response.setDate(date);
         response.setGapDetails(gapDetails);
-        response.setUserName(user.getUsername());
 
         return response;
     }
