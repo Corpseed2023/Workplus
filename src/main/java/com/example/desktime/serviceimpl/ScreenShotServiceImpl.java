@@ -8,6 +8,7 @@ import com.example.desktime.model.User;
 import com.example.desktime.repository.ScreenshotRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.LogoutUpdateRequest;
+import com.example.desktime.responseDTO.ScreenShotAllResponse;
 import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.ScreenShotService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -108,38 +110,34 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     }
 
     @Override
-    public List<ScreenshotResponse> getUserScreenshotsByEmailAndDate(String userEmail, LocalDate date) {
+    public List<ScreenShotAllResponse> getUserScreenshotsByEmailAndDate(String userEmail, LocalDate date) {
         User user = userRepository.findUserByEmail(userEmail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userEmail);
         }
 
-        List<Screenshot> screenshots = screenshotRepository.findByUserAndScreenshotTime(user, date);
+        List<Screenshot> screenshots = screenshotRepository.findByUserAndDate(user, date);
 
-
-        if (screenshots.isEmpty()) {
-            throw new IllegalArgumentException("No screenshots found for the user " + userEmail + " on " + date);
-        }
         return screenshots.stream()
-                .map(this::mapScreenshotToResponseAll)
+                .map(screenshot -> {
+                    Instant screenshotTimeInstant = screenshot.getScreenshotTime().toInstant();
+                    Instant screenshotTimeIndianInstant = screenshotTimeInstant.plus(5, ChronoUnit.HOURS).plus(30, ChronoUnit.MINUTES);
+                    Date screenshotTimeIndianDate = Date.from(screenshotTimeIndianInstant);
+
+                    return new ScreenShotAllResponse(
+                            screenshot.getId(),
+                            user.getEmail(),
+                            screenshot.getDate(),
+                            screenshotTimeIndianDate,
+                            screenshot.getScreenshotUrl(),
+                            screenshot.getScreenshotName());
+
+                })
                 .collect(Collectors.toList());
     }
 
 
-    private ScreenshotResponse mapScreenshotToResponseAll(Screenshot screenshot) {
-        return new ScreenshotResponse(
-                screenshot.getId(),
-                screenshot.getUser().getId(),
-                screenshot.getUser().getEmail(),
-                screenshot.getScreenshotTime(),
-                screenshot.getScreenshotUrl(),
-                screenshot.getDate(),
-                screenshot.getScreenshotName(),
-                screenshot.getCreatedAt(),
-                screenshot.getUpdatedAt()
 
-        );
-    }
 
     @Override
     public void deleteScreenshotById(Long screenshotId, Long userId) {
@@ -160,6 +158,22 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         }
     }
 
+    // Utility method to parse date and time from the file name
+    private LocalDateTime parseDateTimeFromFileName(String fileName) {
+
+        String[] parts = fileName.split("_");
+        String datePart = parts[1];
+        String timePart = parts[2].split("\\.")[0]; // Remove the file extension
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate date = LocalDate.parse(datePart, dateFormatter);
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmmss");
+        LocalTime time = LocalTime.parse(timePart, timeFormatter);
+
+        return LocalDateTime.of(date, time);
+    }
+
     @Override
     public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
         User user = userRepository.findUserByEmail(userMail);
@@ -167,21 +181,26 @@ public class ScreenShotServiceImpl implements ScreenShotService {
             throw new IllegalArgumentException("User not found with email: " + userMail);
         }
 
+        // Parse the date and time from the file name
+        LocalDateTime dateTime = parseDateTimeFromFileName(originalFilename);
+        LocalDate date = dateTime.toLocalDate();
+        Date screenshotTime = java.sql.Timestamp.valueOf(dateTime);
+        Date currentDate = new Date();
+
         String s = azureAdapter.uploadv2(file, 0);
         String filePath = PROD_PATH + s;
 
         Screenshot screenshot = new Screenshot();
         screenshot.setUser(user);
-        screenshot.setDate(LocalDate.now());
-        screenshot.setScreenshotTime(new Date());
+        screenshot.setDate(date);
+        screenshot.setScreenshotTime(screenshotTime);
         screenshot.setScreenshotUrl(filePath);
         screenshot.setScreenshotName(s);
-        screenshot.setCreatedAt(new Date());
-        screenshot.setUpdatedAt(new Date());
+        screenshot.setCreatedAt(currentDate);
+        screenshot.setUpdatedAt(currentDate);
 
         // Save the screenshot
         Screenshot savedScreenshot = screenshotRepository.save(screenshot);
-
 
         ScreenshotResponse screenshotResponse = new ScreenshotResponse();
         screenshotResponse.setId(savedScreenshot.getId());
@@ -196,6 +215,5 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
         return screenshotResponse;
     }
-
 
 }

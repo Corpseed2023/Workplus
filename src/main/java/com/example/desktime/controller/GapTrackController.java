@@ -2,6 +2,7 @@ package com.example.desktime.controller;
 
 
 import com.example.desktime.ApiResponse.UserNotFoundException;
+import com.example.desktime.requestDTO.GapReasonRequest;
 import com.example.desktime.requestDTO.GapTrackRequest;
 import com.example.desktime.responseDTO.GapTrackResponse;
 import com.example.desktime.responseDTO.GapTrackSaveResponse;
@@ -51,10 +52,10 @@ public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @Reques
 }
 
     @PutMapping("/editReason")
-    public ResponseEntity<String> updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody String gapReason) {
+    public ResponseEntity<String> updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody GapReasonRequest gapReason) {
         try {
-            if (gapId != null && gapReason != null && !gapReason.trim().isEmpty()) {
-                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason);
+            if (gapId != null && gapReason.getReason() != null && !gapReason.getReason().isEmpty()) {
+                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason.getReason());
                 return ResponseEntity.ok("Gap reason updated successfully.");
             } else {
                 return ResponseEntity.badRequest().body("Invalid input data.");

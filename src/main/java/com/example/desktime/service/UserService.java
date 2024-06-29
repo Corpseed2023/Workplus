@@ -20,19 +20,18 @@ public interface UserService {
 
     void saveUserData(UserRequest userRequest) throws AccessDeniedException, MessagingException;
 
-    List<UserResponse> getAllUsers();
 
     User authenticateUser(String email, String password);
 
     boolean existofUserDetails(String username, String email);
 
-
-    void softDeleteUser(Long userId);
-
     ResponseEntity<SingleUserResponse> getSingleUserDetails(String usernameMail);
-
 
     void initiatePasswordReset(String email, String password) throws MessagingException;
 
     UserResponse editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException ;
+
+    void softDeleteUsers(List<Long> userIds);
+
+    List<UserResponse> getAllUsers(int page, int size);
 }

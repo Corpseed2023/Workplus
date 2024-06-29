@@ -200,7 +200,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setDayOfWeek(dailyActivity.getDayOfWeek());
         response.setAttendanceType(dailyActivity.getAttendanceType());
         response.setLoginTimeConvention(dailyActivity.getLoginTimeConvention());
-        response.setLogoutTimeConvention(dailyActivity.getLogoutTimeConvention());
 
 
         // Calculate today's total time if login time and logout time are present
@@ -218,21 +217,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 minutes = 0;
             }
 
-            // Set today's total time
-            response.setTodayTotalTime(LocalDateTime.of(1, 1, 1, (int)hours, (int)minutes));
 
-            // Format the total time as "X hours Y minutes"
-            String totalTime = "";
-            if (hours > 0) {
-                totalTime += hours + " hours";
-                if (minutes > 0) {
-                    totalTime += " ";
-                }
-            }
-            if (minutes > 0) {
-                totalTime += minutes + " minutes";
-            }
-            response.setLoginTimeToLogoutTime(totalTime);
         }
 
         return response;

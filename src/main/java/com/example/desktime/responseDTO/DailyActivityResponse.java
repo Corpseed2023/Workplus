@@ -20,11 +20,7 @@ public class DailyActivityResponse {
     private boolean present;
     private String dayOfWeek;
     private AttendanceType attendanceType;
-    private LocalDateTime todayTotalTime;
     private String loginTimeConvention;
-    private String logoutTimeConvention;
-    private String loginTimeToLogoutTime;
-    private String totalTime;
     private String gapTime ;
 
 

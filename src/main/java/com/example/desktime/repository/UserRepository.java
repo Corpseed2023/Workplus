@@ -2,6 +2,8 @@ package com.example.desktime.repository;
 
 
 import com.example.desktime.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,8 +43,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT * FROM user WHERE id = :userId AND is_enable = true", nativeQuery = true)
     User findEnabledUserById(@Param("userId") Long userId);
 
-
     @Query("SELECT u.id, u.username, u.email, u.createdAt, r.roleName FROM user u JOIN u.roles r WHERE u.isEnable = true")
-    List<Object[]> findEnabledUsersWithRoles();
+    Page<Object[]> findEnabledUsersWithRoles(Pageable pageable);
 
 }
