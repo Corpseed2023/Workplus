@@ -24,6 +24,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class FileServiceImpl implements FileService {
+
     @Value("${aws.bucket.name}")
     private String bucketName;
 
