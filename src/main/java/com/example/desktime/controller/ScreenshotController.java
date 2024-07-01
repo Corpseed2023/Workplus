@@ -1,5 +1,6 @@
 package com.example.desktime.controller;
 
+import com.example.desktime.responseDTO.ScreenShotAllResponse;
 import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.ScreenShotService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class ScreenshotController {
             } else {
                 screenshotDate = LocalDate.now();
             }
-            List<ScreenshotResponse> userScreenshots = screenShotService.getUserScreenshotsByEmailAndDate(userEmail, screenshotDate);
+            List<ScreenShotAllResponse> userScreenshots = screenShotService.getUserScreenshotsByEmailAndDate(userEmail, screenshotDate);
             return new ResponseEntity<>(userScreenshots, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
