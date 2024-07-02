@@ -47,6 +47,8 @@ public class SpringBootFileUploadExceptionHandler extends ResponseEntityExceptio
 
     // Handle exceptions that occur when the call was transmitted successfully, but Amazon S3 couldn't process
     // it, so it returned an error response.
+
+
     @ExceptionHandler(value
             = { AmazonServiceException.class})
     protected ResponseEntity<Object> handleAmazonServiceException(

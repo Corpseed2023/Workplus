@@ -38,6 +38,7 @@ public class FileUploadController {
         boolean isValidFile = isValidFile(multipartFile);
         List<String> allowedFileExtensions = new ArrayList<>(Arrays.asList("pdf", "txt", "epub", "csv", "png", "jpg", "jpeg", "srt"));
 
+
         if (isValidFile && allowedFileExtensions.contains(FilenameUtils.getExtension(multipartFile.getOriginalFilename()))){
             String fileName = fileService.uploadFile(multipartFile);
             APIResponse apiResponse = APIResponse.builder()

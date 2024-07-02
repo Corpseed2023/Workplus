@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class AWSS3ClientConfig {
 
 
+
     @Value("${aws.accessKey}")
     private String accessKey;
 

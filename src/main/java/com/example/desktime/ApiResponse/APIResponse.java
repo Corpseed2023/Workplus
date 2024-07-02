@@ -12,4 +12,5 @@ public class APIResponse {
     private boolean isSuccessful;
     private int statusCode;
     private Object data;
+
 }
