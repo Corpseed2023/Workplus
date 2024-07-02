@@ -1,11 +1,15 @@
 package com.example.desktime.controller;
 
 import com.example.desktime.ApiResponse.APIResponse;
+import com.example.desktime.exception.FileDownloadException;
 import com.example.desktime.exception.FileEmptyException;
 import com.example.desktime.exception.FileUploadException;
 import com.example.desktime.service.FileService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -39,6 +43,10 @@ public class FileUploadController {
         List<String> allowedFileExtensions = new ArrayList<>(Arrays.asList("pdf", "txt", "epub", "csv", "png", "jpg", "jpeg", "srt"));
 
 
+
+
+
+
         if (isValidFile && allowedFileExtensions.contains(FilenameUtils.getExtension(multipartFile.getOriginalFilename()))){
             String fileName = fileService.uploadFile(multipartFile);
             APIResponse apiResponse = APIResponse.builder()
@@ -58,34 +66,36 @@ public class FileUploadController {
     }
 
 
-//    @GetMapping("/download")
-//    public ResponseEntity<?> downloadFile(@RequestParam("fileName")  @NotBlank @NotNull String fileName) throws FileDownloadException, IOException {
-//        Object response = fileService.downloadFile(fileName);
-//        if (response != null){
-//            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"").body(response);
-//        } else {
-//            APIResponse apiResponse = APIResponse.builder()
-//                    .message("File could not be downloaded")
-//                    .isSuccessful(false)
-//                    .statusCode(400)
-//                    .build();
-//            return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
-//        }
-//    }
-//
-//    @DeleteMapping("/delete")
-//    public ResponseEntity<?> delete(@RequestParam("fileName") @NotBlank @NotNull String fileName){
-//        boolean isDeleted = fileService.delete(fileName);
-//        if (isDeleted){
-//            APIResponse apiResponse = APIResponse.builder().message("file deleted!")
-//                    .statusCode(200).build();
-//            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-//        } else {
-//            APIResponse apiResponse = APIResponse.builder().message("file does not exist")
-//                    .statusCode(404).build();
-//            return new ResponseEntity<>("file does not exist", HttpStatus.NOT_FOUND);
-//        }
-//    }
+
+
+    @GetMapping("/download")
+    public ResponseEntity<?> downloadFile(@RequestParam("fileName")  @NotBlank @NotNull String fileName) throws FileDownloadException, IOException, FileDownloadException {
+        Object response = fileService.downloadFile(fileName);
+        if (response != null){
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"").body(response);
+        } else {
+            APIResponse apiResponse = APIResponse.builder()
+                    .message("File could not be downloaded")
+                    .isSuccessful(false)
+                    .statusCode(400)
+                    .build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> delete(@RequestParam("fileName") @NotBlank @NotNull String fileName){
+        boolean isDeleted = fileService.delete(fileName);
+        if (isDeleted){
+            APIResponse apiResponse = APIResponse.builder().message("file deleted!")
+                    .statusCode(200).build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        } else {
+            APIResponse apiResponse = APIResponse.builder().message("file does not exist")
+                    .statusCode(404).build();
+            return new ResponseEntity<>("file does not exist", HttpStatus.NOT_FOUND);
+        }
+    }
 
     private boolean isValidFile(MultipartFile multipartFile){
         log.info("Empty Status ==> {}", multipartFile.isEmpty());
