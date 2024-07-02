@@ -15,4 +15,5 @@ public class GapUserResponse  {
     private String userEmail;
     private LocalDate date;
     private List<GapDetail> gapDetails;
+    private String userName;
 }

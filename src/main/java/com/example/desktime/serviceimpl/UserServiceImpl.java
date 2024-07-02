@@ -13,6 +13,9 @@ import com.example.desktime.responseDTO.UserResponse;
 import com.example.desktime.service.UserService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -180,9 +183,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameAndEmail(username, email);
     }
 
+
     @Override
-    public List<UserResponse> getAllUsers() {
-        List<Object[]> results = userRepository.findEnabledUsersWithRoles();
+    public List<UserResponse> getAllUsers(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Object[]> results = userRepository.findEnabledUsersWithRoles(pageable);
 
         Map<Long, UserResponse> userMap = new HashMap<>();
 
@@ -195,11 +202,9 @@ public class UserServiceImpl implements UserService {
 
             UserResponse userResponse = userMap.get(userId);
             if (userResponse == null) {
-                // Initialize with an empty roles list and set the first roleName
                 userResponse = new UserResponse(userId, username, email, roleName, createdAt);
                 userMap.put(userId, userResponse);
             } else {
-                // Concatenate roleName to the existing roles string
                 String existingRoles = userResponse.getRoles();
                 userResponse.setRoles(existingRoles + ", " + roleName);
             }
@@ -207,7 +212,6 @@ public class UserServiceImpl implements UserService {
 
         return new ArrayList<>(userMap.values());
     }
-
 
 
 
@@ -311,18 +315,20 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void softDeleteUser(Long userId) throws IllegalArgumentException {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        User user = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+    public void softDeleteUsers(List<Long> userIds) throws IllegalArgumentException {
+        for (Long userId : userIds) {
+            Optional<User> optionalUser = userRepository.findById(userId);
 
-        // Set isEnable to false for soft delete
-        user.setEnable(false);
+            User user = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        userRepository.save(user);
+            user.setEnable(false);
+
+            userRepository.save(user);
+        }
     }
 
 
-
+// i want to send multiple userid which need to soft dele
     @Override
     public void initiatePasswordReset(String email, String newPassword) throws MessagingException {
         Optional<User> optionalUser = userRepository.findByEmail(email);
