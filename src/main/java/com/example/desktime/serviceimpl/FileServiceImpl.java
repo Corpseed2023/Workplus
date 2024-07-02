@@ -33,29 +33,31 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String uploadFile(MultipartFile multipartFile) throws IOException {
-        // convert multipart file  to a file
+        // Convert multipart file to a file
         File file = new File(multipartFile.getOriginalFilename());
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)){
             fileOutputStream.write(multipartFile.getBytes());
         }
 
-        // generate file name
+        // Generate file name
         String fileName = generateFileName(multipartFile);
 
-        // upload file
-        PutObjectRequest request = new PutObjectRequest(bucketName, fileName, file);
+        // Upload file with public read access
+        PutObjectRequest request = new PutObjectRequest(bucketName, fileName, file)
+                .withCannedAcl(CannedAccessControlList.PublicRead);
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType("plain/"+ FilenameUtils.getExtension(multipartFile.getOriginalFilename()));
+        metadata.setContentType("plain/" + FilenameUtils.getExtension(multipartFile.getOriginalFilename()));
         metadata.addUserMetadata("Title", "File Upload - " + fileName);
         metadata.setContentLength(file.length());
         request.setMetadata(metadata);
         s3Client.putObject(request);
 
-        // delete file
+        // Delete file
         file.delete();
 
         return fileName;
     }
+
 
     @Override
     public Object downloadFile(String fileName) throws FileDownloadException, IOException {

@@ -238,11 +238,12 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
                 activityResponse.setUserName(activity.getUser().getUsername());
                 activityResponse.setUserEmail(activity.getUser().getEmail());
-                activityResponse.setLoginTime(activity.getLoginTime());
-                activityResponse.setLogoutTime(activity.getLogoutTime());
+                activityResponse.setLoginTime(activity.getLoginTime() != null ? activity.getLoginTime().toLocalTime() : null);
+                activityResponse.setLogoutTime(activity.getLogoutTime() != null ? activity.getLogoutTime().toLocalTime() : null);
                 activityResponse.setDate(activity.getDate());
                 activityResponse.setId(activity.getId());
-                activityResponse.setPresent(activity.isPresent() ? "PRESENT" :"ABSENT");
+                activityResponse.setPresent(activity.isPresent() ? "PRESENT" : "ABSENT");
+
                 // Calculate total time if both login and logout times are present
                 if (activity.getLoginTime() != null && activity.getLogoutTime() != null) {
                     LocalDateTime loginTime = activity.getLoginTime();
@@ -261,7 +262,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             }
 
             return response;
-        } catch (Exception e) {
+        }catch (Exception e) {
             // Log the exception if needed
             throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
         }
@@ -334,8 +335,8 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             for (Object[] result : results) {
                 Long id = ((Number) result[0]).longValue();
                 LocalDate date = result[1] != null ? ((java.sql.Date) result[1]).toLocalDate() : null;
-                LocalDateTime loginTime = result[2] != null ? ((java.sql.Timestamp) result[2]).toLocalDateTime() : null;
-                LocalDateTime logoutTime = result[3] != null ? ((java.sql.Timestamp) result[3]).toLocalDateTime() : null;
+                LocalDateTime loginDateTime = result[2] != null ? ((java.sql.Timestamp) result[2]).toLocalDateTime() : null;
+                LocalDateTime logoutDateTime = result[3] != null ? ((java.sql.Timestamp) result[3]).toLocalDateTime() : null;
                 boolean present = (boolean) result[4];
                 String dayOfWeek = (String) result[5];
                 String attendanceType = (String) result[6];
@@ -345,16 +346,16 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
                 activityResponse.setId(id);
                 activityResponse.setDate(date);
-                activityResponse.setLoginTime(loginTime);
-                activityResponse.setLogoutTime(logoutTime);
+                activityResponse.setLoginTime(loginDateTime != null ? loginDateTime.toLocalTime() : null);
+                activityResponse.setLogoutTime(logoutDateTime != null ? logoutDateTime.toLocalTime() : null);
                 activityResponse.setPresent(present ? "PRESENT" : "ABSENT");
                 activityResponse.setUserName(username);
                 activityResponse.setUserEmail(email);
                 activityResponse.setDayOfWeek(dayOfWeek);
                 activityResponse.setAttendanceType(attendanceType);
 
-                if (loginTime != null && logoutTime != null) {
-                    Duration duration = Duration.between(loginTime, logoutTime);
+                if (loginDateTime != null && logoutDateTime != null) {
+                    Duration duration = Duration.between(loginDateTime, logoutDateTime);
                     long hours = duration.toHours();
                     long minutes = duration.toMinutes() % 60;
                     activityResponse.setTotalTime(hours + " hours " + minutes + " minutes");
@@ -370,6 +371,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
         }
     }
+
 
 
 

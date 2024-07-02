@@ -133,9 +133,7 @@ public class GapTrackServiceImpl implements GapTrackService {
         // Fetch all gap activities for the user on the specified date
         List<GapTrack> gapTracks = gapRepository.fetchUserGapData(user, date);
 
-
-        // Sort gap activities by gap_start_time to
-        // ensure correct sequence
+        // Sort gap activities by gap_start_time to ensure correct sequence
         gapTracks.sort(Comparator.comparing(GapTrack::getGapStartTime));
 
         Long lastOfflineId = null;
@@ -159,8 +157,11 @@ public class GapTrackServiceImpl implements GapTrackService {
                     Duration gapDuration = Duration.between(lastOfflineTime, lastOnlineTime);
                     String gapTime = formatDuration(gapDuration);
 
-                    // Add gap details to the list
-                    gapDetails.add(new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason));
+                    // Create gap detail and add it to the list if the gap time is more than 4 minutes
+                    GapDetail gapDetail = new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason);
+                    if (gapDuration.toMinutes() > 4) {
+                        gapDetails.add(gapDetail);
+                    }
 
                     // Reset the lastOfflineTime, lastOfflineId, and reason after pairing with an online event
                     lastOfflineId = null;
