@@ -26,10 +26,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM user u WHERE u.email = :userMail and u.isEnable=true" )
     User findUserByEmail(String userMail);
 
-
-
-
-
     boolean existsByEmailAndUsername(String email, String username);
 
     boolean existsByIdAndRolesRoleName(Long userId, String admin);

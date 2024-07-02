@@ -2,11 +2,18 @@ package com.example.desktime.serviceimpl;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
+import com.example.desktime.config.AzureBlobAdapter;
 import com.example.desktime.exception.FileDownloadException;
+import com.example.desktime.model.Screenshot;
+import com.example.desktime.model.User;
+import com.example.desktime.repository.ScreenshotRepository;
+import com.example.desktime.repository.UserRepository;
+import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -17,6 +24,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +42,32 @@ public class FileServiceImpl implements FileService {
 
     private final AmazonS3 s3Client;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ScreenshotRepository screenshotRepository;
+
+    @Autowired
+    private AzureBlobAdapter azureBlobAdapter;
+
+    public final String PROD_PATH="https://corpseed-workplus.s3.ap-south-1.amazonaws.com/";
+
+
     @Override
-    public String uploadFile(MultipartFile multipartFile) throws IOException {
+    public ScreenshotResponse uploadFile(MultipartFile multipartFile, String userMail, String originalFilename) throws IOException {
+
+        User user = userRepository.findUserByEmail(userMail);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found with email: " + userMail);
+        }
+
+        // Parse the date and time from the file name
+        LocalDateTime dateTime = parseDateTimeFromFileName(originalFilename);
+        LocalDate date = dateTime.toLocalDate();
+        Date screenshotTime = java.sql.Timestamp.valueOf(dateTime);
+        Date currentDate = new Date();
+
         // Convert multipart file to a file
         File file = new File(multipartFile.getOriginalFilename());
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)){
@@ -52,11 +87,41 @@ public class FileServiceImpl implements FileService {
         request.setMetadata(metadata);
         s3Client.putObject(request);
 
+        String s = azureBlobAdapter.uploadv2(multipartFile, 0);
+        String filePath = PROD_PATH + fileName;
+
+        Screenshot screenshot = new Screenshot();
+        screenshot.setUser(user);
+        screenshot.setDate(date);
+        screenshot.setScreenshotTime(screenshotTime);
+        screenshot.setScreenshotUrl(filePath);
+        screenshot.setScreenshotName(fileName); // Ensure this matches the uploaded file name
+        screenshot.setCreatedAt(currentDate);
+        screenshot.setUpdatedAt(currentDate);
+
+        // Save the screenshot
+        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
+
+        ScreenshotResponse screenshotResponse = new ScreenshotResponse();
+        screenshotResponse.setId(savedScreenshot.getId());
+        screenshotResponse.setUserId(savedScreenshot.getUser().getId());
+        screenshotResponse.setUserMail(savedScreenshot.getUser().getEmail());
+        screenshotResponse.setScreenshotTime(savedScreenshot.getScreenshotTime());
+        screenshotResponse.setScreenshotUrl(savedScreenshot.getScreenshotUrl());
+        screenshotResponse.setScreenshotName(savedScreenshot.getScreenshotName());
+        screenshotResponse.setCreatedAt(savedScreenshot.getCreatedAt());
+        screenshotResponse.setUpdatedAt(savedScreenshot.getUpdatedAt());
+        screenshotResponse.setDate(savedScreenshot.getDate());
+
         // Delete file
         file.delete();
 
-        return fileName;
+        return screenshotResponse;
     }
+
+
+
+
 
 
     @Override
@@ -103,7 +168,23 @@ public class FileServiceImpl implements FileService {
         return objects.isEmpty();
     }
 
-    private String generateFileName(MultipartFile multiPart) {
-        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
+    private String generateFileName(MultipartFile file) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String baseName = FilenameUtils.getBaseName(file.getOriginalFilename());
+        String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+        return baseName + "_" + timestamp + "." + extension;
     }
+
+
+    // Utility method to parse date and time from the file name
+    private LocalDateTime parseDateTimeFromFileName(String fileName) {
+        try {
+            String[] parts = FilenameUtils.getBaseName(fileName).split("_");
+            String dateTimePart = parts[parts.length - 1];
+            return LocalDateTime.parse(dateTimePart, DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid file name format. Expected format: <prefix>_yyyyMMdd_HHmmss.<extension>");
+        }
+    }
+
 }

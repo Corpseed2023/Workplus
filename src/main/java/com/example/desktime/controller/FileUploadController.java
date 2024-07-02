@@ -4,6 +4,7 @@ import com.example.desktime.ApiResponse.APIResponse;
 import com.example.desktime.exception.FileDownloadException;
 import com.example.desktime.exception.FileEmptyException;
 import com.example.desktime.exception.FileUploadException;
+import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.FileService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,7 +25,7 @@ import java.util.Objects;
 
 @RestController
 @Slf4j
-@RequestMapping("/api/v1/file")
+//@RequestMapping("/api/v1/file")
 @Validated
 public class FileUploadController {
     private final FileService fileService;
@@ -35,15 +36,19 @@ public class FileUploadController {
     }
 
     @PostMapping(value = "/uploadScreenShotAWS", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> uploadFile(@RequestPart(name = "file", required = false) MultipartFile multipartFile) throws FileEmptyException, FileUploadException, IOException, IOException, FileUploadException {
+    public ResponseEntity<?> uploadFile(@RequestPart(name = "file", required = false) MultipartFile multipartFile,
+                                        @RequestParam(required = false) String userMail) throws FileEmptyException, FileUploadException, IOException, IOException, FileUploadException {
         if (multipartFile.isEmpty()){
             throw new FileEmptyException("File is empty. Cannot save an empty file");
         }
         boolean isValidFile = isValidFile(multipartFile);
-        List<String> allowedFileExtensions = new ArrayList<>(Arrays.asList("pdf", "txt", "epub", "csv", "png", "jpg", "jpeg", "srt"));
+        List<String> allowedFileExtensions = new ArrayList<>(Arrays.asList("pdf", "txt", "epub", "csv", "png", "jpg", "jpeg", "srt","PNG","JPEG"));
+
+        String originalFilename = multipartFile.getOriginalFilename(); // Get the original filename
+
 
         if (isValidFile && allowedFileExtensions.contains(FilenameUtils.getExtension(multipartFile.getOriginalFilename()))){
-            String fileName = fileService.uploadFile(multipartFile);
+            ScreenshotResponse fileName = fileService.uploadFile(multipartFile,userMail,originalFilename);
             APIResponse apiResponse = APIResponse.builder()
                     .message("file uploaded successfully. File unique name =>" + fileName)
                     .isSuccessful(true)

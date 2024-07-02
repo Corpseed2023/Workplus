@@ -238,8 +238,8 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
                 activityResponse.setUserName(activity.getUser().getUsername());
                 activityResponse.setUserEmail(activity.getUser().getEmail());
-                activityResponse.setLoginTime(activity.getLoginTime());
-                activityResponse.setLogoutTime(activity.getLogoutTime());
+                activityResponse.setLoginTime(activity.getLoginTime()!=null ? activity.getLoginTime().toLocalTime() :null);
+                activityResponse.setLogoutTime(activity.getLogoutTime() != null ? activity.getLogoutTime().toLocalTime() :null);
                 activityResponse.setDate(activity.getDate());
                 activityResponse.setId(activity.getId());
                 activityResponse.setPresent(activity.isPresent() ? "PRESENT" :"ABSENT");
@@ -345,8 +345,8 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
                 activityResponse.setId(id);
                 activityResponse.setDate(date);
-                activityResponse.setLoginTime(loginTime);
-                activityResponse.setLogoutTime(logoutTime);
+                activityResponse.setLoginTime(loginTime!=null ? loginTime.toLocalTime() :null);
+                activityResponse.setLogoutTime(logoutTime != null ? logoutTime.toLocalTime() :null);
                 activityResponse.setPresent(present ? "PRESENT" : "ABSENT");
                 activityResponse.setUserName(username);
                 activityResponse.setUserEmail(email);

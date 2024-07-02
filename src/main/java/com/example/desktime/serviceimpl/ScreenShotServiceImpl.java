@@ -43,7 +43,6 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     @Autowired
     AzureBlobAdapter azureAdapter;
 
-    Long referenceId;
 
 
     public final String PROD_PATH="https://recordplus.blob.core.windows.net/test/";
