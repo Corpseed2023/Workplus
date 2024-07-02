@@ -77,7 +77,7 @@ public class UserController {
     @GetMapping("/allUsersList")
     public ResponseEntity<List<UserResponse>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "50") int size) {
         try {
             List<UserResponse> users = userService.getAllUsers(page, size);
             return new ResponseEntity<>(users, HttpStatus.OK);

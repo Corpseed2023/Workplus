@@ -205,7 +205,7 @@ public class DailyActivityController {
             // Populate rows
             int rowNum = 1;
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             for (DailyActivityReportResponse activity : response) {
                 Row row = sheet.createRow(rowNum++);
 
