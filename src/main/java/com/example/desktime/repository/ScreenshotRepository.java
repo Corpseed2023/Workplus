@@ -21,7 +21,7 @@ public interface ScreenshotRepository extends JpaRepository<Screenshot,Long> {
 
 
     @Query("SELECT s FROM screenshot s WHERE s.user = :user AND s.date = :date")
-    List<Screenshot> findByUserAndScreenshotTime(@Param("user") User user, @Param("date") LocalDate date);
+    List<Screenshot> findByUserAndDate(@Param("user") User user, @Param("date") LocalDate date);
 
 
 
