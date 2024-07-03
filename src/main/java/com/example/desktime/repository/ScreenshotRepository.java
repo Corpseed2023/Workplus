@@ -17,8 +17,6 @@ import java.util.List;
 public interface ScreenshotRepository extends JpaRepository<Screenshot,Long> {
     List<Screenshot> findByUserAndScreenshotTimeBetween(User user, LocalDateTime localDateTime, LocalDateTime localDateTime1);
 
-    Screenshot findByScreenshotNameAndCreatedAt(String originalFilename, Date date);
-
 
     @Query("SELECT s FROM screenshot s WHERE s.user = :user AND s.date = :date")
     List<Screenshot> findByUserAndDate(@Param("user") User user, @Param("date") LocalDate date);

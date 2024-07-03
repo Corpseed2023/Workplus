@@ -8,6 +8,7 @@ import com.example.desktime.model.Screenshot;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.ScreenshotRepository;
 import com.example.desktime.repository.UserRepository;
+import com.example.desktime.responseDTO.ScreenShotAllResponse;
 import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.FileService;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +25,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -56,7 +61,6 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public ScreenshotResponse uploadFile(MultipartFile multipartFile, String userMail, String originalFilename) throws IOException {
-
         User user = userRepository.findUserByEmail(userMail);
         if (user == null) {
             throw new IllegalArgumentException("User not found with email: " + userMail);
@@ -70,7 +74,7 @@ public class FileServiceImpl implements FileService {
 
         // Convert multipart file to a file
         File file = new File(multipartFile.getOriginalFilename());
-        try (FileOutputStream fileOutputStream = new FileOutputStream(file)){
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             fileOutputStream.write(multipartFile.getBytes());
         }
 
@@ -87,14 +91,14 @@ public class FileServiceImpl implements FileService {
         request.setMetadata(metadata);
         s3Client.putObject(request);
 
-        String s = azureBlobAdapter.uploadv2(multipartFile, 0);
-        String filePath = PROD_PATH + fileName;
+//        String s = azureBlobAdapter.uploadv2(multipartFile, 0);
+//        String filePath = "/" + fileName;
 
         Screenshot screenshot = new Screenshot();
         screenshot.setUser(user);
         screenshot.setDate(date);
         screenshot.setScreenshotTime(screenshotTime);
-        screenshot.setScreenshotUrl(filePath);
+        screenshot.setScreenshotUrl(fileName);
         screenshot.setScreenshotName(fileName); // Ensure this matches the uploaded file name
         screenshot.setCreatedAt(currentDate);
         screenshot.setUpdatedAt(currentDate);
@@ -178,13 +182,47 @@ public class FileServiceImpl implements FileService {
 
     // Utility method to parse date and time from the file name
     private LocalDateTime parseDateTimeFromFileName(String fileName) {
-        try {
-            String[] parts = FilenameUtils.getBaseName(fileName).split("_");
-            String dateTimePart = parts[parts.length - 1];
-            return LocalDateTime.parse(dateTimePart, DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid file name format. Expected format: <prefix>_yyyyMMdd_HHmmss.<extension>");
-        }
+
+        String[] parts = fileName.split("_");
+        String datePart = parts[1];
+        String timePart = parts[2].split("\\.")[0]; // Remove the file extension
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate date = LocalDate.parse(datePart, dateFormatter);
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmmss");
+        LocalTime time = LocalTime.parse(timePart, timeFormatter);
+
+        return LocalDateTime.of(date, time);
     }
+
+    @Override
+    public List<ScreenShotAllResponse> getUserScreenshotsByEmailAndDate(String userEmail, LocalDate date) {
+        User user = userRepository.findUserByEmail(userEmail);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found with email: " + userEmail);
+        }
+
+        List<Screenshot> screenshots = screenshotRepository.findByUserAndDate(user, date);
+
+        return screenshots.stream()
+                .map(screenshot -> {
+                    Instant screenshotTimeInstant = screenshot.getScreenshotTime().toInstant();
+                    Instant screenshotTimeIndianInstant = screenshotTimeInstant.plus(5, ChronoUnit.HOURS).plus(30, ChronoUnit.MINUTES);
+                    Date screenshotTimeIndianDate = Date.from(screenshotTimeIndianInstant);
+
+                    String fullScreenshotUrl = PROD_PATH + screenshot.getScreenshotUrl();
+
+                    return new ScreenShotAllResponse(
+                            screenshot.getId(),
+                            user.getEmail(),
+                            screenshot.getDate(),
+                            screenshotTimeIndianDate,
+                            fullScreenshotUrl,
+                            screenshot.getScreenshotName());
+                })
+                .collect(Collectors.toList());
+    }
+
 
 }
