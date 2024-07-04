@@ -1,6 +1,5 @@
 package com.example.desktime.requestDTO;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

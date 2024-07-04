@@ -90,24 +90,6 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest, HttpServletRequest serverRequest) {
         try {
-
-//            System.out.println(loginRequest.getEmail()+"email"+loginRequest.getPassword()+"password");
-
-            String networkIp = serverRequest.getRemoteAddr();
-            if (networkIp.contains(":"))
-            {
-                networkIp= networkIp.split(":")[0];
-            }
-            IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
-
-//            System.out.println(ip);
-            if (!ip.getNetworkIpAddress().equals(networkIp))
-
-            {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-            }
-
             if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
                 return ResponseEntity.badRequest().body(new LoginResponse("Email and password are required"));
             }
@@ -116,10 +98,28 @@ public class UserController {
             User authenticatedUser = userService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
 
             if (authenticatedUser != null) {
+                // Check if the user has the ADMIN role
+                boolean isAdmin = authenticatedUser.getRoles().stream()
+                        .anyMatch(role -> "ADMIN".equals(role.getRoleName()));
+
+                // If the user is not an ADMIN, check the IP address
+                if (!isAdmin) {
+                    String networkIp = serverRequest.getRemoteAddr();
+                    if (networkIp.contains(":")) {
+                        networkIp = networkIp.split(":")[0];
+                    }
+                    IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
+
+                    if (ip == null || !ip.getNetworkIpAddress().equals(networkIp)) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                    }
+                }
+
                 // Set roles separately
                 Set<String> roles = authenticatedUser.getRoles().stream()
                         .map(role -> role.getRoleName())
-                        .collect(Collectors.toSet());//
+                        .collect(Collectors.toSet());
+
                 // Create LoginResponse object with roles
                 LoginResponse response = new LoginResponse("Login successful");
                 response.setId(authenticatedUser.getId());
@@ -141,6 +141,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Error processing the request"));
         }
     }
+
 
 
 

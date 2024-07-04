@@ -13,7 +13,7 @@ public class ScreenShotAllResponse {
     private Long id;
     private String userEmail;
     private LocalDate date;
-    private Date screenshotTime;
+    private String screenshotTime;
     private String screenshotUrl;
     private String screenshotName;
 }

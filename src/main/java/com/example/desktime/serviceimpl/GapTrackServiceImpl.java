@@ -6,7 +6,9 @@ import com.example.desktime.model.User;
 import com.example.desktime.repository.GapRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.GapTrackRequest;
+import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.responseDTO.*;
+import com.example.desktime.service.DailyActivityService;
 import com.example.desktime.service.GapTrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ public class GapTrackServiceImpl implements GapTrackService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DailyActivityService dailyActivityService;
 
 
     @Override
@@ -44,6 +49,16 @@ public class GapTrackServiceImpl implements GapTrackService {
         gapTrack.setGapStartTime(currentIndiaTime.toLocalDateTime()); // Set gapStartTime
 
         GapTrack savedGapTrack = gapRepository.save(gapTrack);
+
+        LogoutUpdateRequest logoutUpdateRequest = new LogoutUpdateRequest();
+
+
+        logoutUpdateRequest.setEmail(gapTrackRequest.getUserEmail());
+        logoutUpdateRequest.setLocalDate(currentIndiaTime.toLocalDate());
+
+
+        dailyActivityService.updateLogoutTime(logoutUpdateRequest);
+
 
         // Convert to response DTO
         GapTrackSaveResponse response = new GapTrackSaveResponse();

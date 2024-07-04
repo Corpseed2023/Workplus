@@ -2,8 +2,10 @@ package com.example.desktime.serviceimpl;
 
 import com.example.desktime.config.EmailService;
 import com.example.desktime.config.PasswordConfig;
+import com.example.desktime.controller.DailyActivityController;
 import com.example.desktime.model.Roles;
 import com.example.desktime.model.User;
+import com.example.desktime.repository.IpAccessRepository;
 import com.example.desktime.repository.RolesRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.UserRequest;
@@ -55,7 +57,7 @@ public class UserServiceImpl implements UserService {
             adminUser.setUsername(userRequest.getUsername());
             adminUser.setEmail(userRequest.getEmail());
             char[] passwordChars = passwordConfig.geek_Password(7);
-//            System.out.println("User Password Is "+ passwordChars);
+
             String randomPassword = String.valueOf(passwordChars);
             adminUser.setPassword(passwordEncoder.encode(randomPassword));
             adminUser.setCreatedAt(new Date());
@@ -164,6 +166,7 @@ public class UserServiceImpl implements UserService {
 //                    .map(Roles::getRoleName)
 //                    .collect(Collectors.toSet());
 
+
             Set<String> roleName = userDetails.getRoles().stream().
                     map(Roles::getRoleName).collect(Collectors.toSet());
 
@@ -219,8 +222,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User authenticateUser(String email, String password) {
         // Retrieve user by email
-        User user = userRepository.findByEmail(email)
-                .orElse(null);
+        User user = userRepository.findUserByEmail(email);
 
         if (user != null && passwordMatches(password, user.getPassword())) {
             return user;

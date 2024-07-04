@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -207,22 +208,18 @@ public class FileServiceImpl implements FileService {
 
         return screenshots.stream()
                 .map(screenshot -> {
-                    Instant screenshotTimeInstant = screenshot.getScreenshotTime().toInstant();
-                    Instant screenshotTimeIndianInstant = screenshotTimeInstant.plus(5, ChronoUnit.HOURS).plus(30, ChronoUnit.MINUTES);
-                    Date screenshotTimeIndianDate = Date.from(screenshotTimeIndianInstant);
-
-                    String fullScreenshotUrl = PROD_PATH + screenshot.getScreenshotUrl();
-
+                    String screenshotTimeStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(screenshot.getScreenshotTime());
                     return new ScreenShotAllResponse(
                             screenshot.getId(),
                             user.getEmail(),
                             screenshot.getDate(),
-                            screenshotTimeIndianDate,
-                            fullScreenshotUrl,
+                            screenshotTimeStr,
+                            screenshot.getScreenshotUrl(),
                             screenshot.getScreenshotName());
                 })
                 .collect(Collectors.toList());
     }
+
 
 
 }

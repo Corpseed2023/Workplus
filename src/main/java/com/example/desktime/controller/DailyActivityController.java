@@ -21,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -40,12 +42,17 @@ public class DailyActivityController {
     @PostMapping("/saveDailyActivity")
     public ResponseEntity<?> saveDailyActivity(@RequestBody DailyActivityRequest request) {
         try {
+            // Get the current date in Indian time zone
+            LocalDate currentDateInIndia = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
-//            System.out.println("Get Hit By Process");
+            // Check if today is Sunday
+            if (currentDateInIndia.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                return new ResponseEntity<>("Data cannot be saved on Sunday.", HttpStatus.BAD_REQUEST);
+            }
+
             if (request.getEmail() == null || !request.getEmail().endsWith("@corpseed.com")) {
                 return new ResponseEntity<>("User not found within the domain corpseed.com. Email is null or doesn't contain the specified domain.", HttpStatus.NOT_FOUND);
             }
-
 
             // No need to parse LocalDate again, it's already a LocalDate object
             DailyActivityResponse response = dailyActivityService.saveDailyActivity(request);
@@ -58,6 +65,7 @@ public class DailyActivityController {
             return new ResponseEntity<>("Error processing the request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
     @PatchMapping("/updateLogoutTime")

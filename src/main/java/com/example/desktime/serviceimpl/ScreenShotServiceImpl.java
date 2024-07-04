@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -119,21 +120,22 @@ public class ScreenShotServiceImpl implements ScreenShotService {
 
         return screenshots.stream()
                 .map(screenshot -> {
-                    Instant screenshotTimeInstant = screenshot.getScreenshotTime().toInstant();
-                    Instant screenshotTimeIndianInstant = screenshotTimeInstant.plus(5, ChronoUnit.HOURS).plus(30, ChronoUnit.MINUTES);
-                    Date screenshotTimeIndianDate = Date.from(screenshotTimeIndianInstant);
-
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(screenshot.getScreenshotTime());
+                    calendar.add(Calendar.HOUR_OF_DAY, -5);
+                    String screenshotTimeStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
                     return new ScreenShotAllResponse(
                             screenshot.getId(),
                             user.getEmail(),
                             screenshot.getDate(),
-                            screenshotTimeIndianDate,
+                            screenshotTimeStr,
                             screenshot.getScreenshotUrl(),
                             screenshot.getScreenshotName());
-
                 })
                 .collect(Collectors.toList());
     }
+
+
 
 
 
