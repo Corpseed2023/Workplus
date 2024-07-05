@@ -67,7 +67,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
-                LocalTime timeThreshHold= LocalTime.of(10,5);
+                LocalTime timeThreshHold= LocalTime.of(9,35);
 
                 AttendanceType attendanceType = currentIndiaTime.toLocalTime().isAfter(timeThreshHold) ? AttendanceType.HALF_DAY : AttendanceType.NORMAL_DAY;
 
@@ -137,7 +137,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         dailyActivity.setLogoutTimeConvention(logoutTimeConvention);
 
         // Calculate the duration between loginTime and logoutTime
-        if (dailyActivity.getLoginTime() != null) {
+        if (dailyActivity.getLoginTime() != null && dailyActivity.getAttendanceType() == AttendanceType.NORMAL_DAY) {
             Duration duration = Duration.between(dailyActivity.getLoginTime(), currentIndiaTime);
             long hours = duration.toHours();
 

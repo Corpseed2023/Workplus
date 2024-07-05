@@ -70,7 +70,6 @@ public class DailyActivityController {
 
     @PatchMapping("/updateLogoutTime")
     public ResponseEntity<?> updateLogoutTime(@RequestBody LogoutUpdateRequest request) {
-//        System.out.println("Error Test 1123");
 
         try {
 

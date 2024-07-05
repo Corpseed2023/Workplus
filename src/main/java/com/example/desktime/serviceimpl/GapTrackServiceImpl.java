@@ -27,9 +27,6 @@ public class GapTrackServiceImpl implements GapTrackService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private DailyActivityService dailyActivityService;
-
 
     @Override
     public GapTrackSaveResponse saveGapTrack(GapTrackRequest gapTrackRequest) {
@@ -47,17 +44,9 @@ public class GapTrackServiceImpl implements GapTrackService {
         gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
         gapTrack.setDate(currentIndiaTime.toLocalDate());
         gapTrack.setGapStartTime(currentIndiaTime.toLocalDateTime()); // Set gapStartTime
+        gapTrack.setProductivity("offline".equals(gapTrackRequest.getStatus()) ? false :true);
 
         GapTrack savedGapTrack = gapRepository.save(gapTrack);
-
-        LogoutUpdateRequest logoutUpdateRequest = new LogoutUpdateRequest();
-
-
-        logoutUpdateRequest.setEmail(gapTrackRequest.getUserEmail());
-        logoutUpdateRequest.setLocalDate(currentIndiaTime.toLocalDate());
-
-
-        dailyActivityService.updateLogoutTime(logoutUpdateRequest);
 
 
         // Convert to response DTO
