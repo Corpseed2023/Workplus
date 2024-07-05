@@ -169,6 +169,8 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
                 .sum();
 
+        String productiveTime = gapTrackService.getProductiveUserActivity(email,currentDate);
+
         long gapHours = totalGapMinutes / 60;
         long gapMinutes = totalGapMinutes % 60;
 

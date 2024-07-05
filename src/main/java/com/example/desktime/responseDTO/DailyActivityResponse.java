@@ -22,6 +22,7 @@ public class DailyActivityResponse {
     private AttendanceType attendanceType;
     private String loginTimeConvention;
     private String gapTime ;
+    private String productiveTime;
 
 
     public DailyActivityResponse() {
