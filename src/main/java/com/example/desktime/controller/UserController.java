@@ -104,7 +104,7 @@ public class UserController {
 
                 // If the user is not an ADMIN, check the IP address
                 if (!isAdmin) {
-                    String networkIp = serverRequest.getHeader("Ip Test");
+                    String networkIp = serverRequest.getHeader("X-Forwarded-For");
                     if (networkIp.contains(":")) {
                         networkIp = networkIp.split(":")[0];
                     }
