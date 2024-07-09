@@ -1,8 +1,10 @@
 package com.example.desktime.serviceimpl;
 
 import com.example.desktime.ApiResponse.DataNotFoundException;
+import com.example.desktime.model.DailyActivity;
 import com.example.desktime.model.GapTrack;
 import com.example.desktime.model.User;
+import com.example.desktime.repository.DailyActivityRepository;
 import com.example.desktime.repository.GapRepository;
 import com.example.desktime.repository.UserRepository;
 import com.example.desktime.requestDTO.GapTrackRequest;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.desktime.ApiResponse.UserNotFoundException;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -26,6 +29,9 @@ public class GapTrackServiceImpl implements GapTrackService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DailyActivityRepository dailyActivityRepository;
 
 
     @Override
@@ -136,6 +142,11 @@ public class GapTrackServiceImpl implements GapTrackService {
         // Fetch all gap activities for the user on the specified date
         List<GapTrack> gapTracks = gapRepository.fetchUserGapData(user, date);
 
+        Optional<DailyActivity> dailyActivity = dailyActivityRepository.findByUserAndDate(user, date);
+
+
+
+
 
         // Sort gap activities by gap_start_time to
         // ensure correct sequence
@@ -176,11 +187,18 @@ public class GapTrackServiceImpl implements GapTrackService {
             }
         }
 
+
+        // Convert LocalDateTime to String
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String loginTimeStr = dailyActivity.map(activity -> activity.getLoginTime().format(formatter)).orElse(null);
+
+
         // Prepare response DTO
         GapUserResponse response = new GapUserResponse();
         response.setUserEmail(userEmail);
         response.setDate(date);
         response.setGapDetails(gapDetails);
+        response.setUserLoginTime(loginTimeStr);
 
         return response;
     }
