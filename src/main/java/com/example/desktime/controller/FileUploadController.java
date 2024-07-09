@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 //@RequestMapping("/api/v1/file")
+@RequestMapping("/api")
+
 @Validated
 public class FileUploadController {
     private final FileService fileService;

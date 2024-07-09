@@ -16,8 +16,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/gap-track")
 @CrossOrigin(origins = "*", maxAge = 3600)
+@RequestMapping("/api")
 
 public class GapTrackController {
 
