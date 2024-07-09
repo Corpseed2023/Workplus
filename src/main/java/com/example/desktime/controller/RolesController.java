@@ -11,9 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/roles")
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping("/api")
-
 public class RolesController {
 
     @Autowired

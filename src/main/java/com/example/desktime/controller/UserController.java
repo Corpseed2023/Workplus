@@ -104,12 +104,21 @@ public class UserController {
 
                 // If the user is not an ADMIN, check the IP address
                 if (!isAdmin) {
-                    String networkIp = serverRequest.getRemoteAddr();
+                    String networkIp = serverRequest.getHeader("Ip Test");
                     if (networkIp.contains(":")) {
                         networkIp = networkIp.split(":")[0];
                     }
+
+//                    System.out.println("Network IP"+ networkIp);
+//                    System.out.println("Network IP"+serverRequest.getRemoteUser() );
+//                    System.out.println("Network IP"+serverRequest.getRemoteHost() );
+//                    System.out.println("Network IP"+serverRequest.getRemotePort() );
+
+
+
                     IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
 
+                    System.out.println("IP is"+ip);
                     if (ip == null || !ip.getNetworkIpAddress().equals(networkIp)) {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                     }
@@ -119,6 +128,7 @@ public class UserController {
                 Set<String> roles = authenticatedUser.getRoles().stream()
                         .map(role -> role.getRoleName())
                         .collect(Collectors.toSet());
+                System.out.println("role is"+roles);
 
                 // Create LoginResponse object with roles
                 LoginResponse response = new LoginResponse("Login successful");
