@@ -199,6 +199,7 @@ public class GapTrackServiceImpl implements GapTrackService {
         response.setDate(date);
         response.setGapDetails(gapDetails);
         response.setUserLoginTime(loginTimeStr);
+
         // Fetch and set the last gap_start_time
 
         if(!gapTracks.isEmpty())
