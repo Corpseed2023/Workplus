@@ -14,11 +14,16 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
+@RequestMapping("/api")
+
 public class ScreenshotController {
 
 
     @Autowired
     private ScreenShotService screenShotService;
+
+    public final String PROD_PATH="https://corpseed-workplus.s3.ap-south-1.amazonaws.com/";
+
 
 
     @PostMapping(value = "/uploadScreenShotV2", consumes = {"multipart/form-data"})
@@ -68,7 +73,7 @@ public class ScreenshotController {
         }
     }
 
-    @PostMapping(value = "/uploadScreenShot", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/uploadScreenShotAzure", consumes = {"multipart/form-data"})
     public ResponseEntity<?> uploadScreenshotV2(@RequestPart(name = "file", required = false) MultipartFile file,
                                                 @RequestParam(required = false) String userMail) {
         try {
