@@ -17,4 +17,5 @@ public class GapUserResponse  {
     private List<GapDetail> gapDetails;
     private String userName;
     private String userLoginTime;
+    private String lastActiveTime;
 }
