@@ -204,7 +204,6 @@ public class GapTrackServiceImpl implements GapTrackService {
         if(!gapTracks.isEmpty())
         {
             LocalDateTime localDateTime =  gapTracks.get(gapTracks.size()-1).getGapStartTime();
-
             response.setLastActiveTime(localDateTime.format(formatter));
         }
 
