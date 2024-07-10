@@ -41,7 +41,7 @@ public class FileUploadController {
         this.fileService = fileUploadService;
     }
 
-    @PostMapping(value = "/uploadScreenShotAWS", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/uploadScreenShot", consumes = {"multipart/form-data"})
     public ResponseEntity<?> uploadFile(@RequestPart(name = "file", required = false) MultipartFile multipartFile,
                                         @RequestParam(required = false) String userMail) throws FileEmptyException, FileUploadException, IOException {
         if (multipartFile.isEmpty()) {
