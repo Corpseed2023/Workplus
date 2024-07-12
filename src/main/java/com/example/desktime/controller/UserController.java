@@ -109,13 +109,6 @@ public class UserController {
                         networkIp = networkIp.split(":")[0];
                     }
 
-//                    System.out.println("Network IP"+ networkIp);
-//                    System.out.println("Network IP"+serverRequest.getRemoteUser() );
-//                    System.out.println("Network IP"+serverRequest.getRemoteHost() );
-//                    System.out.println("Network IP"+serverRequest.getRemotePort() );
-
-
-
                     IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
 
                     System.out.println("IP is"+ip);
@@ -221,6 +214,7 @@ public class UserController {
             return new ResponseEntity<>("Error initiating password reset: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
 

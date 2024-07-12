@@ -21,9 +21,10 @@ public class DailyActivityResponse {
     private String dayOfWeek;
     private AttendanceType attendanceType;
     private String loginTimeConvention;
-    private String gapTime ;
+    private String gapTime;
     private String productiveTime;
-
+    private String totalWorkingHours;
+    private long totalWorkingMinutes;
 
     public DailyActivityResponse() {
     }

@@ -165,11 +165,12 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
         // Fetch gap data and calculate total gap time
         GapUserResponse gapUserResponse = gapTrackService.getUserActivity(email, currentDate);
+
         long totalGapMinutes = gapUserResponse.getGapDetails().stream()
                 .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
                 .sum();
 
-        String productiveTime = gapTrackService.getProductiveUserActivity(email,currentDate);
+        GapUserResponse productiveTime = gapTrackService.getProductivityUserActivity(email, currentDate);
 
         long gapHours = totalGapMinutes / 60;
         long gapMinutes = totalGapMinutes % 60;
@@ -187,9 +188,17 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         }
         response.setGapTime(totalGapTime);
 
+
+        // Subtract gap time from total working hours
+        long adjustedWorkingMinutes = response.getTotalWorkingMinutes() - totalGapMinutes;
+        long adjustedWorkingHours = adjustedWorkingMinutes / 60;
+        long remainingMinutes = adjustedWorkingMinutes % 60;
+
+        String adjustedWorkingHoursString = adjustedWorkingHours + " hours " + remainingMinutes + " minutes";
+        response.setTotalWorkingHours(adjustedWorkingHoursString);
+
         return response;
     }
-
 
     public DailyActivityResponse convertToResponse(DailyActivity dailyActivity) {
         DailyActivityResponse response = new DailyActivityResponse();
@@ -203,13 +212,18 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setAttendanceType(dailyActivity.getAttendanceType());
         response.setLoginTimeConvention(dailyActivity.getLoginTimeConvention());
 
-
-        // Calculate today's total time if login time and logout time are present
-        if (dailyActivity.getLoginTime() != null && dailyActivity.getLogoutTime() != null) {
+        // Calculate today's total time if login time is present
+        if (dailyActivity.getLoginTime() != null) {
             LocalDateTime loginTime = dailyActivity.getLoginTime();
-            LocalDateTime logoutTime = dailyActivity.getLogoutTime();
+            LocalDateTime currentTime = LocalDateTime.now();
 
-            long minutesPassed = Duration.between(loginTime, logoutTime).toMinutes();
+            long minutesPassed;
+            if (dailyActivity.getLogoutTime() != null && !dailyActivity.getLogoutTime().equals(loginTime)) {
+                minutesPassed = Duration.between(loginTime, dailyActivity.getLogoutTime()).toMinutes();
+            } else {
+                minutesPassed = Duration.between(loginTime, currentTime).toMinutes();
+            }
+
             long hours = minutesPassed / 60;
             long minutes = minutesPassed % 60;
 
@@ -219,13 +233,15 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 minutes = 0;
             }
 
+            String totalWorkingHours = hours + " hours " + minutes + " minutes";
+            response.setTotalWorkingHours(totalWorkingHours);
 
+            // Set total working hours in minutes
+            response.setTotalWorkingMinutes(minutesPassed);
         }
 
         return response;
     }
-
-
     public List<DailyActivityReportResponse> getMonthlyActivityReport(String email, LocalDate startDate, LocalDate endDate) {
         try {
             List<DailyActivity> activities = dailyActivityRepository.findByUserEmailAndDateBetween(email, startDate, endDate);
