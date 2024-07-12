@@ -30,13 +30,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     private UserRepository userRepository;
 
     @Autowired
-    private UserProcessRepository userProcessRepository;
-
-    @Autowired
-    private GapRepository gapRepository;
-
-
-    @Autowired
     private DailyActivityRepository dailyActivityRepository;
 
     @Autowired
@@ -170,8 +163,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
                 .sum();
 
-        GapUserResponse productiveTime = gapTrackService.getProductivityUserActivity(email, currentDate);
-
         long gapHours = totalGapMinutes / 60;
         long gapMinutes = totalGapMinutes % 60;
 
@@ -188,17 +179,36 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         }
         response.setGapTime(totalGapTime);
 
+        if (dailyActivity != null && dailyActivity.getLoginTime() != null) {
+            LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+            LocalDateTime loginTime = dailyActivity.getLoginTime();
 
-        // Subtract gap time from total working hours
-        long adjustedWorkingMinutes = response.getTotalWorkingMinutes() - totalGapMinutes;
-        long adjustedWorkingHours = adjustedWorkingMinutes / 60;
-        long remainingMinutes = adjustedWorkingMinutes % 60;
+            long totalMinutesPassed = Duration.between(loginTime, currentIndiaTime).toMinutes();
+            long productiveMinutes = totalMinutesPassed - totalGapMinutes;
 
-        String adjustedWorkingHoursString = adjustedWorkingHours + " hours " + remainingMinutes + " minutes";
-        response.setTotalWorkingHours(adjustedWorkingHoursString);
+            long productiveHours = productiveMinutes / 60;
+            long productiveRemainingMinutes = productiveMinutes % 60;
+
+            // Format the productive time as "X hours Y minutes"
+            String totalProductiveTime = "";
+            if (productiveHours > 0) {
+                totalProductiveTime += productiveHours + " hours";
+                if (productiveRemainingMinutes > 0) {
+                    totalProductiveTime += " ";
+                }
+            }
+            if (productiveRemainingMinutes > 0) {
+                totalProductiveTime += productiveRemainingMinutes + " minutes";
+            }
+            response.setProductiveTime(totalProductiveTime);
+
+            // Print duration from login time to current time
+            System.out.println("Duration from login time to current India time: " + totalProductiveTime);
+        }
 
         return response;
     }
+
 
     public DailyActivityResponse convertToResponse(DailyActivity dailyActivity) {
         DailyActivityResponse response = new DailyActivityResponse();
@@ -233,11 +243,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 minutes = 0;
             }
 
-            String totalWorkingHours = hours + " hours " + minutes + " minutes";
-            response.setTotalWorkingHours(totalWorkingHours);
-
-            // Set total working hours in minutes
-            response.setTotalWorkingMinutes(minutesPassed);
         }
 
         return response;

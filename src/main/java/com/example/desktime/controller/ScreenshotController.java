@@ -73,20 +73,20 @@ public class ScreenshotController {
         }
     }
 
-    @PostMapping(value = "/uploadScreenShotAzure", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> uploadScreenshotV2(@RequestPart(name = "file", required = false) MultipartFile file,
-                                                @RequestParam(required = false) String userMail) {
-        try {
-            if (file.isEmpty()) {
-                return new ResponseEntity<>("Please upload a screenshot file.", HttpStatus.BAD_REQUEST);
-            }
-            byte[] screenshotData = file.getBytes();
-            String originalFilename = file.getOriginalFilename(); // Get the original filename
-            ScreenshotResponse screenshotResponse = screenShotService.uploadScreenshotV2(file, userMail, originalFilename);
-            return ResponseEntity.ok().body(screenshotResponse);
-        } catch (IOException e) {
-            return new ResponseEntity<>("Failed to upload screenshot.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @PostMapping(value = "/uploadScreenShotAzure", consumes = {"multipart/form-data"})
+//    public ResponseEntity<?> uploadScreenshotV2(@RequestPart(name = "file", required = false) MultipartFile file,
+//                                                @RequestParam(required = false) String userMail) {
+//        try {
+//            if (file.isEmpty()) {
+//                return new ResponseEntity<>("Please upload a screenshot file.", HttpStatus.BAD_REQUEST);
+//            }
+//            byte[] screenshotData = file.getBytes();
+//            String originalFilename = file.getOriginalFilename(); // Get the original filename
+//            ScreenshotResponse screenshotResponse = screenShotService.uploadScreenshotV2(file, userMail, originalFilename);
+//            return ResponseEntity.ok().body(screenshotResponse);
+//        } catch (IOException e) {
+//            return new ResponseEntity<>("Failed to upload screenshot.", HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
 }

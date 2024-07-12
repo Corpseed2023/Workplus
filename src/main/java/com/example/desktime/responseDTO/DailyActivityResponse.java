@@ -23,8 +23,6 @@ public class DailyActivityResponse {
     private String loginTimeConvention;
     private String gapTime;
     private String productiveTime;
-    private String totalWorkingHours;
-    private long totalWorkingMinutes;
 
     public DailyActivityResponse() {
     }
