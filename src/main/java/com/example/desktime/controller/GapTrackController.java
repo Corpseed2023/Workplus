@@ -24,7 +24,7 @@ public class GapTrackController {
     @Autowired
     private GapTrackService gapTrackService;
 
-    @PostMapping("/saveGap")
+    @PostMapping("/gap-track/saveGap")
     public ResponseEntity<?> saveGapTrack(@RequestBody GapTrackRequest gapTrackRequest) {
         try {
             GapTrackSaveResponse response = gapTrackService.saveGapTrack(gapTrackRequest);

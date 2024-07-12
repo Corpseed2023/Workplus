@@ -32,5 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 
-# Add your configuration file here
-src/main/resources/application.properties
+## Add your configuration file here
+#src/main/resources/application.properties
