@@ -1,31 +1,21 @@
 package com.example.desktime.serviceimpl;
 
 
-import com.example.desktime.config.AzureBlobAdapter;
 import com.example.desktime.controller.DailyActivityController;
 import com.example.desktime.model.Screenshot;
 import com.example.desktime.model.User;
 import com.example.desktime.repository.ScreenshotRepository;
 import com.example.desktime.repository.UserRepository;
-import com.example.desktime.requestDTO.LogoutUpdateRequest;
 import com.example.desktime.responseDTO.ScreenShotAllResponse;
 import com.example.desktime.responseDTO.ScreenshotResponse;
 import com.example.desktime.service.ScreenShotService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,8 +31,8 @@ public class ScreenShotServiceImpl implements ScreenShotService {
     @Autowired
     private DailyActivityController dailyActivityController;
 
-    @Autowired
-    AzureBlobAdapter azureAdapter;
+//    @Autowired
+//    AzureBlobAdapter azureAdapter;
 
 
     public final String PROD_PATH="https://corpseed-workplus.s3.ap-south-1.amazonaws.com/";
@@ -118,46 +108,46 @@ public class ScreenShotServiceImpl implements ScreenShotService {
         return LocalDateTime.of(date, time);
     }
 
-    @Override
-    public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
-        User user = userRepository.findUserByEmail(userMail);
-        if (user == null) {
-            throw new IllegalArgumentException("User not found with email: " + userMail);
-        }
-
-        // Parse the date and time from the file name
-        LocalDateTime dateTime = parseDateTimeFromFileName(originalFilename);
-        LocalDate date = dateTime.toLocalDate();
-        Date screenshotTime = java.sql.Timestamp.valueOf(dateTime);
-        Date currentDate = new Date();
-
-        String s = azureAdapter.uploadv2(file, 0);
-        String filePath = PROD_PATH + s;
-
-        Screenshot screenshot = new Screenshot();
-        screenshot.setUser(user);
-        screenshot.setDate(date);
-        screenshot.setScreenshotTime(screenshotTime);
-        screenshot.setScreenshotUrl(filePath);
-        screenshot.setScreenshotName(s);
-        screenshot.setCreatedAt(currentDate);
-        screenshot.setUpdatedAt(currentDate);
-
-        // Save the screenshot
-        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
-
-        ScreenshotResponse screenshotResponse = new ScreenshotResponse();
-        screenshotResponse.setId(savedScreenshot.getId());
-        screenshotResponse.setUserId(savedScreenshot.getUser().getId()); // Assuming getId() returns the user ID
-        screenshotResponse.setUserMail(savedScreenshot.getUser().getEmail());
-        screenshotResponse.setScreenshotTime(savedScreenshot.getScreenshotTime());
-        screenshotResponse.setScreenshotUrl(savedScreenshot.getScreenshotUrl());
-        screenshotResponse.setScreenshotName(savedScreenshot.getScreenshotName());
-        screenshotResponse.setCreatedAt(savedScreenshot.getCreatedAt());
-        screenshotResponse.setUpdatedAt(savedScreenshot.getUpdatedAt());
-        screenshotResponse.setDate(savedScreenshot.getDate());
-
-        return screenshotResponse;
-    }
+//    @Override
+//    public ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename) {
+//        User user = userRepository.findUserByEmail(userMail);
+//        if (user == null) {
+//            throw new IllegalArgumentException("User not found with email: " + userMail);
+//        }
+//
+//        // Parse the date and time from the file name
+//        LocalDateTime dateTime = parseDateTimeFromFileName(originalFilename);
+//        LocalDate date = dateTime.toLocalDate();
+//        Date screenshotTime = java.sql.Timestamp.valueOf(dateTime);
+//        Date currentDate = new Date();
+//
+//        String s = azureAdapter.uploadv2(file, 0);
+//        String filePath = PROD_PATH + s;
+//
+//        Screenshot screenshot = new Screenshot();
+//        screenshot.setUser(user);
+//        screenshot.setDate(date);
+//        screenshot.setScreenshotTime(screenshotTime);
+//        screenshot.setScreenshotUrl(filePath);
+//        screenshot.setScreenshotName(s);
+//        screenshot.setCreatedAt(currentDate);
+//        screenshot.setUpdatedAt(currentDate);
+//
+//        // Save the screenshot
+//        Screenshot savedScreenshot = screenshotRepository.save(screenshot);
+//
+//        ScreenshotResponse screenshotResponse = new ScreenshotResponse();
+//        screenshotResponse.setId(savedScreenshot.getId());
+//        screenshotResponse.setUserId(savedScreenshot.getUser().getId()); // Assuming getId() returns the user ID
+//        screenshotResponse.setUserMail(savedScreenshot.getUser().getEmail());
+//        screenshotResponse.setScreenshotTime(savedScreenshot.getScreenshotTime());
+//        screenshotResponse.setScreenshotUrl(savedScreenshot.getScreenshotUrl());
+//        screenshotResponse.setScreenshotName(savedScreenshot.getScreenshotName());
+//        screenshotResponse.setCreatedAt(savedScreenshot.getCreatedAt());
+//        screenshotResponse.setUpdatedAt(savedScreenshot.getUpdatedAt());
+//        screenshotResponse.setDate(savedScreenshot.getDate());
+//
+//        return screenshotResponse;
+//    }
 
 }

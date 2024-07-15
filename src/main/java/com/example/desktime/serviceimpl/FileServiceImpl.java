@@ -2,7 +2,6 @@ package com.example.desktime.serviceimpl;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-import com.example.desktime.config.AzureBlobAdapter;
 import com.example.desktime.exception.FileDownloadException;
 import com.example.desktime.model.Screenshot;
 import com.example.desktime.model.User;
@@ -26,13 +25,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,8 +50,8 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private ScreenshotRepository screenshotRepository;
 
-    @Autowired
-    private AzureBlobAdapter azureBlobAdapter;
+//    @Autowired
+//    private AzureBlobAdapter azureBlobAdapter;
 
     public final String PROD_PATH="https://corpseed-workplus.s3.ap-south-1.amazonaws.com/";
 

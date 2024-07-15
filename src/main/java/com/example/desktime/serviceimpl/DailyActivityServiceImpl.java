@@ -30,13 +30,6 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     private UserRepository userRepository;
 
     @Autowired
-    private UserProcessRepository userProcessRepository;
-
-    @Autowired
-    private GapRepository gapRepository;
-
-
-    @Autowired
     private DailyActivityRepository dailyActivityRepository;
 
     @Autowired
@@ -165,11 +158,10 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
         // Fetch gap data and calculate total gap time
         GapUserResponse gapUserResponse = gapTrackService.getUserActivity(email, currentDate);
+
         long totalGapMinutes = gapUserResponse.getGapDetails().stream()
                 .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
                 .sum();
-
-        String productiveTime = gapTrackService.getProductiveUserActivity(email,currentDate);
 
         long gapHours = totalGapMinutes / 60;
         long gapMinutes = totalGapMinutes % 60;
@@ -187,6 +179,33 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         }
         response.setGapTime(totalGapTime);
 
+        if (dailyActivity != null && dailyActivity.getLoginTime() != null) {
+            LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+            LocalDateTime loginTime = dailyActivity.getLoginTime();
+
+            long totalMinutesPassed = Duration.between(loginTime, currentIndiaTime).toMinutes();
+            long productiveMinutes = totalMinutesPassed - totalGapMinutes;
+
+            long productiveHours = productiveMinutes / 60;
+            long productiveRemainingMinutes = productiveMinutes % 60;
+
+            // Format the productive time as "X hours Y minutes"
+            String totalProductiveTime = "";
+            if (productiveHours > 0) {
+                totalProductiveTime += productiveHours + " hours";
+                if (productiveRemainingMinutes > 0) {
+                    totalProductiveTime += " ";
+                }
+            }
+            if (productiveRemainingMinutes > 0) {
+                totalProductiveTime += productiveRemainingMinutes + " minutes";
+            }
+            response.setProductiveTime(totalProductiveTime);
+
+            // Print duration from login time to current time
+            System.out.println("Duration from login time to current India time: " + totalProductiveTime);
+        }
+
         return response;
     }
 
@@ -203,13 +222,18 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setAttendanceType(dailyActivity.getAttendanceType());
         response.setLoginTimeConvention(dailyActivity.getLoginTimeConvention());
 
-
-        // Calculate today's total time if login time and logout time are present
-        if (dailyActivity.getLoginTime() != null && dailyActivity.getLogoutTime() != null) {
+        // Calculate today's total time if login time is present
+        if (dailyActivity.getLoginTime() != null) {
             LocalDateTime loginTime = dailyActivity.getLoginTime();
-            LocalDateTime logoutTime = dailyActivity.getLogoutTime();
+            LocalDateTime currentTime = LocalDateTime.now();
 
-            long minutesPassed = Duration.between(loginTime, logoutTime).toMinutes();
+            long minutesPassed;
+            if (dailyActivity.getLogoutTime() != null && !dailyActivity.getLogoutTime().equals(loginTime)) {
+                minutesPassed = Duration.between(loginTime, dailyActivity.getLogoutTime()).toMinutes();
+            } else {
+                minutesPassed = Duration.between(loginTime, currentTime).toMinutes();
+            }
+
             long hours = minutesPassed / 60;
             long minutes = minutesPassed % 60;
 
@@ -219,13 +243,10 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 minutes = 0;
             }
 
-
         }
 
         return response;
     }
-
-
     public List<DailyActivityReportResponse> getMonthlyActivityReport(String email, LocalDate startDate, LocalDate endDate) {
         try {
             List<DailyActivity> activities = dailyActivityRepository.findByUserEmailAndDateBetween(email, startDate, endDate);

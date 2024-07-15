@@ -18,5 +18,5 @@ public interface ScreenShotService {
 
     void deleteScreenshotById(Long screenshotId, Long userId);
 
-    ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename);
+//    ScreenshotResponse uploadScreenshotV2(MultipartFile file, String userMail, String originalFilename);
 }
