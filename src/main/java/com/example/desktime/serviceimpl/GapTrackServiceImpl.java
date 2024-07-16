@@ -120,27 +120,36 @@ public class GapTrackServiceImpl implements GapTrackService {
         return responseList;
     }
 
-    @Override
-    public void updateUserGapReason(String userEmail, Long gapId, String gapReason) {
-
+    public void updateUserGapReason(String userEmail, Long lastOfflineId, String gapReason, Long lastOnlineId) {
         User user = userRepository.findUserByEmail(userEmail);
 
         if (user == null) {
             throw new UserNotFoundException();
         }
 
-        Optional<GapTrack> gapTrackData = gapRepository.findById(gapId);
+        List<GapTrack> gapTrackData = gapRepository.findByGapId(lastOfflineId, lastOnlineId, user);
 
-        if (gapTrackData.isPresent()) {
-            GapTrack gapTrack = gapTrackData.get();
-            gapTrack.setReason(gapReason);
-            gapTrack.setProductivity(true);
-            gapRepository.save(gapTrack);  // Save the updated object
+        if (gapTrackData != null && !gapTrackData.isEmpty()) {
+            // Update the first element
+            GapTrack firstGapTrack = gapTrackData.get(0);
+            firstGapTrack.setReason(gapReason);
+            firstGapTrack.setProductivity(true);
+            firstGapTrack.setAvailability(true);
+
+            // Update the last element
+            GapTrack lastGapTrack = gapTrackData.get(gapTrackData.size() - 1);
+            lastGapTrack.setProductivity(true);
+            lastGapTrack.setAvailability(true);
+
+            // Save the updated objects
+            gapRepository.save(firstGapTrack);
+            if (firstGapTrack.getId() != lastGapTrack.getId()) {
+                gapRepository.save(lastGapTrack);
+            }
         } else {
-            throw  new DataNotFoundException("Gap Data Not Found");
+            throw new DataNotFoundException("Gap Data Not Found");
         }
     }
-
 
     @Override
     public GapUserResponse getUserActivity(String userEmail, LocalDate date) {

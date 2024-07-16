@@ -19,6 +19,6 @@ public interface GapTrackService {
 
     GapUserResponse getUserActivity(String userEmail, LocalDate date);
 
-    void updateUserGapReason(String userEmail, Long gapId, String gapReason);
+    void updateUserGapReason(String userEmail, Long lastOfflineId, String gapReason,Long lastOnlineId);
 
 }
