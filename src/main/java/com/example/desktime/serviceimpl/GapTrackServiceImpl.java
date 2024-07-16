@@ -49,11 +49,19 @@ public class GapTrackServiceImpl implements GapTrackService {
         gapTrack.setUser(user);
         gapTrack.setWorkingStatus(gapTrackRequest.getStatus());
         gapTrack.setDate(currentIndiaTime.toLocalDate());
-        gapTrack.setGapStartTime(currentIndiaTime.toLocalDateTime()); // Set gapStartTime
-        gapTrack.setProductivity("offline".equals(gapTrackRequest.getStatus()) ? false :true);
+        gapTrack.setGapStartTime(currentIndiaTime.toLocalDateTime());
+        gapTrack.setProductivity("offline".equals(gapTrackRequest.getStatus()) ? false : true);
 
         GapTrack savedGapTrack = gapRepository.save(gapTrack);
 
+
+        if ("online".equals(gapTrackRequest.getStatus())) {
+            DailyActivity dailyActivity = dailyActivityRepository.findByUserEmailAndDate(gapTrackRequest.getUserEmail(), currentIndiaTime.toLocalDate());
+
+            if (dailyActivity != null) {
+                dailyActivityRepository.updateLogoutTime(gapTrackRequest.getUserEmail(), currentIndiaTime.toLocalDate(), currentIndiaTime.toLocalDateTime());
+            }
+        }
         // Convert to response DTO
         GapTrackSaveResponse response = new GapTrackSaveResponse();
         response.setId(savedGapTrack.getId());
@@ -66,6 +74,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         return response;
     }
+
 
 
     @Override
