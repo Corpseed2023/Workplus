@@ -160,6 +160,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         GapUserResponse gapUserResponse = gapTrackService.getUserActivity(email, currentDate);
 
         long totalGapMinutes = gapUserResponse.getGapDetails().stream()
+                .filter(gap -> !gap.isAvailability())  // Only count gaps where availability is false
                 .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
                 .sum();
 
@@ -201,13 +202,11 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 totalProductiveTime += productiveRemainingMinutes + " minutes";
             }
             response.setProductiveTime(totalProductiveTime);
-
-            // Print duration from login time to current time
-            System.out.println("Duration from login time to current India time: " + totalProductiveTime);
         }
 
         return response;
     }
+
 
 
     public DailyActivityResponse convertToResponse(DailyActivity dailyActivity) {

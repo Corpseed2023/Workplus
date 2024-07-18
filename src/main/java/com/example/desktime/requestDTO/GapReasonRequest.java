@@ -1,15 +1,14 @@
 package com.example.desktime.requestDTO;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 
 public class GapReasonRequest {
 
     private String reason;
 
-    public String getReason() {
-        return reason;
-    }
 
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
 }

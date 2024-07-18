@@ -52,10 +52,12 @@ public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @Reques
 }
 
     @PutMapping("/editReason")
-    public ResponseEntity<String> updateReason(@RequestParam String userEmail, @RequestParam Long gapId, @RequestBody GapReasonRequest gapReason) {
+    public ResponseEntity<String> updateReason(@RequestParam String userEmail, @RequestParam Long lastOfflineId, @RequestParam Long lastOnlineId,
+                                               @RequestParam LocalDate date,
+                                               @RequestBody GapReasonRequest gapReason) {
         try {
-            if (gapId != null && gapReason.getReason() != null && !gapReason.getReason().isEmpty()) {
-                gapTrackService.updateUserGapReason(userEmail, gapId, gapReason.getReason());
+            if (lastOfflineId != null && gapReason.getReason() != null && !gapReason.getReason().isEmpty()) {
+                gapTrackService.updateUserGapReason(userEmail, lastOfflineId, gapReason.getReason(),lastOnlineId);
                 return ResponseEntity.ok("Gap reason updated successfully.");
             } else {
                 return ResponseEntity.badRequest().body("Invalid input data.");
