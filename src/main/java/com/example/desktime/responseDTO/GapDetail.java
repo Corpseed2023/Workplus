@@ -17,13 +17,15 @@ public class GapDetail {
     private LocalDateTime lastOnlineTime;
     private String gapTime;
     private String reason;
+    private boolean availability;
 
-    public GapDetail(Long lastOfflineId, LocalDateTime lastOfflineTime, Long lastOnlineId, LocalDateTime lastOnlineTime, String gapTime, String reason) {
+    public GapDetail(Long lastOfflineId, LocalDateTime lastOfflineTime, Long lastOnlineId, LocalDateTime lastOnlineTime, String gapTime, String reason, boolean availability) {
         this.lastOfflineId = lastOfflineId;
         this.lastOfflineTime = lastOfflineTime;
         this.lastOnlineId = lastOnlineId;
         this.lastOnlineTime = lastOnlineTime;
         this.gapTime = gapTime;
         this.reason = reason;
+        this.availability = availability;
     }
 }

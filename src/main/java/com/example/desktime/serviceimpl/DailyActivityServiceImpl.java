@@ -203,7 +203,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             response.setProductiveTime(totalProductiveTime);
 
             // Print duration from login time to current time
-            System.out.println("Duration from login time to current India time: " + totalProductiveTime);
+//            System.out.println("Duration from login time to current India time: " + totalProductiveTime);
         }
 
         return response;
