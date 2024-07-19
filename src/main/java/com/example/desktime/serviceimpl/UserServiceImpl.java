@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -189,9 +190,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllUsers(int page, int size) {
-
-        Pageable pageable = PageRequest.of(page, size);
-
+        Pageable pageable = PageRequest.of(page, size, Sort.by("username").ascending());
         Page<Object[]> results = userRepository.findEnabledUsersWithRoles(pageable);
 
         Map<Long, UserResponse> userMap = new HashMap<>();
@@ -213,9 +212,15 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        return new ArrayList<>(userMap.values());
-    }
+        // Create a list from the userMap values
+        List<UserResponse> sortedUsers = new ArrayList<>(userMap.values());
 
+        // Sort the list explicitly by username to ensure order
+        sortedUsers.sort(Comparator.comparing(UserResponse::getUsername));
+
+
+        return sortedUsers;
+    }
 
 
 
