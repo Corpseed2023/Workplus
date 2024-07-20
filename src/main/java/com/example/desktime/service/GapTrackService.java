@@ -21,4 +21,5 @@ public interface GapTrackService {
 
     void updateUserGapReason(String userEmail, Long lastOfflineId, String gapReason,Long lastOnlineId);
 
+    void removeGap(String userEmail, Long lastOfflineId, String reason, Long lastOnlineId);
 }

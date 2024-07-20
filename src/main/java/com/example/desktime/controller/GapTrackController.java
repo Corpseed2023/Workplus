@@ -56,9 +56,27 @@ public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @Reques
                                                @RequestParam LocalDate date,
                                                @RequestBody GapReasonRequest gapReason) {
         try {
-            if (lastOfflineId != null && gapReason.getReason() != null && !gapReason.getReason().isEmpty()) {
+            if (lastOfflineId != null) {
                 gapTrackService.updateUserGapReason(userEmail, lastOfflineId, gapReason.getReason(),lastOnlineId);
                 return ResponseEntity.ok("Gap reason updated successfully.");
+            } else {
+                return ResponseEntity.badRequest().body("Invalid input data.");
+            }
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the gap reason.");
+        }
+    }
+
+    @DeleteMapping("/deleteGap")
+    public ResponseEntity<String> removeGap(@RequestParam String userEmail, @RequestParam Long lastOfflineId, @RequestParam Long lastOnlineId,
+                                               @RequestParam LocalDate date,
+                                               @RequestBody GapReasonRequest gapReason) {
+        try {
+            if (lastOfflineId != null) {
+                gapTrackService.removeGap(userEmail, lastOfflineId, gapReason.getReason(),lastOnlineId);
+                return ResponseEntity.ok("Gap Removed Successfully");
             } else {
                 return ResponseEntity.badRequest().body("Invalid input data.");
             }

@@ -42,4 +42,9 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
     List<Object[]> findAllUserMonthlyReport(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 
+    @Query(value = "SELECT * FROM workplus.daily_activity a WHERE date = CURRENT_DATE() AND " +
+            "user_id IN (SELECT user_id FROM workplus.daily_activity" +
+            " WHERE date = CURRENT_DATE() GROUP BY user_id HAVING COUNT(*) > 1)",nativeQuery = true)
+    List<DailyActivity> findDuplicateEntryInActivity();
+
 }
