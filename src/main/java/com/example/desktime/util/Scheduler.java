@@ -62,7 +62,7 @@ public class Scheduler {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
             }
 
-            System.out.println("Auto working ");
+//            System.out.println("Auto working ");
             // Create Excel file
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             Workbook workbook = new XSSFWorkbook();

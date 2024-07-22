@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -21,4 +22,9 @@ public interface GapRepository  extends JpaRepository<GapTrack, Long> {
 
         @Query("SELECT g FROM GapTrack g WHERE g.user = :user AND g.id BETWEEN :lastOfflineId AND :lastOnlineId")
         List<GapTrack> findByGapId(Long lastOfflineId, Long lastOnlineId, User user);
+
+//        @Query("SELECT g FROM GapTrack g WHERE g.user = :user AND g.id BETWEEN :lastOfflineId AND :lastOnlineId")
+//        List<GapTrack> findByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime, User user);
+
+
 }
