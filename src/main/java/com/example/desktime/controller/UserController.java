@@ -111,7 +111,7 @@ public class UserController {
 
                     IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
 
-                    System.out.println("IP is"+ip);
+//                    System.out.println("IP is"+ip);
                     if (ip == null || !ip.getNetworkIpAddress().equals(networkIp)) {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                     }
@@ -121,7 +121,7 @@ public class UserController {
                 Set<String> roles = authenticatedUser.getRoles().stream()
                         .map(role -> role.getRoleName())
                         .collect(Collectors.toSet());
-                System.out.println("role is"+roles);
+//                System.out.println("role is"+roles);
 
                 // Create LoginResponse object with roles
                 LoginResponse response = new LoginResponse("Login successful");

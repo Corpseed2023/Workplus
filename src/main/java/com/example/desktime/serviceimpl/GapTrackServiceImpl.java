@@ -133,8 +133,16 @@ public class GapTrackServiceImpl implements GapTrackService {
             // Update the first element
             GapTrack firstGapTrack = gapTrackData.get(0);
             firstGapTrack.setReason(gapReason);
-            firstGapTrack.setProductivity(true);
-            firstGapTrack.setAvailability(true);
+
+            if (!gapReason.isBlank()) {
+                firstGapTrack.setProductivity(true);
+                firstGapTrack.setAvailability(true);
+            }
+            else
+            {
+                firstGapTrack.setProductivity(false);
+                firstGapTrack.setAvailability(false);
+            }
 
             // Update the last element
             GapTrack lastGapTrack = gapTrackData.get(gapTrackData.size() - 1);
@@ -150,6 +158,47 @@ public class GapTrackServiceImpl implements GapTrackService {
             throw new DataNotFoundException("Gap Data Not Found");
         }
     }
+
+
+//    public void updateTimeUserGapReason(String userEmail, LocalDateTime startTime, String reason, LocalDateTime endTime) {
+//        User user = userRepository.findUserByEmail(userEmail);
+//
+//        if (user == null) {
+//            throw new UserNotFoundException();
+//        }
+//
+//        List<GapTrack> gapTrackData = gapRepository.findByStartTimeAndEndTime(startTime, endTime, user);
+//
+//        if (gapTrackData != null && !gapTrackData.isEmpty()) {
+//            // Update the first element
+//            GapTrack firstGapTrack = gapTrackData.get(0);
+//            firstGapTrack.setReason(reason);
+//
+//            if (!reason.isBlank()) {
+//                firstGapTrack.setProductivity(true);
+//                firstGapTrack.setAvailability(true);
+//            }
+//            else
+//            {
+//                firstGapTrack.setProductivity(false);
+//                firstGapTrack.setAvailability(false);
+//            }
+//
+//            // Update the last element
+//            GapTrack lastGapTrack = gapTrackData.get(gapTrackData.size() - 1);
+//            lastGapTrack.setProductivity(true);
+//            lastGapTrack.setAvailability(true);
+//
+//            // Save the updated objects
+//            gapRepository.save(firstGapTrack);
+//            if (firstGapTrack.getId() != lastGapTrack.getId()) {
+//                gapRepository.save(lastGapTrack);
+//            }
+//        } else {
+//            throw new DataNotFoundException("Gap Data Not Found");
+//        }
+//    }
+
 
     @Override
     public GapUserResponse getUserActivity(String userEmail, LocalDate date) {
@@ -235,6 +284,33 @@ public class GapTrackServiceImpl implements GapTrackService {
         return minutes + " Minutes";
     }
 
+    @Override
+    public void removeGap(String userEmail, Long lastOfflineId, String reason, Long lastOnlineId) {
+
+    User user = userRepository.findUserByEmail(userEmail);
+    if (user == null) {
+        throw new UserNotFoundException();
+    }
+        List<GapTrack> gapTrackData = gapRepository.findByGapId(lastOfflineId, lastOnlineId, user);
 
 
+        if (!gapTrackData.isEmpty()) {
+            updateRemoveGapTrack(gapTrackData.get(0), false, false);
+
+            GapTrack lastGapTrack = gapTrackData.get(gapTrackData.size() - 1);
+            updateRemoveGapTrack(lastGapTrack, null, false);
+        }
+    }
+
+    private void updateRemoveGapTrack(GapTrack gapTrack, Boolean productivity, Boolean availability) {
+        if (productivity != null) {
+            gapTrack.setProductivity(productivity);
+        }
+        if (availability != null) {
+            gapTrack.setAvailability(availability);
+        }
+
+        gapTrack.setReason(null);
+        gapRepository.save(gapTrack);
+    }
 }

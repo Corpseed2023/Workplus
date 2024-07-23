@@ -260,11 +260,12 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
                 activityResponse.setUserName(activity.getUser().getUsername());
                 activityResponse.setUserEmail(activity.getUser().getEmail());
-                activityResponse.setLoginTime(activity.getLoginTime()!=null ? activity.getLoginTime().toLocalTime() :null);
-                activityResponse.setLogoutTime(activity.getLogoutTime() != null ? activity.getLogoutTime().toLocalTime() :null);
+                activityResponse.setLoginTime(activity.getLoginTime() != null ? activity.getLoginTime().toLocalTime() : null);
+                activityResponse.setLogoutTime(activity.getLogoutTime() != null ? activity.getLogoutTime().toLocalTime() : null);
                 activityResponse.setDate(activity.getDate());
                 activityResponse.setId(activity.getId());
-                activityResponse.setPresent(activity.isPresent() ? "PRESENT" :"ABSENT");
+                activityResponse.setPresent(activity.isPresent() ? "PRESENT" : "ABSENT");
+
                 // Calculate total time if both login and logout times are present
                 if (activity.getLoginTime() != null && activity.getLogoutTime() != null) {
                     LocalDateTime loginTime = activity.getLoginTime();
@@ -278,6 +279,30 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 } else {
                     activityResponse.setTotalTime("N/A"); // If either login or logout time is missing, set totalTime as "N/A"
                 }
+
+                // Fetch gap data and calculate total gap time for the day
+                GapUserResponse gapUserResponse = gapTrackService.getUserActivity(email, activity.getDate());
+
+                long totalGapMinutes = gapUserResponse.getGapDetails().stream()
+                        .filter(gap -> !gap.isAvailability()) // Only count gaps where availability is false
+                        .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
+                        .sum();
+
+                long gapHours = totalGapMinutes / 60;
+                long gapMinutes = totalGapMinutes % 60;
+
+                // Format the total gap time as "X hours Y minutes"
+                String totalGapTime = "";
+                if (gapHours > 0) {
+                    totalGapTime += gapHours + " hours";
+                    if (gapMinutes > 0) {
+                        totalGapTime += " ";
+                    }
+                }
+                if (gapMinutes > 0) {
+                    totalGapTime += gapMinutes + " minutes";
+                }
+                activityResponse.setGapTime(totalGapTime);
 
                 response.add(activityResponse);
             }
@@ -350,6 +375,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             if (results == null || results.isEmpty()) {
                 return Collections.emptyList();
             }
+
 
             List<DailyActivityReportResponse> response = new ArrayList<>();
 
