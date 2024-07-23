@@ -120,8 +120,6 @@ public class DailyActivityController {
     @GetMapping("/report")
     public ResponseEntity<?> getMonthlyActivityReport(@RequestParam String email, @RequestParam int year, @RequestParam int month) {
 
-
-
         try {
             LocalDate startDate = LocalDate.of(year, month, 1);
             LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());

@@ -38,7 +38,7 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
             "FROM daily_activity da " +
             "JOIN user u ON da.user_id = u.id " +
             "WHERE da.date BETWEEN :startDate AND :endDate " +
-            "ORDER BY u.id", nativeQuery = true)
+            "ORDER BY u.username", nativeQuery = true)
     List<Object[]> findAllUserMonthlyReport(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 
