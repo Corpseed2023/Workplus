@@ -74,4 +74,30 @@ public class EmailService {
         }
     }
 
+    public void sendOTP(String otp, String userName, String userEmail) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+        try {
+            helper.setTo(userEmail);
+            helper.setSubject("Your OTP Code");
+
+            // Construct the HTML email body
+            String htmlContent = "<html><body>"
+                    + "<h2>OTP Verification</h2>"
+                    + "<p>Dear " + userName + ",</p>"
+                    + "<p>Your OTP code is: <strong>" + otp + "</strong></p>"
+                    + "<p>Please enter this code to verify your email address.</p>"
+                    + "<p>If you did not request this, please ignore this email.</p>"
+                    + "<p>Thank you!</p>"
+                    + "</body></html>";
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+
 }
