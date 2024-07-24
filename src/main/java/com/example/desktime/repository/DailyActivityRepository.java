@@ -47,4 +47,10 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
             " WHERE date = CURRENT_DATE() GROUP BY user_id HAVING COUNT(*) > 1)",nativeQuery = true)
     List<DailyActivity> findDuplicateEntryInActivity();
 
+
+    @Query("SELECT da.present FROM DailyActivity da JOIN da.user u WHERE u.email = :email AND da.date = :date")
+    Boolean findUserPresentOrNot(@Param("email") String email, @Param("date") LocalDate date);
+
+
 }
+

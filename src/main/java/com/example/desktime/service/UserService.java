@@ -2,11 +2,11 @@ package com.example.desktime.service;
 
 
 import com.example.desktime.model.User;
-import com.example.desktime.requestDTO.ResetPasswordRequest;
 import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.SingleUserResponse;
 import com.example.desktime.responseDTO.UserResponse;
+import com.example.desktime.responseDTO.UserUpdatedResponse;
 import jakarta.mail.MessagingException;
 import org.springframework.http.ResponseEntity;
 
@@ -29,7 +29,7 @@ public interface UserService {
 
     void initiatePasswordReset(String email, String password) throws MessagingException;
 
-    UserResponse editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException ;
+    UserUpdatedResponse editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException ;
 
     void softDeleteUsers(List<Long> userIds);
 

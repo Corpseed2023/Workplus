@@ -222,6 +222,8 @@ public class GapTrackServiceImpl implements GapTrackService {
         String reason = null;
         List<GapDetail> gapDetails = new ArrayList<>();
 
+
+
         for (GapTrack gapTrack : gapTracks) {
             if ("offline".equals(gapTrack.getWorkingStatus())) {
                 if (lastOfflineTime == null) {

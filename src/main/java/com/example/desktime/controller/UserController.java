@@ -12,6 +12,7 @@ import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.LoginResponse;
 import com.example.desktime.responseDTO.SingleUserResponse;
 import com.example.desktime.responseDTO.UserResponse;
+import com.example.desktime.responseDTO.UserUpdatedResponse;
 import com.example.desktime.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +174,7 @@ public class UserController {
     @PutMapping("/editUser")
     public ResponseEntity<?> editUserDetails(@RequestParam Long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
         try {
-            UserResponse editedUserDetails= userService.editUserDetails(userId, userUpdateRequest);
+            UserUpdatedResponse editedUserDetails= userService.editUserDetails(userId, userUpdateRequest);
             return new ResponseEntity<>(editedUserDetails,HttpStatus.OK);
 
         } catch (IllegalArgumentException e) {
