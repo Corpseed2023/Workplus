@@ -39,7 +39,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT * FROM user WHERE id = :userId AND is_enable = true", nativeQuery = true)
     User findEnabledUserById(@Param("userId") Long userId);
 
-    @Query("SELECT u.id, u.username, u.email, u.createdAt, r.roleName FROM user u JOIN u.roles r WHERE u.isEnable = true ORDER BY u.username ASC")
+    @Query("SELECT u.id, u.username, u.email, u.createdAt, r.roleName FROM user u " +
+            "JOIN u.roles r WHERE u.isEnable = true ORDER BY u.username ASC")
     Page<Object[]> findEnabledUsersWithRoles(Pageable pageable);
 
 

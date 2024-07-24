@@ -5,6 +5,7 @@ import com.example.desktime.config.PasswordConfig;
 import com.example.desktime.controller.DailyActivityController;
 import com.example.desktime.model.Roles;
 import com.example.desktime.model.User;
+import com.example.desktime.repository.DailyActivityRepository;
 import com.example.desktime.repository.IpAccessRepository;
 import com.example.desktime.repository.RolesRepository;
 import com.example.desktime.repository.UserRepository;
@@ -12,6 +13,7 @@ import com.example.desktime.requestDTO.UserRequest;
 import com.example.desktime.requestDTO.UserUpdateRequest;
 import com.example.desktime.responseDTO.SingleUserResponse;
 import com.example.desktime.responseDTO.UserResponse;
+import com.example.desktime.responseDTO.UserUpdatedResponse;
 import com.example.desktime.service.UserService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordConfig passwordConfig;
+
+    @Autowired
+    private DailyActivityRepository dailyActivityRepository;
 
     @Autowired
     EmailService emailService;
@@ -195,6 +201,9 @@ public class UserServiceImpl implements UserService {
 
         Map<Long, UserResponse> userMap = new HashMap<>();
 
+        LocalDate currentDate=LocalDate.now();
+
+
         for (Object[] result : results) {
             Long userId = (Long) result[0];
             String username = (String) result[1];
@@ -202,9 +211,14 @@ public class UserServiceImpl implements UserService {
             Date createdAt = (Date) result[3];
             String roleName = (String) result[4];
 
+            Boolean isPresent = dailyActivityRepository.findUserPresentOrNot(email, currentDate);
+            if (isPresent == null) {
+                isPresent = false; // Assuming not present if there's no record
+            }
+
             UserResponse userResponse = userMap.get(userId);
             if (userResponse == null) {
-                userResponse = new UserResponse(userId, username, email, roleName, createdAt);
+                userResponse = new UserResponse(userId, username, email, roleName, createdAt,isPresent);
                 userMap.put(userId, userResponse);
             } else {
                 String existingRoles = userResponse.getRoles();
@@ -255,7 +269,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserResponse editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException {
+    public UserUpdatedResponse editUserDetails(Long userId, UserUpdateRequest userUpdateRequest) throws AccessDeniedException {
 
         Optional<User> optionalUser = userRepository.findById(userId);
 
@@ -305,12 +319,12 @@ public class UserServiceImpl implements UserService {
 
 
 
-    private UserResponse convertToUserResponse(User updatedUserData) {
+    private UserUpdatedResponse convertToUserResponse(User updatedUserData) {
         String rolesString = updatedUserData.getRoles().stream()
                 .map(Roles::getRoleName)
                 .collect(Collectors.joining(","));
 
-        return new UserResponse(
+        return new UserUpdatedResponse(
                 updatedUserData.getId(),
                 updatedUserData.getUsername(),
                 updatedUserData.getEmail(),
