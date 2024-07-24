@@ -87,14 +87,14 @@ public class DailyActivityController {
     @GetMapping("/dailyActivity")
     public ResponseEntity<?> getDailyActivity(@RequestParam String email , @RequestParam(required = false) LocalDate date) {
         try {
-            LocalDate currentDate;
-            if (date != null) {
-                currentDate = date;
-            } else {
-                currentDate = LocalDate.now();
-            }
+//            LocalDate currentDate;
+//            if (date != null) {
+//                currentDate = date;
+//            } else {
+//                currentDate = LocalDate.now();
+//            }
 
-            DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email, currentDate);
+            DailyActivityResponse dailyActivityResponse = dailyActivityService.getDailyActivityByEmail(email, date);
             return new ResponseEntity<>(dailyActivityResponse, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
