@@ -32,8 +32,6 @@ public class User {
     @Column(name = "created_by")
     private Long createdBy;
 
-    private int count;
-
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
