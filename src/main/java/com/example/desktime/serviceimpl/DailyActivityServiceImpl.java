@@ -157,7 +157,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         }
 
         // Fetch gap data and calculate total gap time
-        GapUserResponse gapUserResponse = gapTrackService.getUserActivity(email, currentDate);
+        GapUserResponse gapUserResponse = gapTrackService.getUserGapDataByEmailAndDate(email, currentDate);
 
         long totalGapMinutes = gapUserResponse.getGapDetails().stream()
                 .filter(gap -> !gap.isAvailability())  // Only count gaps where availability is false
@@ -181,10 +181,10 @@ public class DailyActivityServiceImpl implements DailyActivityService {
         response.setGapTime(totalGapTime);
 
         if (dailyActivity != null && dailyActivity.getLoginTime() != null) {
-            LocalDateTime currentIndiaTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+            LocalDateTime endTime = dailyActivity.getLogoutTime() != null ? dailyActivity.getLogoutTime() : LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
             LocalDateTime loginTime = dailyActivity.getLoginTime();
 
-            long totalMinutesPassed = Duration.between(loginTime, currentIndiaTime).toMinutes();
+            long totalMinutesPassed = Duration.between(loginTime, endTime).toMinutes();
             long productiveMinutes = totalMinutesPassed - totalGapMinutes;
 
             long productiveHours = productiveMinutes / 60;
