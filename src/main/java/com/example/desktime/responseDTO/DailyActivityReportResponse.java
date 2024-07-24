@@ -22,5 +22,6 @@ public class DailyActivityReportResponse {
     private String dayOfWeek;
     private String attendanceType;
     private String gapTime;
+    private String productiveTime;
 
 }

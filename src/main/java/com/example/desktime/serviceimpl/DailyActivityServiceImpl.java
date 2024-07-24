@@ -276,33 +276,55 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     long minutes = duration.toMinutes() % 60;
 
                     activityResponse.setTotalTime(hours + " hours " + minutes + " minutes");
+
+                    // Fetch gap data and calculate total gap time for the day
+                    GapUserResponse gapUserResponse = gapTrackService.getUserActivity(email, activity.getDate());
+
+                    long totalGapMinutes = gapUserResponse.getGapDetails().stream()
+                            .filter(gap -> !gap.isAvailability()) // Only count gaps where availability is false
+                            .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
+                            .sum();
+
+                    long gapHours = totalGapMinutes / 60;
+                    long gapMinutes = totalGapMinutes % 60;
+
+                    // Format the total gap time as "X hours Y minutes"
+                    String totalGapTime = "";
+                    if (gapHours > 0) {
+                        totalGapTime += gapHours + " hours";
+                        if (gapMinutes > 0) {
+                            totalGapTime += " ";
+                        }
+                    }
+                    if (gapMinutes > 0) {
+                        totalGapTime += gapMinutes + " minutes";
+                    }
+                    activityResponse.setGapTime(totalGapTime);
+
+                    // Calculate total productive time
+                    long totalMinutesPassed = duration.toMinutes();
+                    long productiveMinutes = totalMinutesPassed - totalGapMinutes;
+
+                    long productiveHours = productiveMinutes / 60;
+                    long productiveRemainingMinutes = productiveMinutes % 60;
+
+                    // Format the productive time as "X hours Y minutes"
+                    String totalProductiveTime = "";
+                    if (productiveHours > 0) {
+                        totalProductiveTime += productiveHours + " hours";
+                        if (productiveRemainingMinutes > 0) {
+                            totalProductiveTime += " ";
+                        }
+                    }
+                    if (productiveRemainingMinutes > 0) {
+                        totalProductiveTime += productiveRemainingMinutes + " minutes";
+                    }
+                    activityResponse.setProductiveTime(totalProductiveTime);
+
                 } else {
                     activityResponse.setTotalTime("N/A"); // If either login or logout time is missing, set totalTime as "N/A"
+                    activityResponse.setProductiveTime("N/A"); // If either login or logout time is missing, set productiveTime as "N/A"
                 }
-
-                // Fetch gap data and calculate total gap time for the day
-                GapUserResponse gapUserResponse = gapTrackService.getUserActivity(email, activity.getDate());
-
-                long totalGapMinutes = gapUserResponse.getGapDetails().stream()
-                        .filter(gap -> !gap.isAvailability()) // Only count gaps where availability is false
-                        .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
-                        .sum();
-
-                long gapHours = totalGapMinutes / 60;
-                long gapMinutes = totalGapMinutes % 60;
-
-                // Format the total gap time as "X hours Y minutes"
-                String totalGapTime = "";
-                if (gapHours > 0) {
-                    totalGapTime += gapHours + " hours";
-                    if (gapMinutes > 0) {
-                        totalGapTime += " ";
-                    }
-                }
-                if (gapMinutes > 0) {
-                    totalGapTime += gapMinutes + " minutes";
-                }
-                activityResponse.setGapTime(totalGapTime);
 
                 response.add(activityResponse);
             }
@@ -313,6 +335,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
         }
     }
+
 
 
     @Override
@@ -379,6 +402,8 @@ public class DailyActivityServiceImpl implements DailyActivityService {
 
             List<DailyActivityReportResponse> response = new ArrayList<>();
 
+
+
             for (Object[] result : results) {
                 Long id = ((Number) result[0]).longValue();
                 LocalDate date = result[1] != null ? ((java.sql.Date) result[1]).toLocalDate() : null;
@@ -389,6 +414,13 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 String attendanceType = (String) result[6];
                 String username = (String) result[7];
                 String email = (String) result[8];
+
+                GapUserResponse gapUserResponse = gapTrackService.getUserGapDataByEmailAndDate(email, date);
+
+                long totalGapMinutes = gapUserResponse.getGapDetails().stream()
+                        .filter(gap -> !gap.isAvailability())  // Only count gaps where availability is false
+                        .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
+                        .sum();
 
                 DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
                 activityResponse.setId(id);
