@@ -399,10 +399,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 return Collections.emptyList();
             }
 
-
             List<DailyActivityReportResponse> response = new ArrayList<>();
-
-
 
             for (Object[] result : results) {
                 Long id = ((Number) result[0]).longValue();
@@ -415,12 +412,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 String username = (String) result[7];
                 String email = (String) result[8];
 
-                GapUserResponse gapUserResponse = gapTrackService.getUserGapDataByEmailAndDate(email, date);
-
-                long totalGapMinutes = gapUserResponse.getGapDetails().stream()
-                        .filter(gap -> !gap.isAvailability())  // Only count gaps where availability is false
-                        .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
-                        .sum();
+//                GapUserResponse gapUserResponse = gapTrackService.getUserGapDataByEmailAndDate(email, date);
 
                 DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
                 activityResponse.setId(id);
