@@ -227,6 +227,65 @@ public class DailyActivityController {
     }
 
 
+    @GetMapping("/userReport")
+    public ResponseEntity<?> getUserDail(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
+        try {
+
+            List<DailyActivityReportResponse> response = dailyActivityService.getUserReportWithdate(startDate, endDate);
+
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
+            }
+
+            // Create Excel file
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("User Monthly Report");
+
+            // Create header row
+            Row headerRow = sheet.createRow(0);
+            String[] headersArray = {"ID", "User Name", "User Email", "Date", "Login Time", "Logout Time", "Present", "Total Time", "Day of Week", "Attendance Type","GapTime"};
+            for (int i = 0; i < headersArray.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headersArray[i]);
+            }
+
+            // Populate rows
+            int rowNum = 1;
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            for (DailyActivityReportResponse activity : response) {
+                Row row = sheet.createRow(rowNum++);
+
+                row.createCell(0).setCellValue(activity.getId());
+                row.createCell(1).setCellValue(activity.getUserName());
+                row.createCell(2).setCellValue(activity.getUserEmail());
+                row.createCell(3).setCellValue(activity.getDate().format(dateFormatter));
+                row.createCell(4).setCellValue(activity.getLoginTime() != null ? activity.getLoginTime().format(timeFormatter) : "N/A");
+                row.createCell(5).setCellValue(activity.getLogoutTime() != null ? activity.getLogoutTime().format(timeFormatter) : "N/A");
+                row.createCell(6).setCellValue(activity.getPresent());
+                row.createCell(7).setCellValue(activity.getTotalTime());
+                row.createCell(8).setCellValue(activity.getDayOfWeek());
+                row.createCell(9).setCellValue(activity.getAttendanceType());
+                row.createCell(10).setCellValue(activity.getGapTime());
+
+            }
+
+            workbook.write(out);
+            workbook.close();
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Content-Disposition", "attachment; filename=user_report_" + startDate +".xlsx");
+
+            return ResponseEntity.ok()
+                    .headers(httpHeaders)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(out.toByteArray());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request: " + e.getMessage());
+        }
+    }
 
 
 }

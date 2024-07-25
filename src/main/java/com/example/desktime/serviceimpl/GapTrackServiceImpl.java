@@ -288,6 +288,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
 
     public GapUserResponse getUserGapDataByEmailAndDate(String userEmail, LocalDate date) {
+
         User user = userRepository.findUserByEmail(userEmail);
         if (user == null) {
             throw new UserNotFoundException();

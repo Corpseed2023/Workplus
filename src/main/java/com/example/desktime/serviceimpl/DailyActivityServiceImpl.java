@@ -399,6 +399,8 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 return Collections.emptyList();
             }
 
+
+
             List<DailyActivityReportResponse> response = new ArrayList<>();
 
             for (Object[] result : results) {
@@ -444,7 +446,82 @@ public class DailyActivityServiceImpl implements DailyActivityService {
     }
 
 
+    public List<DailyActivityReportResponse> getUserReportWithdate(LocalDate startDate, LocalDate endDate) {
+
+        try {
+                List<Object[]> results = dailyActivityRepository.findAllUserMonthlyReport(startDate, endDate);
+                if (results == null || results.isEmpty()) {
+                    return Collections.emptyList();
+                }
+
+                List<DailyActivityReportResponse> response = new ArrayList<>();
+
+                for (Object[] result : results) {
+                    Long id = ((Number) result[0]).longValue();
+                    LocalDate date = result[1] != null ? ((java.sql.Date) result[1]).toLocalDate() : null;
+                    LocalDateTime loginTime = result[2] != null ? ((java.sql.Timestamp) result[2]).toLocalDateTime() : null;
+                    LocalDateTime logoutTime = result[3] != null ? ((java.sql.Timestamp) result[3]).toLocalDateTime() : null;
+                    boolean present = (boolean) result[4];
+                    String dayOfWeek = (String) result[5];
+                    String attendanceType = (String) result[6];
+                    String username = (String) result[7];
+                    String email = (String) result[8];
+
+                   GapUserResponse gapUserResponse = gapTrackService.getUserGapDataByEmailAndDate(email, date);
 
 
+                    long totalGapMinutes = gapUserResponse.getGapDetails().stream()
+                            .filter(gap -> !gap.isAvailability()) // Only count gaps where availability is false
+                            .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
+                            .sum();
+
+                    long gapHours = totalGapMinutes / 60;
+                    long gapMinutes = totalGapMinutes % 60;
+
+                    // Format the total gap time as "X hours Y minutes"
+                    String totalGapTime = "";
+                    if (gapHours > 0) {
+                        totalGapTime += gapHours + " hours";
+                        if (gapMinutes > 0) {
+                            totalGapTime += " ";
+                        }
+                    }
+                    if (gapMinutes > 0) {
+                        totalGapTime += gapMinutes + " minutes";
+                    }
+
+
+
+
+                    DailyActivityReportResponse activityResponse = new DailyActivityReportResponse();
+
+                    activityResponse.setId(id);
+                    activityResponse.setDate(date);
+                    activityResponse.setLoginTime(loginTime!=null ? loginTime.toLocalTime() :null);
+                    activityResponse.setLogoutTime(logoutTime != null ? logoutTime.toLocalTime() :null);
+                    activityResponse.setPresent(present ? "PRESENT" : "ABSENT");
+                    activityResponse.setUserName(username);
+                    activityResponse.setUserEmail(email);
+                    activityResponse.setDayOfWeek(dayOfWeek);
+                    activityResponse.setAttendanceType(attendanceType);
+                    activityResponse.setGapTime(totalGapTime);
+
+                    if (loginTime != null && logoutTime != null) {
+                        Duration duration = Duration.between(loginTime, logoutTime);
+                        long hours = duration.toHours();
+                        long minutes = duration.toMinutes() % 60;
+                        activityResponse.setTotalTime(hours + " hours " + minutes + " minutes");
+                    } else {
+                        activityResponse.setTotalTime("N/A");
+                    }
+
+                    response.add(activityResponse);
+                }
+
+                return response;
+            } catch (Exception e) {
+                throw new RuntimeException("Error retrieving monthly activity report: " + e.getMessage(), e);
+            }
+        }
 
 }
