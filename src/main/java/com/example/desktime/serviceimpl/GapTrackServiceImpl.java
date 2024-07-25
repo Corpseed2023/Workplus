@@ -212,9 +212,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
         Optional<DailyActivity> dailyActivity = dailyActivityRepository.findByUserAndDate(user, date);
 
-
-        // Sort gap activities by gap_start_time to
-        // ensure correct sequence
+        // Sort gap activities by gap_start_time to ensure correct sequence
         gapTracks.sort(Comparator.comparing(GapTrack::getGapStartTime));
 
         Long lastOfflineId = null;
@@ -222,43 +220,55 @@ public class GapTrackServiceImpl implements GapTrackService {
         String reason = null;
         List<GapDetail> gapDetails = new ArrayList<>();
 
-
-
-        for (GapTrack gapTrack : gapTracks) {
-            if ("offline".equals(gapTrack.getWorkingStatus())) {
+        for (int i = 0; i < gapTracks.size(); i++) {
+            GapTrack currentGapTrack = gapTracks.get(i);
+            if ("offline".equals(currentGapTrack.getWorkingStatus())) {
                 if (lastOfflineTime == null) {
-                    lastOfflineId = gapTrack.getId();
-                    lastOfflineTime = gapTrack.getGapStartTime();
-                    reason = gapTrack.getReason();
+                    lastOfflineId = currentGapTrack.getId();
+                    lastOfflineTime = currentGapTrack.getGapStartTime();
+                    reason = currentGapTrack.getReason();
                 }
-            } else if ("online".equals(gapTrack.getWorkingStatus())) {
+            } else if ("online".equals(currentGapTrack.getWorkingStatus())) {
                 if (lastOfflineTime != null) {
-                    Long lastOnlineId = gapTrack.getId();
-                    LocalDateTime lastOnlineTime = gapTrack.getGapStartTime();
+                    Long lastOnlineId = currentGapTrack.getId();
+                    LocalDateTime lastOnlineTime = currentGapTrack.getGapStartTime();
 
                     // Calculate the gap time
                     Duration gapDuration = Duration.between(lastOfflineTime, lastOnlineTime);
                     String gapTime = formatDuration(gapDuration);
 
-                    boolean availability = gapTrack.getAvailability();
+                    boolean availability = currentGapTrack.getAvailability();
 
                     GapDetail gapDetail = new GapDetail(lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason, availability);
                     if (gapDuration.toMinutes() > 4) {
                         gapDetails.add(gapDetail);
                     }
-                        // Reset the lastOfflineTime, lastOfflineId, and reason after pairing with an online event
+                    // Reset the lastOfflineTime, lastOfflineId, and reason after pairing with an online event
                     lastOfflineId = null;
                     lastOfflineTime = null;
                     reason = null;
                 }
+                // Check for consecutive online statuses with gapStartTime difference > 10 minutes
+                if (i > 0) {
+                    GapTrack previousGapTrack = gapTracks.get(i - 1);
+                    if ("online".equals(previousGapTrack.getWorkingStatus())) {
+                        Duration gapDuration = Duration.between(previousGapTrack.getGapStartTime(), currentGapTrack.getGapStartTime());
+                        if (gapDuration.toMinutes() > 10) {
+                            Long lastOnlineId = currentGapTrack.getId();
+                            LocalDateTime lastOnlineTime = currentGapTrack.getGapStartTime();
+                            String gapTime = formatDuration(gapDuration);
+
+                            GapDetail gapDetail = new GapDetail(previousGapTrack.getId(), previousGapTrack.getGapStartTime(), lastOnlineId, lastOnlineTime, gapTime, null, currentGapTrack.getAvailability());
+                            gapDetails.add(gapDetail);
+                        }
+                    }
+                }
             }
         }
-
 
         // Convert LocalDateTime to String
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String loginTimeStr = dailyActivity.map(activity -> activity.getLoginTime().format(formatter)).orElse(null);
-
 
         // Prepare response DTO
         GapUserResponse response = new GapUserResponse();
@@ -268,10 +278,8 @@ public class GapTrackServiceImpl implements GapTrackService {
         response.setUserLoginTime(loginTimeStr);
 
         // Fetch and set the last gap_start_time
-
-        if(!gapTracks.isEmpty())
-        {
-            LocalDateTime localDateTime =  gapTracks.get(gapTracks.size()-1).getGapStartTime();
+        if (!gapTracks.isEmpty()) {
+            LocalDateTime localDateTime = gapTracks.get(gapTracks.size() - 1).getGapStartTime();
             response.setLastActiveTime(localDateTime.format(formatter));
         }
 
@@ -280,6 +288,7 @@ public class GapTrackServiceImpl implements GapTrackService {
 
 
     public GapUserResponse getUserGapDataByEmailAndDate(String userEmail, LocalDate date) {
+
         User user = userRepository.findUserByEmail(userEmail);
         if (user == null) {
             throw new UserNotFoundException();
