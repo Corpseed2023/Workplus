@@ -54,22 +54,34 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 Optional<DailyActivity> existingActivity = dailyActivityRepository.findByUserAndDate(user, activityDate);
 
                 // If data already exists for today, return a response indicating that the data was not saved
-                if (existingActivity!=null && existingActivity.isPresent()) {
+                if (existingActivity.isPresent()) {
                     throw new IllegalArgumentException("Data already exists for today.");
                 }
 
-                LocalTime timeThreshHold= LocalTime.of(9,35);
+                LocalTime nineAM = LocalTime.of(9, 0);
+                LocalTime sixFortyFiveAM = LocalTime.of(6, 45);
+                LocalTime nineThirtyAM = LocalTime.of(9, 30);
+                LocalTime timeThreshold = LocalTime.of(9, 35);
 
-                AttendanceType attendanceType = currentIndiaTime.toLocalTime().isAfter(timeThreshHold) ? AttendanceType.HALF_DAY : AttendanceType.NORMAL_DAY;
+                // Check if the current time is before 9:00 AM but after 6:45 AM
+                if (currentIndiaTime.toLocalTime().isAfter(sixFortyFiveAM) && currentIndiaTime.toLocalTime().isBefore(nineAM)) {
+                    throw new IllegalArgumentException("Invalid time.");
+                }
 
+                AttendanceType attendanceType = currentIndiaTime.toLocalTime().isAfter(timeThreshold) ? AttendanceType.HALF_DAY : AttendanceType.NORMAL_DAY;
 
-                DailyActivity dailyActivity = new DailyActivity(user, activityDate, currentIndiaTime, currentIndiaTime, true, null);
+                LocalDateTime loginTime;
+                if (currentIndiaTime.toLocalTime().isAfter(nineAM) && currentIndiaTime.toLocalTime().isBefore(nineThirtyAM)) {
+                    loginTime = LocalDateTime.of(activityDate, nineThirtyAM);
+                } else {
+                    loginTime = currentIndiaTime;
+                }
+
+                DailyActivity dailyActivity = new DailyActivity(user, activityDate, loginTime, currentIndiaTime, true, attendanceType);
                 dailyActivity.setDayOfWeek(activityDate.getDayOfWeek().toString());
                 dailyActivity.setLoginTimeConvention(loginTimeConvention);
                 dailyActivity.setLogoutTime(currentIndiaTime);
-                dailyActivity.setLoginTimeConvention(loginTimeConvention);
                 dailyActivity.setAttendanceType(attendanceType);
-
 
                 DailyActivity savedActivity = dailyActivityRepository.save(dailyActivity);
 
@@ -77,7 +89,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                 response.setId(savedActivity.getId());
                 response.setUserEmail(request.getEmail());
                 response.setDate(activityDate);
-                response.setLoginTime(currentIndiaTime);
+                response.setLoginTime(loginTime);
                 response.setPresent(true);
                 response.setDayOfWeek(savedActivity.getDayOfWeek());
                 response.setAttendanceType(savedActivity.getAttendanceType());
@@ -90,6 +102,7 @@ public class DailyActivityServiceImpl implements DailyActivityService {
             throw new IllegalArgumentException("Invalid date format. Please provide the date in yyyy-MM-dd format.");
         }
     }
+
 
 
     @Override

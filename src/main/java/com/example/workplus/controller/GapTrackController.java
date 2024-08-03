@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -70,23 +71,23 @@ public class GapTrackController {
         }
     }
 
-//    @PutMapping("/editTimeReason")
-//    public ResponseEntity<String> updateTimeReason(@RequestParam String userEmail, @RequestParam LocalDateTime startTime , @RequestParam LocalDateTime lastTime,
-//                                                   @RequestParam LocalDate date,
-//                                                   @RequestBody GapReasonRequest gapReason) {
-//        try {
-//            if (lastTime != null) {
-//                gapTrackService.updateTimeUserGapReason(userEmail, startTime, gapReason.getReason(),lastTime);
-//                return ResponseEntity.ok("Gap reason updated successfully.");
-//            } else {
-//                return ResponseEntity.badRequest().body("Invalid input data.");
-//            }
-//        } catch (UserNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the gap reason.");
-//        }
-//    }
+    @PutMapping("/editTimeReason")
+    public ResponseEntity<String> updateTimeReason(@RequestParam String userEmail, @RequestParam LocalDateTime startTime , @RequestParam LocalDateTime lastTime,
+                                                   @RequestParam LocalDate date,
+                                                   @RequestBody GapReasonRequest gapReason) {
+        try {
+            if (lastTime != null) {
+                gapTrackService.updateTimeUserGapReason(userEmail, startTime, gapReason.getReason(),lastTime);
+                return ResponseEntity.ok("Gap reason updated successfully.");
+            } else {
+                return ResponseEntity.badRequest().body("Invalid input data.");
+            }
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the gap reason.");
+        }
+    }
 
     @DeleteMapping("/deleteGap")
     public ResponseEntity<String> removeGap(@RequestParam String userEmail, @RequestParam Long lastOfflineId, @RequestParam Long lastOnlineId,

@@ -1,6 +1,7 @@
 package com.example.workplus.model;
 
 import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import java.util.Date;
 

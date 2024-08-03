@@ -157,44 +157,44 @@ public class GapTrackServiceImpl implements GapTrackService {
     }
 
 
-//    public void updateTimeUserGapReason(String userEmail, LocalDateTime startTime, String reason, LocalDateTime endTime) {
-//        User user = userRepository.findUserByEmail(userEmail);
-//
-//        if (user == null) {
-//            throw new UserNotFoundException();
-//        }
-//
-//        List<GapTrack> gapTrackData = gapRepository.findByStartTimeAndEndTime(startTime, endTime, user);
-//
-//        if (gapTrackData != null && !gapTrackData.isEmpty()) {
-//            // Update the first element
-//            GapTrack firstGapTrack = gapTrackData.get(0);
-//            firstGapTrack.setReason(reason);
-//
-//            if (!reason.isBlank()) {
-//                firstGapTrack.setProductivity(true);
-//                firstGapTrack.setAvailability(true);
-//            }
-//            else
-//            {
-//                firstGapTrack.setProductivity(false);
-//                firstGapTrack.setAvailability(false);
-//            }
-//
-//            // Update the last element
-//            GapTrack lastGapTrack = gapTrackData.get(gapTrackData.size() - 1);
-//            lastGapTrack.setProductivity(true);
-//            lastGapTrack.setAvailability(true);
-//
-//            // Save the updated objects
-//            gapRepository.save(firstGapTrack);
-//            if (firstGapTrack.getId() != lastGapTrack.getId()) {
-//                gapRepository.save(lastGapTrack);
-//            }
-//        } else {
-//            throw new DataNotFoundException("Gap Data Not Found");
-//        }
-//    }
+    public void updateTimeUserGapReason(String userEmail, LocalDateTime startTime, String reason, LocalDateTime endTime) {
+        User user = userRepository.findUserByEmail(userEmail);
+
+        if (user == null) {
+            throw new UserNotFoundException();
+        }
+
+        List<GapTrack> gapTrackData = gapRepository.findByStartTimeAndEndTime(startTime, endTime, user);
+
+        if (gapTrackData != null && !gapTrackData.isEmpty()) {
+            // Update the first element
+            GapTrack firstGapTrack = gapTrackData.get(0);
+            firstGapTrack.setReason(reason);
+
+            if (!reason.isBlank()) {
+                firstGapTrack.setProductivity(true);
+                firstGapTrack.setAvailability(true);
+            }
+            else
+            {
+                firstGapTrack.setProductivity(false);
+                firstGapTrack.setAvailability(false);
+            }
+
+            // Update the last element
+            GapTrack lastGapTrack = gapTrackData.get(gapTrackData.size() - 1);
+            lastGapTrack.setProductivity(true);
+            lastGapTrack.setAvailability(true);
+
+            // Save the updated objects
+            gapRepository.save(firstGapTrack);
+            if (firstGapTrack.getId() != lastGapTrack.getId()) {
+                gapRepository.save(lastGapTrack);
+            }
+        } else {
+            throw new DataNotFoundException("Gap Data Not Found");
+        }
+    }
 
 
     @Override
@@ -285,20 +285,21 @@ public class GapTrackServiceImpl implements GapTrackService {
 
 
     public GapUserResponse getUserGapDataByEmailAndDate(String userEmail, LocalDate date) {
+        // Log the email and date for which the user is being looked up
+//        System.out.println("Looking up user with email: " + userEmail + " for date: " + date);
 
         User user = userRepository.findUserByEmail(userEmail);
         if (user == null) {
-            throw new UserNotFoundException();
+            // Log the user not found scenario
+            System.out.println("User not found with email: " + userEmail);
+            return null; // Return null if the user is not found
         }
 
         // Fetch all gap activities for the user on the specified date
         List<GapTrack> gapTracks = gapRepository.fetchUserGapData(user, date);
-
         Optional<DailyActivity> dailyActivity = dailyActivityRepository.findByUserAndDate(user, date);
 
-
-        // Sort gap activities by gap_start_time to
-        // ensure correct sequence
+        // Sort gap activities by gap_start_time to ensure correct sequence
         gapTracks.sort(Comparator.comparing(GapTrack::getGapStartTime));
 
         Long lastOfflineId = null;
@@ -336,11 +337,9 @@ public class GapTrackServiceImpl implements GapTrackService {
             }
         }
 
-
         // Convert LocalDateTime to String
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String loginTimeStr = dailyActivity.map(activity -> activity.getLoginTime().format(formatter)).orElse(null);
-
 
         // Prepare response DTO
         GapUserResponse response = new GapUserResponse();
@@ -350,10 +349,8 @@ public class GapTrackServiceImpl implements GapTrackService {
         response.setUserLoginTime(loginTimeStr);
 
         // Fetch and set the last gap_start_time
-
-        if(!gapTracks.isEmpty())
-        {
-            LocalDateTime localDateTime =  gapTracks.get(gapTracks.size()-1).getGapStartTime();
+        if (!gapTracks.isEmpty()) {
+            LocalDateTime localDateTime = gapTracks.get(gapTracks.size() - 1).getGapStartTime();
             response.setLastActiveTime(localDateTime.format(formatter));
         }
 

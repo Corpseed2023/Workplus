@@ -19,13 +19,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.ByteArrayOutputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -230,12 +230,15 @@ public class DailyActivityController {
     @GetMapping("/userReport")
     public ResponseEntity<?> getUserDail(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
         try {
-
             List<DailyActivityReportResponse> response = dailyActivityService.getUserReportWithdate(startDate, endDate);
 
             if (response == null || response.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No activity found for the specified period.");
             }
+
+            // Sort the response by user name and date
+            response.sort(Comparator.comparing(DailyActivityReportResponse::getUserName)
+                    .thenComparing(DailyActivityReportResponse::getDate));
 
             // Create Excel file
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -244,7 +247,7 @@ public class DailyActivityController {
 
             // Create header row
             Row headerRow = sheet.createRow(0);
-            String[] headersArray = {"ID", "User Name", "User Email", "Date", "Login Time", "Logout Time", "Present", "Total Time", "Day of Week", "Attendance Type","GapTime"};
+            String[] headersArray = {"ID", "User Name", "User Email", "Date", "Login Time", "Logout Time", "Present", "Total Time", "Day of Week", "Attendance Type", "Gap Time"};
             for (int i = 0; i < headersArray.length; i++) {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(headersArray[i]);
@@ -254,6 +257,8 @@ public class DailyActivityController {
             int rowNum = 1;
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            DateTimeFormatter gapTimeFormatter = DateTimeFormatter.ofPattern("H:mm");
+
             for (DailyActivityReportResponse activity : response) {
                 Row row = sheet.createRow(rowNum++);
 
@@ -267,15 +272,14 @@ public class DailyActivityController {
                 row.createCell(7).setCellValue(activity.getTotalTime());
                 row.createCell(8).setCellValue(activity.getDayOfWeek());
                 row.createCell(9).setCellValue(activity.getAttendanceType());
-                row.createCell(10).setCellValue(activity.getGapTime());
-
+                row.createCell(10).setCellValue(formatGapTime(activity.getGapTime()));
             }
 
             workbook.write(out);
             workbook.close();
 
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Content-Disposition", "attachment; filename=user_report_" + startDate +".xlsx");
+            httpHeaders.add("Content-Disposition", "attachment; filename=user_report_" + startDate + ".xlsx");
 
             return ResponseEntity.ok()
                     .headers(httpHeaders)
@@ -284,6 +288,27 @@ public class DailyActivityController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request: " + e.getMessage());
+        }
+    }
+
+    // Helper method to format gap time as "H:mm"
+    private String formatGapTime(String gapTime) {
+        try {
+            String[] parts = gapTime.split(" ");
+            int hours = 0;
+            int minutes = 0;
+
+            for (int i = 0; i < parts.length; i += 2) {
+                if (parts[i + 1].startsWith("hour")) {
+                    hours = Integer.parseInt(parts[i]);
+                } else if (parts[i + 1].startsWith("minute")) {
+                    minutes = Integer.parseInt(parts[i]);
+                }
+            }
+
+            return String.format("%d:%02d:00", hours, minutes);
+        } catch (Exception e) {
+            return gapTime;
         }
     }
 
