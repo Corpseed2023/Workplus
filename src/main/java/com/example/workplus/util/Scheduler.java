@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -100,4 +103,20 @@ public class Scheduler {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing the request: " + e.getMessage());
 //        }
 //    }
+
+
+    @Scheduled(cron = "0 31 9 * * *")
+    public void adjustLoginTimes() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime nineThirtyAM = LocalDateTime.of(today, LocalTime.of(9, 30));
+
+        List<DailyActivity> dailyActivities = dailyActivityRepository.findUsersLoggedInBefore(nineThirtyAM, today);
+
+        for (DailyActivity dailyActivity : dailyActivities) {
+            dailyActivity.setLoginTime(nineThirtyAM);
+            dailyActivityRepository.save(dailyActivity);
+        }
+    }
+
+
 }

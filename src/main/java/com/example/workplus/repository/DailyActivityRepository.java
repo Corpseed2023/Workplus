@@ -52,5 +52,7 @@ public interface DailyActivityRepository  extends JpaRepository<DailyActivity,Lo
     Boolean findUserPresentOrNot(@Param("email") String email, @Param("date") LocalDate date);
 
 
+    @Query("SELECT d FROM DailyActivity d WHERE d.loginTime < :time AND d.date = :date")
+    List<DailyActivity> findUsersLoggedInBefore(@Param("time") LocalDateTime time, @Param("date") LocalDate date);
 }
 
