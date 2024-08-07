@@ -183,6 +183,7 @@ public class DailyActivityController {
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("User Monthly Report");
 
+
             // Create header row
             Row headerRow = sheet.createRow(0);
             String[] headersArray = {"ID", "User Name", "User Email", "Date", "Login Time", "Logout Time", "Present", "Total Time", "Day of Week", "Attendance Type"};

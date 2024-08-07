@@ -105,13 +105,14 @@ public class UserController {
                 // If the user is not an ADMIN, check the IP address
                 if (!isAdmin) {
                     String networkIp = serverRequest.getHeader("X-Forwarded-For");
-                    if (networkIp.contains(":")) {
+                    if (networkIp == null || networkIp.isEmpty()) {
+                        networkIp = serverRequest.getRemoteAddr();
+                    } else if (networkIp.contains(":")) {
                         networkIp = networkIp.split(":")[0];
                     }
 
                     IPAccess ip = ipAccessRepository.findByNetworkIpAddress(networkIp);
 
-//                    System.out.println("IP is"+ip);
                     if (ip == null || !ip.getNetworkIpAddress().equals(networkIp)) {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                     }
@@ -121,7 +122,6 @@ public class UserController {
                 Set<String> roles = authenticatedUser.getRoles().stream()
                         .map(role -> role.getRoleName())
                         .collect(Collectors.toSet());
-//                System.out.println("role is"+roles);
 
                 // Create LoginResponse object with roles
                 LoginResponse response = new LoginResponse("Login successful");
@@ -144,6 +144,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Error processing the request"));
         }
     }
+
 
 
 

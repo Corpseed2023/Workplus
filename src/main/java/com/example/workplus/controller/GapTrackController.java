@@ -2,19 +2,19 @@ package com.example.workplus.controller;
 
 
 import com.example.workplus.ApiResponse.UserNotFoundException;
+import com.example.workplus.requestDTO.EditTimeReasonRequest;
 import com.example.workplus.requestDTO.GapReasonRequest;
 import com.example.workplus.requestDTO.GapTrackRequest;
-import com.example.workplus.responseDTO.GapTrackResponse;
 import com.example.workplus.responseDTO.GapTrackSaveResponse;
 import com.example.workplus.responseDTO.GapUserResponse;
 import com.example.workplus.service.GapTrackService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -35,24 +35,6 @@ public class GapTrackController {
         }
     }
 
-
-    @GetMapping("/getUserGapData")
-    public ResponseEntity<?> getUserGapData(@RequestParam String userMailId, @RequestParam(required = false) LocalDate date) {
-
-    try {
-        LocalDate currentDate = (date != null) ? date : LocalDate.now();
-        List<GapTrackResponse> userGapData = gapTrackService.getUserGapData(userMailId, currentDate);
-
-        if (!userGapData.isEmpty()) {
-            return new ResponseEntity<>(userGapData, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Data not Found", HttpStatus.NOT_FOUND);
-        }
-        } catch (Exception e) {
-        return new ResponseEntity<>("Error fetching user gap data: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-                          }
-      }
-
     @PutMapping("/editReason")
     public ResponseEntity<String> updateReason(@RequestParam String userEmail, @RequestParam Long lastOfflineId, @RequestParam Long lastOnlineId,
                                                @RequestParam LocalDate date,
@@ -72,12 +54,16 @@ public class GapTrackController {
     }
 
     @PutMapping("/editTimeReason")
-    public ResponseEntity<String> updateTimeReason(@RequestParam String userEmail, @RequestParam LocalDateTime startTime , @RequestParam LocalDateTime lastTime,
-                                                   @RequestParam LocalDate date,
-                                                   @RequestBody GapReasonRequest gapReason) {
+    public ResponseEntity<String> updateTimeReason(@RequestBody EditTimeReasonRequest request,@RequestParam String userEmail) {
         try {
+            // Extract values from the request body
+            LocalDateTime startTime = request.getStartTime();
+            LocalDateTime lastTime = request.getLastTime();
+            String reason = request.getReason();
+            LocalDate date = request.getDate();
+
             if (lastTime != null) {
-                gapTrackService.updateTimeUserGapReason(userEmail, startTime, gapReason.getReason(),lastTime);
+                gapTrackService.updateTimeUserGapReason(userEmail, startTime, reason, lastTime,date);
                 return ResponseEntity.ok("Gap reason updated successfully.");
             } else {
                 return ResponseEntity.badRequest().body("Invalid input data.");
@@ -88,11 +74,10 @@ public class GapTrackController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the gap reason.");
         }
     }
-
     @DeleteMapping("/deleteGap")
     public ResponseEntity<String> removeGap(@RequestParam String userEmail, @RequestParam Long lastOfflineId, @RequestParam Long lastOnlineId,
-                                               @RequestParam LocalDate date,
-                                               @RequestBody GapReasonRequest gapReason) {
+                                            @RequestParam LocalDate date,
+                                            @RequestBody GapReasonRequest gapReason) {
         try {
             if (lastOfflineId != null) {
                 gapTrackService.removeGap(userEmail, lastOfflineId, gapReason.getReason(),lastOnlineId);
@@ -110,19 +95,18 @@ public class GapTrackController {
 
 
     @GetMapping("/gapActivity")
-   public ResponseEntity<GapUserResponse> getUserActivity(
-        @RequestParam("email") String userEmail, @RequestParam(required = false) LocalDate date) {
-    try {
-        LocalDate currentDate = (date != null) ? date : LocalDate.now();
+    public ResponseEntity<GapUserResponse> getUserActivity(
+            @RequestParam("email") String userEmail, @RequestParam(required = false) LocalDate date) {
+        try {
+            LocalDate currentDate = (date != null) ? date : LocalDate.now();
 
-        GapUserResponse response = gapTrackService.getUserActivity(userEmail, currentDate);
-        return ResponseEntity.ok(response);
-    } catch (Exception e) {
-        return ResponseEntity.notFound().build();
+            GapUserResponse response = gapTrackService.getUserActivity(userEmail, currentDate);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
-}
 
 
 
 }
-

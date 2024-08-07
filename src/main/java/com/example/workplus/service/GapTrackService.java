@@ -13,7 +13,6 @@ public interface GapTrackService {
 
 
 
-    List<GapTrackResponse> getUserGapData(String userMailId, LocalDate date);
 
     GapTrackSaveResponse saveGapTrack(GapTrackRequest gapTrackRequest);
 
@@ -23,5 +22,8 @@ public interface GapTrackService {
 
     void removeGap(String userEmail, Long lastOfflineId, String reason, Long lastOnlineId);
 
-    void updateTimeUserGapReason(String userEmail, LocalDateTime startTime, String reason, LocalDateTime lastTime);
+    void updateTimeUserGapReason(String userEmail, LocalDateTime startTime, String reason, LocalDateTime lastTime, LocalDate date);
+
+
+//    void updateTimeUserGapReason(String userEmail, LocalDateTime startTime, String reason, LocalDateTime lastTime);
 }

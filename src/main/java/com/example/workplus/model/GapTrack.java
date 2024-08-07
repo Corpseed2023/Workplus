@@ -38,6 +38,8 @@ public class GapTrack {
 
     private Boolean productivity=true;
 
+    private int filledGapStatus =0;
+
 
 
 

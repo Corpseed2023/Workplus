@@ -25,8 +25,11 @@ public interface GapRepository  extends JpaRepository<GapTrack, Long> {
         @Query("SELECT g FROM GapTrack g WHERE g.user = :user AND g.id BETWEEN :lastOfflineId AND :lastOnlineId")
         List<GapTrack> findByGapId(Long lastOfflineId, Long lastOnlineId, User user);
 
-        @Query("select g from GapTrack g where g.user = :user and g.gapStartTime between :startTime and :endTime")
-        List<GapTrack> findByStartTimeAndEndTime(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime, @Param("user") User user);
+        @Query("SELECT g FROM GapTrack g WHERE g.user = :user AND g.gapStartTime BETWEEN :startTime AND :endTime and g.date =:date")
+        List<GapTrack> findByStartTimeAndEndTime(@Param("startTime") LocalDateTime startTime,
+                                                 @Param("endTime") LocalDateTime endTime,
+                                                 @Param("user") User user,@Param("date") LocalDate date);
+
 
 //        @Query("SELECT g FROM GapTrack g WHERE g.user = :user AND g.id BETWEEN :lastOfflineId AND :lastOnlineId")
 //        List<GapTrack> findByStartTimeAndEndTime(LocalDateTime startTime, LocalDateTime endTime, User user);
