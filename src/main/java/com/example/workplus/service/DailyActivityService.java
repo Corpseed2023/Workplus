@@ -3,8 +3,8 @@ package com.example.workplus.service;
 import com.example.workplus.requestDTO.DailyActivityRequest;
 import com.example.workplus.requestDTO.EditDailyActivityRequest;
 import com.example.workplus.requestDTO.LogoutUpdateRequest;
-import com.example.workplus.responseDTO.DailyActivityReportResponse;
-import com.example.workplus.responseDTO.DailyActivityResponse;
+import com.example.workplus.responseDTO.dailActivityResponse.DailyActivityReportResponse;
+import com.example.workplus.responseDTO.dailActivityResponse.DailyActivityResponse;
 import com.example.workplus.responseDTO.LogoutUpdateResponse;
 
 import java.time.LocalDate;

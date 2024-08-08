@@ -1,28 +1,21 @@
-package com.example.workplus.responseDTO;
+package com.example.workplus.responseDTO.gapResponse;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class GapTrackResponse {
-
+public class GapTrackUpdateResponse {
     private Long id;
     private Long userId;
     private LocalDate date;
-    private LocalDateTime gapStartTime;
+    private Date gapStartTime;
+    private Date gapEndTime;
     private String reason;
     private String gapTime;
     private String workingStatus;
     private Boolean availability;
-
-
-
 }

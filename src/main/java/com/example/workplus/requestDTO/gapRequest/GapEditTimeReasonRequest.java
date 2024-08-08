@@ -1,4 +1,4 @@
-package com.example.workplus.requestDTO;
+package com.example.workplus.requestDTO.gapRequest;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-public class EditTimeReasonRequest {
+public class GapEditTimeReasonRequest {
 
     private LocalDateTime startTime;
 

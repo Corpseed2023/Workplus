@@ -1,6 +1,6 @@
 package com.example.workplus.util;
 
-import com.example.workplus.responseDTO.DailyActivityReportResponse;
+import com.example.workplus.responseDTO.dailActivityResponse.DailyActivityReportResponse;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 

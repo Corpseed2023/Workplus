@@ -1,4 +1,4 @@
-package com.example.workplus.requestDTO;
+package com.example.workplus.requestDTO.gapRequest;
 
 import lombok.Getter;
 import lombok.Setter;

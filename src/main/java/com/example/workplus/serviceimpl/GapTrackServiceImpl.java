@@ -7,8 +7,8 @@ import com.example.workplus.model.User;
 import com.example.workplus.repository.DailyActivityRepository;
 import com.example.workplus.repository.GapRepository;
 import com.example.workplus.repository.UserRepository;
-import com.example.workplus.requestDTO.GapTrackRequest;
-import com.example.workplus.responseDTO.*;
+import com.example.workplus.requestDTO.gapRequest.GapTrackRequest;
+import com.example.workplus.responseDTO.gapResponse.*;
 import com.example.workplus.service.GapTrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -337,4 +337,107 @@ public class GapTrackServiceImpl implements GapTrackService {
         gapTrack.setReason(null);
         gapTrackRepository.save(gapTrack);
     }
+
+
+
+    public GapEditTimeResponse getUserGapData(String userEmail, LocalDate date) {
+        // Fetch user by email
+        User user = userRepository.findUserByEmail(userEmail);
+        if (user == null) {
+            throw new UserNotFoundException();
+        }
+
+        // Fetch all gap activities for the user on the specified date
+        List<GapTrack> gapTracks = gapTrackRepository.fetchUserGapData(user, date);
+
+        Optional<DailyActivity> dailyActivity = dailyActivityRepository.findByUserAndDate(user, date);
+
+        // Sort gap activities by gap_start_time to ensure correct sequence
+        gapTracks.sort(Comparator.comparing(GapTrack::getGapStartTime));
+
+        Long lastOfflineId = null;
+        LocalDateTime lastOfflineTime = null;
+        String reason = null;
+        List<GapTimeEditDetails> gapTimeEditDetails = new ArrayList<>();
+
+        Duration totalFilledDuration = Duration.ZERO;
+        LocalDateTime filledGapStartTime = null;
+
+        for (int i = 0; i < gapTracks.size(); i++) {
+            GapTrack currentGapTrack = gapTracks.get(i);
+
+            if ("offline".equals(currentGapTrack.getWorkingStatus())) {
+                if (lastOfflineTime == null) {
+                    lastOfflineId = currentGapTrack.getId();
+                    lastOfflineTime = currentGapTrack.getGapStartTime();
+                    reason = currentGapTrack.getReason();
+                }
+
+                if (currentGapTrack.getFilledGapStatus() == 2) {
+                    if (filledGapStartTime == null) {
+                        filledGapStartTime = currentGapTrack.getGapStartTime();
+                    }
+
+                    // Check if it's the last entry or if the next entry is not "offline" or has a different filledGapStatus
+                    if (i + 1 >= gapTracks.size() || !"offline".equals(gapTracks.get(i + 1).getWorkingStatus())
+                            || gapTracks.get(i + 1).getFilledGapStatus() != 2) {
+                        Duration filledDuration = Duration.between(filledGapStartTime, currentGapTrack.getGapStartTime());
+                        totalFilledDuration = totalFilledDuration.plus(filledDuration);
+                        filledGapStartTime = null; // Reset the start time for the next sequence
+                    }
+                }
+            } else if ("online".equals(currentGapTrack.getWorkingStatus())) {
+                if (lastOfflineTime != null) {
+                    Long lastOnlineId = currentGapTrack.getId();
+                    LocalDateTime lastOnlineTime = currentGapTrack.getGapStartTime();
+
+                    // Calculate the gap time
+                    Duration gapDuration = Duration.between(lastOfflineTime, lastOnlineTime);
+                    String gapTime = formatDuration(gapDuration);
+
+                    boolean availability = currentGapTrack.getAvailability();
+
+                    // Use totalFilledDuration to set the filledTime
+                    String filledTime = totalFilledDuration.isZero() ? null : formatDuration(totalFilledDuration);
+
+                    GapTimeEditDetails gapTimeEditDetails1 = new GapTimeEditDetails(
+                            lastOfflineId, lastOfflineTime, lastOnlineId, lastOnlineTime, gapTime, reason, availability, filledTime);
+
+                    if (gapDuration.toMinutes() > 4) {
+                        gapTimeEditDetails.add(gapTimeEditDetails1);
+                    }
+
+                    // Reset the lastOfflineTime, lastOfflineId, reason, and totalFilledDuration after pairing with an online event
+                    lastOfflineId = null;
+                    lastOfflineTime = null;
+                    reason = null;
+                    totalFilledDuration = Duration.ZERO;
+                }
+            }
+        }
+
+        // Convert LocalDateTime to String
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String loginTimeStr = dailyActivity.map(activity -> activity.getLoginTime().format(formatter)).orElse(null);
+
+        // Prepare response DTO
+        GapEditTimeResponse gapEditTimeResponse = new GapEditTimeResponse();
+        gapEditTimeResponse.setUserEmail(userEmail);
+        gapEditTimeResponse.setDate(date);
+        gapEditTimeResponse.setGapTimeEditDetails(gapTimeEditDetails);
+        gapEditTimeResponse.setUserLoginTime(loginTimeStr);
+
+        // Fetch and set the last gap_start_time
+        if (!gapTracks.isEmpty()) {
+            LocalDateTime localDateTime = gapTracks.get(gapTracks.size() - 1).getGapStartTime();
+            gapEditTimeResponse.setLastActiveTime(localDateTime.format(formatter));
+        }
+
+        return gapEditTimeResponse;
+    }
+
+
+
+
+
 }

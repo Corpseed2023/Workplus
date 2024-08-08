@@ -8,9 +8,10 @@ import com.example.workplus.repository.UserRepository;
 import com.example.workplus.requestDTO.DailyActivityRequest;
 import com.example.workplus.requestDTO.EditDailyActivityRequest;
 import com.example.workplus.requestDTO.LogoutUpdateRequest;
-import com.example.workplus.responseDTO.DailyActivityReportResponse;
-import com.example.workplus.responseDTO.DailyActivityResponse;
-import com.example.workplus.responseDTO.GapUserResponse;
+import com.example.workplus.responseDTO.dailActivityResponse.DailyActivityReportResponse;
+import com.example.workplus.responseDTO.dailActivityResponse.DailyActivityResponse;
+import com.example.workplus.responseDTO.gapResponse.GapEditTimeResponse;
+import com.example.workplus.responseDTO.gapResponse.GapUserResponse;
 import com.example.workplus.responseDTO.LogoutUpdateResponse;
 import com.example.workplus.service.DailyActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -478,10 +479,10 @@ public class DailyActivityServiceImpl implements DailyActivityService {
                     String username = (String) result[7];
                     String email = (String) result[8];
 
-                   GapUserResponse gapUserResponse = gapTrackService.getUserGapDataByEmailAndDate(email, date);
+                    GapEditTimeResponse gapEditTimeResponse = gapTrackService.getUserGapData(email, date);
 
 
-                    long totalGapMinutes = gapUserResponse.getGapDetails().stream()
+                    long totalGapMinutes = gapEditTimeResponse.getGapTimeEditDetails().stream()
                             .filter(gap -> !gap.isAvailability()) // Only count gaps where availability is false
                             .mapToLong(gap -> Duration.between(gap.getLastOfflineTime(), gap.getLastOnlineTime()).toMinutes())
                             .sum();

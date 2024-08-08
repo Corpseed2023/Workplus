@@ -1,4 +1,4 @@
-package com.example.workplus.responseDTO;
+package com.example.workplus.responseDTO.gapResponse;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

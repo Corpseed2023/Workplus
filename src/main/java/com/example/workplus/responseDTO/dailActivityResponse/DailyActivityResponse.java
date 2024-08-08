@@ -1,4 +1,4 @@
-package com.example.workplus.responseDTO;
+package com.example.workplus.responseDTO.dailActivityResponse;
 
 import com.example.workplus.model.AttendanceType;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.example.workplus.responseDTO;
+package com.example.workplus.responseDTO.userResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

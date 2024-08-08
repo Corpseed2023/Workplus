@@ -2,7 +2,7 @@ package com.example.workplus.controller;
 
 
 import com.example.workplus.requestDTO.UserProcessRequest;
-import com.example.workplus.responseDTO.UserProcessResponse;
+import com.example.workplus.responseDTO.userResponse.UserProcessResponse;
 import com.example.workplus.service.UserProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

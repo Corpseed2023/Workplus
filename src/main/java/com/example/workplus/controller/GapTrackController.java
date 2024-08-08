@@ -2,14 +2,14 @@ package com.example.workplus.controller;
 
 
 import com.example.workplus.ApiResponse.UserNotFoundException;
-import com.example.workplus.requestDTO.EditTimeReasonRequest;
-import com.example.workplus.requestDTO.GapReasonRequest;
-import com.example.workplus.requestDTO.GapTrackRequest;
-import com.example.workplus.responseDTO.GapTrackSaveResponse;
-import com.example.workplus.responseDTO.GapUserResponse;
+import com.example.workplus.requestDTO.gapRequest.GapEditTimeReasonRequest;
+import com.example.workplus.requestDTO.gapRequest.GapReasonRequest;
+import com.example.workplus.requestDTO.gapRequest.GapTrackRequest;
+import com.example.workplus.responseDTO.gapResponse.GapEditTimeResponse;
+import com.example.workplus.responseDTO.gapResponse.GapTrackSaveResponse;
+import com.example.workplus.responseDTO.gapResponse.GapUserResponse;
 import com.example.workplus.service.GapTrackService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +54,7 @@ public class GapTrackController {
     }
 
     @PutMapping("/editTimeReason")
-    public ResponseEntity<String> updateTimeReason(@RequestBody EditTimeReasonRequest request,@RequestParam String userEmail) {
+    public ResponseEntity<String> updateTimeReason(@RequestBody GapEditTimeReasonRequest request, @RequestParam String userEmail) {
         try {
             // Extract values from the request body
             LocalDateTime startTime = request.getStartTime();
@@ -101,6 +101,19 @@ public class GapTrackController {
             LocalDate currentDate = (date != null) ? date : LocalDate.now();
 
             GapUserResponse response = gapTrackService.getUserActivity(userEmail, currentDate);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/userGap")
+    public ResponseEntity<GapEditTimeResponse> getUserGap(
+            @RequestParam("email") String userEmail, @RequestParam(required = false) LocalDate date) {
+        try {
+            LocalDate currentDate = (date != null) ? date : LocalDate.now();
+
+            GapEditTimeResponse response = gapTrackService.getUserGapData(userEmail, currentDate);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

@@ -4,9 +4,9 @@ package com.example.workplus.service;
 import com.example.workplus.model.User;
 import com.example.workplus.requestDTO.UserRequest;
 import com.example.workplus.requestDTO.UserUpdateRequest;
-import com.example.workplus.responseDTO.SingleUserResponse;
-import com.example.workplus.responseDTO.UserResponse;
-import com.example.workplus.responseDTO.UserUpdatedResponse;
+import com.example.workplus.responseDTO.userResponse.SingleUserResponse;
+import com.example.workplus.responseDTO.userResponse.UserResponse;
+import com.example.workplus.responseDTO.userResponse.UserUpdatedResponse;
 import jakarta.mail.MessagingException;
 import org.springframework.http.ResponseEntity;
 

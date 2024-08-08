@@ -1,4 +1,4 @@
-package com.example.workplus.responseDTO;
+package com.example.workplus.responseDTO.dailActivityResponse;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,5 +22,6 @@ public class DailyActivityReportResponse {
     private String attendanceType;
     private String gapTime;
     private String productiveTime;
+    private String filledTime;
 
 }

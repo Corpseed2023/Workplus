@@ -1,13 +1,12 @@
 package com.example.workplus.service;
 
-import com.example.workplus.requestDTO.GapTrackRequest;
-import com.example.workplus.responseDTO.GapTrackResponse;
-import com.example.workplus.responseDTO.GapTrackSaveResponse;
-import com.example.workplus.responseDTO.GapUserResponse;
+import com.example.workplus.requestDTO.gapRequest.GapTrackRequest;
+import com.example.workplus.responseDTO.gapResponse.GapEditTimeResponse;
+import com.example.workplus.responseDTO.gapResponse.GapTrackSaveResponse;
+import com.example.workplus.responseDTO.gapResponse.GapUserResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public interface GapTrackService {
 
@@ -23,6 +22,8 @@ public interface GapTrackService {
     void removeGap(String userEmail, Long lastOfflineId, String reason, Long lastOnlineId);
 
     void updateTimeUserGapReason(String userEmail, LocalDateTime startTime, String reason, LocalDateTime lastTime, LocalDate date);
+
+    GapEditTimeResponse getUserGapData(String userEmail, LocalDate currentDate);
 
 
 //    void updateTimeUserGapReason(String userEmail, LocalDateTime startTime, String reason, LocalDateTime lastTime);
